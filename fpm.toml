@@ -1,0 +1,15 @@
+name = "ising_ml"
+version = "0.5.0"
+license = "MIT"
+author = "Austin C Bullock, Andrew Wasserbeck"
+maintainer = "acb.bullock@gmail.com"
+copyright = "© 2022, Austin Bullock & Andrew Wasserbeck"
+
+[build]
+link = ['mkl_blas95_lp64', 'mkl_lapack95_lp64', 'mkl_intel_lp64', 'mkl_intel_thread', 'mkl_core', 'libiomp5md']
+auto-executables = true
+auto-tests = true
+auto-examples = true
+
+[install]
+library = false
