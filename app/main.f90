@@ -1,3 +1,7 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  This program demonstrates the use of the module `ising_ml`, from instantiating a `RestrictedBoltzmannMachine`
+!!  to training the neural network with the required input data and output data.
+!!
 program main
     use, intrinsic :: iso_fortran_env, only: rk=>real64, i64=>int64                            !! Import standard kinds
     use io_mod, only: csvwrite                                                                        !! I/O procedures
