@@ -1,3 +1,17 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  This module file contains an implementation of a Restricted Boltzmann Machine with supporting procedures for
+!!  learning ground states of the one-dimensional Ising spin model to demonstrate machine learning techniques
+!!  applied to a prototypical quantum spin system. The only public data is the class `RestrictedBoltzmannMachine`,
+!!  and the only public component of the class is the procedure `train`, which may be called from any program unit
+!!  which uses the module `ising_ml`.
+!!  
+!!  This program unit is conforming to Fortran 2018, built and tested with the Fortran Package Manager 0.7.0 (© 2020
+!!  fpm contributors) using the Intel Fortran Compiler (ifx 2022.2.0) and the Intel Fortran Compiler Classic 
+!!  (ifort 2021.7.0).
+!!  
+!!  The only external dependency is a system installation of LAPACK that supports the lapack95 interfaces, such as
+!!  the Intel MKL distribution of LAPACK.
+!!
 module ising_ml
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8                              !! Import standard kinds
 	implicit none (type,external)                                                    !! No implicit types or interfaces
@@ -19,7 +33,7 @@ module ising_ml
 			procedure, pass, public :: train                                !! Procedure for training Boltzmann machine
             procedure, pass :: init                                     !! Procedure for initializing Boltzmann machine
 			procedure, pass :: metropolis_hastings             !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
-            procedure, pass :: sq_psi_ratio                   !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
+            procedure, pass :: prob_ratio                     !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
             procedure, pass :: ising_energy                    !! Computes Ising local energy for given configuration s
             procedure, pass :: gradient_descent                            !! Procedure for updating weights and biases
 	end type RestrictedBoltzmannMachine
@@ -48,7 +62,6 @@ module ising_ml
 		!! Procedure for Xavier Initialization
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
 
-		real(rk), allocatable, dimension(:,:,:) :: w                              !! Local variable for setting weights
 		integer :: n, m                                                                     !! Visible and hidden units
 
 		if ( this_image() == 1 ) then
@@ -80,7 +93,7 @@ module ising_ml
         real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
 
         real(rk), allocatable, dimension(:) :: s_unit, neighbor_couplings                !! s -> ±1, neighbor couplings
-		complex(rk), allocatable, dimension(:) :: b_ws, sech_b_ws                               !! b + ws, sech(b + ws)
+		complex(rk), allocatable, dimension(:) :: theta, sech_theta                             !! b + ws, sech(b + ws)
 		complex(rk), allocatable, dimension(:) :: field_couplings                                    !! Field couplings
 		complex(rk), allocatable :: e_interaction, e_transverse          !! Interaction energy, transverse field energy
         real(rk), allocatable :: J_str, B_str                       !! Ising model coupling strength and field strength
@@ -94,14 +107,14 @@ module ising_ml
         s_unit = -2.0_rk*s + 1.0_rk                                                            !! Map {0,1} -> {1.,-1.}
         neighbor_couplings = s_unit(1:n-1)*s_unit(2:n)                                    !! Nearest neighbor couplings
 
-		b_ws = self%b + matmul(self%w, s)                                                         !! b + ws for input s
-        sech_b_ws = sech(b_ws)                                                            !! f^{-1} = cosh^{-1}(b + ws)
+		theta = self%b + matmul(self%w, s)                                                        !! b + ws for input s
+        sech_theta = sech(theta)                                                          !! f^{-1} = cosh^{-1}(b + ws)
 
         allocate( field_couplings(n) )                                                          !! Spin-field couplings
 
 		get_field_couplings: do concurrent (j = 1:n)
 			field_couplings(j) = exp( conjg(self%a(j))*s_unit(j) + &                           !! 𝜓(s')/𝜓(s) for all s'
-            cas_sum(log(cosh(b_ws + self%w(:,j)*s_unit(j))*sech_b_ws)) )            !! ∑ ln(cosh(b + ws')*sech(b + ws))
+            cas_sum(log(cosh(theta + self%w(:,j)*s_unit(j))*sech_theta)) )          !! ∑ ln(cosh(b + ws')*sech(b + ws))
 		end do get_field_couplings
 
 		e_interaction = J_str*cas_sum(neighbor_couplings)                  !! Local energy due to neighbor interactions
@@ -144,11 +157,11 @@ module ising_ml
 			thermalize: do k = 1, thermal_length
 				s_prop = start_sample                                                    !! Transfer sample to proposal
 				s_prop(1) = 1_ik - s_prop(1)                                                     !! Flip the first spin
-                call self%sq_psi_ratio(s1=start_sample, s2=s_prop, theta=theta, prob_ratio=acc_prob)
+                acc_prob = self%prob_ratio(s1=start_sample, s2=s_prop, theta_1=theta)         !! Acceptance probability
 				get_best_proposal: do j = 2, n                     !! Find proposal with largest acceptance probability
 					new_proposal = s_prop                                                          !! Transfer proposal
 					new_proposal(j) = 1_ik - new_proposal(j)                                          !! Flip j-th spin
-                    call self%sq_psi_ratio(s1=start_sample, s2=new_proposal, theta=theta, prob_ratio=prob)
+                    prob = self%prob_ratio(s1=start_sample, s2=new_proposal, theta_1=theta)          !! New probability
 					if ( prob > acc_prob ) then                                         !! If new probability is better
 						s_prop = new_proposal                                            !! Update with better proposal
 						acc_prob = prob                                       !! Update with new acceptance probability
@@ -183,7 +196,7 @@ module ising_ml
 				do pass = 1, passes
 					s_prop = this_sample                                                 !! Transfer sample to proposal
 					s_prop(rand_index(pass, k)) = 1_ik - s_prop(rand_index(pass, k))       !! Flip spin at random index
-                    call self%sq_psi_ratio(s1=this_sample, s2=s_prop, theta=theta, prob_ratio=acc_prob)
+                    acc_prob = self%prob_ratio(s1=this_sample, s2=s_prop, theta_1=theta)      !! Acceptance probability
 					if ( rands(pass, k) < acc_prob ) then                            !! Roll to update sample and theta
                         theta = theta + self%w(:,rand_index(pass,k))*(-2.0_rk*this_sample(rand_index(pass,k)) + 1.0_rk)
                         this_sample = s_prop                                !! M-H acceptance criterion - update sample
@@ -198,15 +211,14 @@ module ising_ml
 		sqerr = var(e_local)/num_samples                                                    !! Square error of energies
 	end subroutine metropolis_hastings
 
-    pure subroutine sq_psi_ratio(self, s1, s2, theta, prob_ratio)
+    pure real function prob_ratio(self, s1, s2, theta_1) result(p)
 		!! Function for computing the ratio of probabilities |𝜓(s_2)/𝜓(s_1)|^2 for two given configurations
 		class(RestrictedBoltzmannMachine), intent(in) :: self                                      !! Boltzmann machine
 		integer(ik), contiguous, dimension(:), intent(in) :: s1, s2                                   !! Configurations
-        complex(rk), contiguous, dimension(:), intent(in) :: theta                          !! Cached value of b + ws_1
-        real, intent(out) :: prob_ratio                                                       !! Ratio of probabilities
+        complex(rk), contiguous, dimension(:), intent(in) :: theta_1                        !! Cached value of b + ws_1
 
 		complex(rk), allocatable :: sum_as, amplitude_prob_ratio                          !! ∑_j a_j*s_j, 𝜓(s_2)/𝜓(s_1)
-		complex(rk), allocatable, dimension(:) :: thetap                                                     !! b + ws'
+		complex(rk), allocatable, dimension(:) :: theta_2                                                   !! b + ws_2
 		integer(ik), allocatable, dimension(:) :: s                                                !! Sample difference
 		integer, allocatable, dimension(:) :: indices, contributors                              !! For sorting indices
 		integer :: j, n, m                                                                   !! Loop and size variables
@@ -220,13 +232,13 @@ module ising_ml
 		contributors = pack(indices, mask=(indices/=0))                       !! Pack nonzero indices into contributors
         deallocate(indices)
 
-        thetap = theta + matmul(self%w(:, contributors), s(contributors))    !! Matmul over vector subscript where s/=0
+        theta_2 = theta_1 + matmul(self%w(:, contributors), s(contributors)) !! Matmul over vector subscript where s/=0
 
         sum_as = sum( conjg(self%a(contributors))*s(contributors) )                                      !! ∑_j a_j*s_j
 
-		amplitude_prob_ratio = exp(sum_as + sum(log(cosh(thetap)*sech(theta))))                        !! 𝜓(s_2)/𝜓(s_1)
-		prob_ratio = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                        !! |𝜓(s_2)/𝜓(s_1)|^2
-	end subroutine sq_psi_ratio
+		amplitude_prob_ratio = exp(sum_as + sum(log(cosh(theta_2)*sech(theta_1))))                     !! 𝜓(s_2)/𝜓(s_1)
+		p = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                                 !! |𝜓(s_2)/𝜓(s_1)|^2
+	end function prob_ratio
 
 	impure function random_sample(n) result(s_random)
 		!! Function for generating a random spin configuration
@@ -306,14 +318,18 @@ module ising_ml
         complex(rk), allocatable, dimension(:,:) :: dlnb                                             !! Log derivatives
 		complex(rk), allocatable, dimension(:,:,:) :: dlnw                                           !! Log derivatives
         complex(rk), allocatable, dimension(:) :: e_local_cent                               !! Centered local energies
-		real(rk) :: delta, denom                                     !! Regularization, covariance normalization factor
+		real(rk) :: covar_norm, delta, beta_1, beta_2, step, epsilon        !! Normalization, regularization, ADAM vars
 		integer :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
 
 		n = self%v_units                                                                         !! Get number of spins
 		m = self%h_units                                                                  !! Get number of hidden units
 		num_samples = size(markov_chain, dim=2)                                                !! Get number of samples
+        covar_norm = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
 		delta = 0.1_rk                                                                  !! Set regularization parameter
-        denom = 1.0_rk/(num_samples - 1)                                         !! Set sample covariance normalization
+        beta_1 = 0.99_rk                                                                 !! Decay rate for first moment
+        beta_2 = 0.999_rk                                                               !! Decay rate for second moment
+        step = 0.002_rk                                                                           !! Base learning rate
+        epsilon = 0.00000001_rk                                                !! Parameter to prevent division by zero
 
         e_local_cent = (e_local - cas_sum(e_local)/num_samples)                            !! Center the local energies
 
@@ -327,22 +343,26 @@ module ising_ml
 
             grad: do concurrent (j = 1:n)                                      !! Generalized forces (gradient of E[𝜓])
                 dlna_cent(:,j) = dlna(:,j) - cas_sum(dlna(:,j))/num_samples        !! Center each column about its mean
-                forces(j) = cas_sum(dlna_cent(:,j)*e_local_cent)*denom                            !! F(j) = 𝜕/𝜕a_j E[𝜓]
+                forces(j) = cas_sum(dlna_cent(:,j)*e_local_cent)*covar_norm                       !! F(j) = 𝜕/𝜕a_j E[𝜓]
             end do grad
 
             allocate( sr_matrix((n*(n+1))/2) )                            !! Allocate stochastic reconfiguration matrix
 
             cov_mat: do concurrent (jj = 1:n, j = 1:n, j>=jj) local(ind) shared(sr_matrix)
                 ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                 !! Packed index mapping
-                sr_matrix(ind) = cas_sum(dlna_cent(:,j)*dlna_cent(:,jj))*denom                   !! Two-pass covariance
+                sr_matrix(ind) = cas_sum(dlna_cent(:,j)*dlna_cent(:,jj))*covar_norm                       !! Covariance
                 if (j == jj) sr_matrix(ind) = sr_matrix(ind)%re + delta              !! Add regularization to diagonals
             end do cov_mat
 
 			allocate( x, mold=forces )                                                            !! Allocate solutions
 
-			call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')                !! Solves Sx = F for x = S^{-1}F
+			call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')       !! Stochastic reconfiguration x = S^{-1}F
 
-            call ADAM_a(self, grad=x, epoch=epoch)                                                    !! ADAM optimizer
+            self%p_a = beta_1*self%p_a + (1.0_rk - beta_1)*x                            !! Biased first moment estimate
+            self%r_a = beta_2*self%r_a + (1.0_rk - beta_2)*(x**2)                  !! Biased second raw moment estimate
+
+            !! Modify gradient with bias-corrected moments:
+            x = step*( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt((self%r_a/(1.0_rk - beta_2**epoch)) + epsilon)
 
 			self%a = self%a - x                                                !! Use gradient descent to update biases
 		end block update_a !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -364,22 +384,26 @@ module ising_ml
             grad: do concurrent (i = 1:m)                                      !! Generalized forces (gradient of E[𝜓])
                 dlnb_cent(:,i) = dlnb(:,i) - cas_sum(dlnb(:,i))/num_samples        !! Center each column about its mean
                 dlnb_cent_conj(:,i) = conjg(dlnb_cent(:,i))                        !! Cache conjugates of centered data
-                forces(i) = cas_sum(dlnb_cent_conj(:,i)*e_local_cent)*denom                       !! F(i) = 𝜕/𝜕b_i E[𝜓]
+                forces(i) = cas_sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                  !! F(i) = 𝜕/𝜕b_i E[𝜓]
             end do grad
 
             allocate( sr_matrix((m*(m+1))/2) )                            !! Allocate stochastic reconfiguration matrix
 
             cov_mat: do concurrent (ii = 1:m, i = 1:m, i>=ii) local(ind) shared(sr_matrix)
                 ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                 !! Packed index mapping
-                sr_matrix(ind) = cas_sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*denom              !! Two-pass covariance
+                sr_matrix(ind) = cas_sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*covar_norm                  !! Covariance
                 if (i == ii) sr_matrix(ind) = sr_matrix(ind)%re + delta              !! Add regularization to diagonals
             end do cov_mat
 
 			allocate( x, mold=forces )                                                            !! Allocate solutions
 
-			call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')                !! Solves Sx = F for x = S^{-1}F
+			call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')       !! Stochastic reconfiguration x = S^{-1}F
 
-            call ADAM_b(self, grad=x, epoch=epoch)                                                    !! ADAM optimizer
+            self%p_b = beta_1*self%p_b + (1.0_rk - beta_1)*x                            !! Biased first moment estimate
+            self%r_b = beta_2*self%r_b + (1.0_rk - beta_2)*(x**2)                  !! Biased second raw moment estimate
+
+            !! Modify gradient with bias-corrected moments:
+            x = step*( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt((self%r_b/(1.0_rk - beta_2**epoch)) + epsilon)
 
 			self%b = self%b - x                                                !! Use gradient descent to update biases
 		end block update_b !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -401,85 +425,32 @@ module ising_ml
             grad: do concurrent (j = 1:n, i = 1:m)                             !! Generalized forces (gradient of E[𝜓])
                 dlnw_cent(:,i,j) = dlnw(:,i,j) - cas_sum(dlnw(:,i,j))/num_samples  !! Center each column about its mean
                 dlnw_cent_conj(:,i,j) = conjg(dlnw_cent(:,i,j))                    !! Cache conjugates of centered data
-                forces(i,j) = cas_sum(dlnw_cent_conj(:,i,j)*e_local_cent)*denom                !! F(i,j) = 𝜕/𝜕w_ij E[𝜓]
+                forces(i,j) = cas_sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm           !! F(i,j) = 𝜕/𝜕w_ij E[𝜓]
             end do grad
 
             allocate( sr_matrix((m*(m+1))/2, n) )                         !! Allocate stochastic reconfiguration matrix
 
             cov_mat: do concurrent (j = 1:n, ii = 1:m, i = 1:m, i>=ii) local(ind) shared(sr_matrix)
                 ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                 !! Packed index mapping
-                sr_matrix(ind,j) = cas_sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*denom        !! Two-pass covariance
+                sr_matrix(ind,j) = cas_sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*covar_norm            !! Covariance
                 if (i == ii) sr_matrix(ind,j) = sr_matrix(ind,j)%re + delta          !! Add regularization to diagonals
             end do cov_mat
 
             allocate( x, mold=forces )                                                            !! Allocate solutions
 
 			stochastic_reconfiguration: do concurrent (j = 1:n) shared(forces, sr_matrix, x)
-				call ppsvx(AP=sr_matrix(:,j), b=forces(:,j), x=x(:,j), uplo='L', fact='E')         !! x_j = S_j^{-1}F_j
+				call ppsvx(AP=sr_matrix(:,j), b=forces(:,j), x=x(:,j), uplo='L', fact='E')  !! Sto reconfig x = S^{-1}F
 			end do stochastic_reconfiguration
 
-            call ADAM_w(self, grad=x, epoch=epoch)                                                    !! ADAM optimizer
+            self%p_w = beta_1*self%p_w + (1.0_rk - beta_1)*x                            !! Biased first moment estimate
+            self%r_w = beta_2*self%r_w + (1.0_rk - beta_2)*(x**2)                  !! Biased second raw moment estimate
+
+            !! Modify gradient with bias-corrected moments:
+            x = step*( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt((self%r_w/(1.0_rk - beta_2**epoch)) + epsilon)
 
 			self%w = self%w - x                                               !! Use gradient descent to update weights
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	end subroutine gradient_descent
-
-    pure subroutine ADAM_a(self, grad, epoch)
-        !! Procedure for optimizing gradient with adaptive moment estimator
-        class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        complex(rk), contiguous, dimension(:), intent(inout) :: grad                            !! Gradient to optimize
-        integer, intent(in) :: epoch                                                                   !! Current epoch
-
-        real(rk), allocatable :: beta_1, beta_2, step, epsilon
-
-        beta_1 = 0.99_rk
-        beta_2 = 0.999_rk
-        step = 0.002_rk
-        epsilon = 0.00000001_rk
-
-        self%p_a = beta_1*self%p_a + (1.0_rk - beta_1)*grad
-        self%r_a = beta_2*self%r_a + (1.0_rk - beta_2)*(grad**2)
-
-        grad = step*( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt((self%r_a/(1.0_rk - beta_2**epoch)) + epsilon)
-    end subroutine ADAM_a
-
-    pure subroutine ADAM_b(self, grad, epoch)
-        !! Procedure for optimizing gradient with adaptive moment estimator
-        class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        complex(rk), contiguous, dimension(:), intent(inout) :: grad                            !! Gradient to optimize
-        integer, intent(in) :: epoch                                                                   !! Current epoch
-
-        real(rk), allocatable :: beta_1, beta_2, step, epsilon
-
-        beta_1 = 0.99_rk
-        beta_2 = 0.999_rk
-        step = 0.002_rk
-        epsilon = 0.00000001_rk
-
-        self%p_b = beta_1*self%p_b + (1.0_rk - beta_1)*grad
-        self%r_b = beta_2*self%r_b + (1.0_rk - beta_2)*(grad**2)
-
-        grad = step*( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt((self%r_b/(1.0_rk - beta_2**epoch)) + epsilon)
-    end subroutine ADAM_b
-
-    pure subroutine ADAM_w(self, grad, epoch)
-        !! Procedure for optimizing gradient with adaptive moment estimator
-        class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        complex(rk), contiguous, dimension(:,:), intent(inout) :: grad                          !! Gradient to optimize
-        integer, intent(in) :: epoch                                                                   !! Current epoch
-
-        real(rk), allocatable :: beta_1, beta_2, step, epsilon
-
-        beta_1 = 0.99_rk
-        beta_2 = 0.999_rk
-        step = 0.002_rk
-        epsilon = 0.00000001_rk
-
-        self%p_w = beta_1*self%p_w + (1.0_rk - beta_1)*grad
-        self%r_w = beta_2*self%r_w + (1.0_rk - beta_2)*(grad**2)
-
-        grad = step*( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt((self%r_w/(1.0_rk - beta_2**epoch)) + epsilon)
-    end subroutine ADAM_w
 
 	!! Supporting Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
