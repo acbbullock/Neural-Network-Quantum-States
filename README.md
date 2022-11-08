@@ -1,2 +1,16 @@
-# ising_ml
-My cool new project!
+# Learning Quantum States with Neural Networks
+
+## Introduction
+
+The quantum mechanics emerges from the classical mechanics by the relaxation of the requirement of commutativity among the observables as assumed by classical probability theory. The most immediate and striking consequence of this relaxation is the insufficiency of real-valued probability distributions to encode the interferences observed by experiment. In response, we generalize the notion of probability distributions as complex-valued distributions over the set of possible outcomes of measurement, which are able to encode the observed interferences in off-diagonal components of the distribution. Such quantum probability distributions do not describe the mutually exclusive distributions over possible outcomes as in the classical theory, but instead describe distributions over possible outcomes in which the individual probabilities interfere in a wave-like manner.
+
+The increase in predictive power offered by quantum mechanics came with the price of computational difficulties. Unlike the classical world, whose dimensionality scales additively with the number of particles, the dimensionality scaling of quantum systems is multiplicative. Thus, even small systems quickly become intractable without approximation techniques. Luckily, it is rarely the case that knowledge of the full state space is required to accurately model a given system, as most information may be contained in a relatively small subspace. Many of the most successful approximation techniques of the last century, such as Born–Oppenheimer and variational techniques like Density Functional Theory, rely on this convenient notion for their success. With the rapid development of machine learning, a field which specializes in dimensionality reduction and feature extraction of very large datasets, it is natural to apply these novel techniques for dealing with the canonical large data problem of the physical sciences.
+
+## Restricted Boltzmann Machines
+
+The Universal Approximation Theorems are a collection of results concerning the ability of artificial neural networks to arbitrarily approximate different classes of functions. In particular, the Restricted Boltzmann Machine (RBM) is a shallow two-layer network consisting of $n$ input nodes or *visible units*, and $m$ output nodes or *hidden units* such that each input $v \in \{0,1\}^n$ and output $h \in \{0,1\}^m$ are Boolean vectors of respective length. The standard RBM is characterized by parameters $\{a,b,w\}$ where $a \in \mathbb{R}^n$ are the visible layer biases, $b \in \mathbb{R}^m$ are the hidden layer biases, and $w \in \mathbb{R}^{m \times n}$ are the weights which fully connect the layers. The network is "restricted" in the sense that there are no intra-layers connections.
+
+Let $V = \{0,1\}^n$ be the set of inputs and let $H = \{0,1\}^m$ be the set of outputs. Then the RBM is a universal approximator of Boltzmann probability distributions over the set $X = V \times H$ defined by
+    $$X \ni (v,h) \mapsto p(v,h) = \frac{\exp[-E(v,h)]}{Z} = \frac{\exp(a^\perp v + b^\perp h + h^\perp wv)}{\sum_{(v,h) \in X} \exp(a^\perp v + b^\perp h + h^\perp wv)} \in \mathbb{R}$$
+where $E(v,h) = -a^\perp v - b^\perp h - h^\perp wv$ is the dimensionless energy and $Z = \sum_{(v,h) \in X} \exp(a^\perp v + b^\perp h + h^\perp wv)$ is the partition function which normalizes the probabilities. From the joint probability distribution $p(v,h)$, we may construct the marginal distributions as the partial sums
+    $$p(v) = \sum_{h \in H} p(v,h)~~,~~p(h) = \sum_{v \in V} p(v,h)$$
