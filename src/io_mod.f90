@@ -1,3 +1,7 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  This module file contains common i/o operations for arrays of real and integer type. Common operations include
+!!  printing arrays to std out with a specified format, reading/writing arrays from/to csv files and binary files.
+!!
 module io_mod
     use, intrinsic :: iso_fortran_env, only: real64, real32, int64, int32, int16, int8, input_unit, output_unit
     implicit none (type,external)
