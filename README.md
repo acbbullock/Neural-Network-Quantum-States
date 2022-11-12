@@ -11,11 +11,7 @@ The increase in predictive power offered by quantum mechanics came with the pric
 The Universal Approximation Theorems are a collection of results concerning the ability of artificial neural networks to arbitrarily approximate different classes of functions. In particular, the Restricted Boltzmann Machine (RBM) is a shallow two-layer network consisting of $n$ input nodes or *visible units*, and $m$ output nodes or *hidden units* such that each input $v \in \\{0,1\\}^n$ and output $h \in \\{0,1\\}^m$ are Boolean vectors of respective length. The standard RBM is characterized by parameters $\alpha \in \\{a,b,w\\} = \mathcal{M}$ where $a \in \mathbb{R}^n$ are the visible layer biases, $b \in \mathbb{R}^m$ are the hidden layer biases, and $w \in \mathbb{R}^{m \times n}$ are the weights which fully connect the layers. Geometrically, we consider the parameters $\alpha \in \mathcal{M}$ to be the points of a parameter manifold $\mathcal{M}$. The network is "restricted" in the sense that there are no intra-layers connections.
 
 Let $V = \\{0,1\\}^n$ be the set of inputs, let $H = \\{0,1\\}^m$ be the set of outputs, and let $X = V \times H$ be the set of pairs. Then the RBM is a universal approximator of Boltzmann probability distributions $p(\alpha):X \to [0,1]$ at $\alpha \in \mathcal{M}$ defined by
-    $$
-    X \ni (v,h) \mapsto p(v,h,\alpha)
-    = \frac{\exp[-E(v,h,\alpha)]}{Z(\alpha)}
-    = \frac{\exp(a^\perp v + b^\perp h + h^\perp wv)}{\sum_{(v',h') \in X} \exp(a^\perp v' + b^\perp h' + {h'}^\perp wv')} \in [0,1]
-    $$
+    $$X \ni (v,h) \mapsto p(v,h,\alpha) = \frac{\exp[-E(v,h,\alpha)]}{Z(\alpha)} = \frac{\exp(a^\perp v + b^\perp h + h^\perp wv)}{\sum_{(v',h') \in X} \exp(a^\perp v' + b^\perp h' + {h'}^\perp wv')} \in [0,1]$$
 where $E(v,h,\alpha) = -a^\perp v - b^\perp h - h^\perp wv$ is the parametrized Boltzmann energy and $Z(\alpha) = \sum_{(v',h') \in X} \exp(a^\perp v' + b^\perp h' + {h'}^\perp wv')$ is the partition function which normalizes the probabilities, with $\perp$ denoting the matrix transpose. From the joint probability distribution $p(\alpha)$, we may construct the marginal distributions as the restrictions $p_V(\alpha):V \to [0,1]$ and $p_H(\alpha): H \to [0,1]$ at $\alpha \in \mathcal{M}$, given by the partial sums
     $$p_V(v,\alpha) = \sum_{h \in H} p(v,h,\alpha)\~\~,\~\~p_H(h,\alpha) = \sum_{v \in V} p(v,h,\alpha)$$
 over $H$ and $V$ respectively. Due to the restricted nature of the RBM, the activation probabilities $p(h_i=1|v,\alpha)$ and $p(v_j=1|h,\alpha)$ of each layer are mutually exclusive for all $i \in [1,m]$ and $j \in [1,n]$ such that the conditional probabilities are the products
@@ -31,9 +27,7 @@ The trial state wave-functions $\psi$ may be constructed as the marginal distrib
 where we ignore the normalization factor of the wave-function, and where $\dagger$ represents the matrix conjugate transpose. By the Born rule, the real, normalized probability distribution $p(\alpha):S \to [0,1]$ associated to the wave-function $\psi$ is defined by $S \ni s \mapsto p(s,\alpha) = |\psi(s,\alpha)|^2/\sum_{s' \in S} |\psi(s',\alpha)|^2 \in [0,1]$.
 
 For the RBM's cost function, we use the statistical expectation $E[\psi(\alpha)] = \langle H \rangle_{\psi(\alpha)}$ of the Hamiltonian $H$ in the variational trial state $\ket{\psi(\alpha)}$, given by
-    $$E[\psi(\alpha)] = \frac{\langle \psi(\alpha), H\psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} =
-    \frac{\sum_{s,s' \in S} \psi^\*(s,\alpha) H_{ss'} \psi(s',\alpha)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} =
-    \frac{\sum_{s \in S} |\psi(s,\alpha)|^2 \left(\sum_{s' \in S} H_{ss'} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}\right)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} = \sum_{s \in S} p(s,\alpha) E_{\text{loc}}(s,\alpha)$$
+    $$E[\psi(\alpha)] = \frac{\langle \psi(\alpha), H\psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} = \frac{\sum_{s,s' \in S} \psi^\*(s,\alpha) H_{ss'} \psi(s',\alpha)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} = \frac{\sum_{s \in S} |\psi(s,\alpha)|^2 \left(\sum_{s' \in S} H_{ss'} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}\right)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} = \sum_{s \in S} p(s,\alpha) E_{\text{loc}}(s,\alpha)$$
 where we define the variational local energies $E_{\text{loc}}(s,\alpha) = \sum_{s' \in S} H_{ss'} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}$, with $H_{ss'}$ being the matrix element of $H$ in between the states $\ket{s}$ and $\ket{s'}$. Thus $E[\psi(\alpha)] = \sum_{s \in S} p(s,\alpha) E_{\text{loc}}(s,\alpha)$ is the statistical expectation of the local energies weighted by the probability distribution $p(\alpha):S \to [0,1]$.
 
 ## Transverse Field Ising Model
