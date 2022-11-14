@@ -24,10 +24,12 @@ module ising_ml
 	type RestrictedBoltzmannMachine                     !! Custom class for implementing a Restricted Boltzmann Machine
 		private
 		integer, allocatable :: v_units, h_units                                             !! Number of layer neurons
-		complex(rk), allocatable, dimension(:) :: a, b                                                !! Network biases
-        complex(rk), allocatable, dimension(:,:) :: w                                                !! Network weights
-		complex(rk), allocatable, dimension(:) :: p_a, r_a, p_b, r_b                                     !! ADAM arrays
-		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                             !! ADAM arrays
+		real(rk), allocatable, dimension(:) :: a                                                !! Visible layer biases
+		complex(rk), allocatable, dimension(:) :: b                                              !! Hidden layer biases
+        complex(rk), allocatable, dimension(:,:) :: w                                                        !! Weights
+		real(rk), allocatable, dimension(:) :: p_a, r_a                                            !! ADAM arrays for a
+		complex(rk), allocatable, dimension(:) :: p_b, r_b                                         !! ADAM arrays for b
+		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
 		contains                                                                     !! Type-bound procedures (methods)
 			private
 			procedure, pass, public :: train                                !! Procedure for training Boltzmann machine
@@ -42,10 +44,6 @@ module ising_ml
 		procedure :: new
 	end interface
 
-    interface cas_sum                                                          !! Interface for cascading sum functions
-        procedure :: cas_sum_real, cas_sum_complex
-    end interface
-
 	contains  !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     !! Initialization Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,7 +57,7 @@ module ising_ml
 	end function new
 
     impure subroutine init(self)
-		!! Procedure for Xavier Initialization
+		!! Procedure for initialization
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
 
 		integer :: n, m                                                                     !! Visible and hidden units
@@ -77,25 +75,26 @@ module ising_ml
 		n = self%v_units                                                                         !! Get number of spins
 		m = self%h_units                                                                  !! Get number of hidden units
 
-		allocate( self%p_a(n), self%r_a(n), self%p_b(m), self%r_b(m), self%p_w(m,n), self%r_w(m,n), &    !! ADAM arrays
-                  self%a(n), self%b(m), self%w(m,n), source=(0.0_rk, 0.0_rk) )                    !! Biases and weights
+        allocate( self%a(n), self%p_a(n), self%r_a(n), source=0.0_rk )            !! Allocate visible layer bias arrays
+        allocate( self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk, 0.0_rk) )   !! Allocate hidden layer bias arrays
+		allocate( self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk, 0.0_rk) )        !! Allocate weight arrays
 
-		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=sqrt(1.0_rk/n))                        !! Real part
-		self%w%im = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=sqrt(1.0_rk/n))                   !! Imaginary part
+		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.001_rk)                              !! Real part
+		self%w%im = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.001_rk)                         !! Imaginary part
 	end subroutine init
 
 	!! Ising Model Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    pure complex(rk) function ising_energy(self, s, params) result(energy)
+    pure real(rk) function ising_energy(self, s, theta, params) result(energy)
 		!! Function for calculating local energy of configuration s in Ising model
 		class(RestrictedBoltzmannMachine), intent(in) :: self                                      !! Boltzmann machine
 		integer(ik), contiguous, dimension(:), intent(in) :: s                                   !! Configuration input
+        complex(rk), contiguous, dimension(:), intent(in) :: theta                            !! Cached value of b + ws
         real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
 
-        real(rk), allocatable, dimension(:) :: s_unit, neighbor_couplings                !! s -> ±1, neighbor couplings
-		complex(rk), allocatable, dimension(:) :: theta, sech_theta                             !! b + ws, sech(b + ws)
-		complex(rk), allocatable, dimension(:) :: field_couplings                                    !! Field couplings
-		complex(rk), allocatable :: e_interaction, e_transverse          !! Interaction energy, transverse field energy
+        real(rk), allocatable, dimension(:) :: s_unit, neighbor_couplings, field_couplings        !! s -> ±1, couplings
+		complex(rk), allocatable, dimension(:) :: arg_theta                                           !! 1 + exp(theta)
+		real(rk), allocatable :: e_interaction, e_transverse             !! Interaction energy, transverse field energy
         real(rk), allocatable :: J_str, B_str                       !! Ising model coupling strength and field strength
 		integer :: j, n, m                                                            !! Loop variable, number of spins
 
@@ -107,31 +106,30 @@ module ising_ml
         s_unit = -2.0_rk*s + 1.0_rk                                                            !! Map {0,1} -> {1.,-1.}
         neighbor_couplings = s_unit(1:n-1)*s_unit(2:n)                                    !! Nearest neighbor couplings
 
-		theta = self%b + matmul(self%w, s)                                                        !! b + ws for input s
-        sech_theta = sech(theta)                                                          !! f^{-1} = cosh^{-1}(b + ws)
-
         allocate( field_couplings(n) )                                                          !! Spin-field couplings
 
+        arg_theta = 1.0_rk + exp(theta)                                                  !! 1 + exp(b + ws) for input s
+
 		get_field_couplings: do concurrent (j = 1:n)
-			field_couplings(j) = exp( conjg(self%a(j))*s_unit(j) + &                           !! 𝜓(s')/𝜓(s) for all s'
-            cas_sum(log(cosh(theta + self%w(:,j)*s_unit(j))*sech_theta)) )          !! ∑ ln(cosh(b + ws')*sech(b + ws))
+			field_couplings(j) = exp( self%a(j)*s_unit(j) + &                                  !! 𝜓(s')/𝜓(s) for all s'
+            sum(log(1.0_rk + exp(theta + self%w(:,j)*s_unit(j))) - log(arg_theta)) )   !! Forgets im part on assignment
 		end do get_field_couplings
 
-		e_interaction = J_str*cas_sum(neighbor_couplings)                  !! Local energy due to neighbor interactions
-		e_transverse = B_str*cas_sum(field_couplings)                           !! Local energy due to transverse field
+		e_interaction = J_str*sum(neighbor_couplings)                      !! Local energy due to neighbor interactions
+		e_transverse = B_str*sum(field_couplings)                               !! Local energy due to transverse field
 
 		energy = e_interaction + e_transverse       !! Local energy is sum of interaction and transverse field energies
 	end function ising_energy
 
 	!!  Metropolis-Hastings Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	impure subroutine metropolis_hastings(self, num_samples, ising_parameters, markov_chain, e_local, energy, sqerr)
+    impure subroutine metropolis_hastings(self, num_samples, ising_parameters, markov_chain, e_local, energy, sqerr)
 		!! Procedure for generating Markov Chain of samples from distribution |𝜓|^2
 		class(RestrictedBoltzmannMachine), intent(in) :: self                             !! Distribution to be sampled
 		integer, intent(in) :: num_samples                                              !! Number of samples to produce
         real(rk), dimension(2), intent(in) :: ising_parameters        !! Specifies coupling strength and field strength
 		integer(ik), allocatable, dimension(:,:), intent(out) :: markov_chain                !! Output chain of samples
-		complex(rk), allocatable, dimension(:), intent(out) :: e_local                         !! Output local energies
+		real(rk), allocatable, dimension(:), intent(out) :: e_local                            !! Output local energies
 		real(rk), allocatable, intent(out) :: energy, sqerr                             !! Energy average, square error
 
 		integer(ik), allocatable, dimension(:) :: start_sample               !! Start sample of stationary distribution
@@ -141,20 +139,14 @@ module ising_ml
 		n = self%v_units                                                                         !! Get number of spins
 
 		start_sample = random_sample(n)                                                     !! Initialize random sample
-        theta = self%b + matmul(self%w, start_sample)                                              !! Get initial theta
+        theta = conjg(self%b) + matmul(self%w, start_sample)                                       !! Get initial theta
 
 		thermalization: block
 			integer(ik), allocatable, dimension(:) :: new_proposal, s_prop                          !! Proposal samples
-			real, allocatable, dimension(:) :: rands                                                  !! Random numbers
-			real :: acc_prob, prob                                                      !! M-H acceptance probabilities
-			integer :: k, j, thermal_length                                                           !! Loop variables
+			real :: acc_prob, prob, r                                                   !! M-H acceptance probabilities
+			integer :: j                                                                               !! Loop variable
 
-			thermal_length = 25 + n/100                                         !! Number of samples for thermalization
-
-			allocate( rands(thermal_length) )
-			call random_number(rands)                                                           !! Get randoms on [0,1)
-
-			thermalize: do k = 1, thermal_length
+			do
 				s_prop = start_sample                                                    !! Transfer sample to proposal
 				s_prop(1) = 1_ik - s_prop(1)                                                     !! Flip the first spin
                 acc_prob = self%prob_ratio(s1=start_sample, s2=s_prop, theta_1=theta)         !! Acceptance probability
@@ -167,11 +159,15 @@ module ising_ml
 						acc_prob = prob                                       !! Update with new acceptance probability
 					end if
 				end do get_best_proposal
-				if ( rands(k) < acc_prob ) then
-                    start_sample = s_prop                                   !! M-H acceptance criterion - update sample
-                    theta = self%b + matmul(self%w, start_sample)                                       !! Update theta
+
+                call random_number(r)                                                   !! Sample from uniform on [0,1)
+				if ( r < acc_prob ) then                                                    !! M-H acceptance criterion
+                    start_sample = s_prop                                                              !! Update sample
+                    theta = conjg(self%b) + matmul(self%w, start_sample)                                !! Update theta
+                else
+                    exit thermalization                                           !! Sample is sufficiently thermalized
                 end if
-			end do thermalize
+			end do
 		end block thermalization
 
 		allocate( markov_chain(n, num_samples), e_local(num_samples) )                        !! Allocate output arrays
@@ -183,7 +179,7 @@ module ising_ml
 			real :: acc_prob                                                              !! M-H acceptance probability
 			integer :: k, pass, passes                                                                !! Loop variables
 
-			passes = max(4, 2*n/5)                                      !! Number of passes to make on the start sample
+			passes = 2*n/5                                              !! Number of passes to make on the start sample
 
 			allocate( rands(passes, num_samples) )
 
@@ -197,17 +193,17 @@ module ising_ml
 					s_prop = this_sample                                                 !! Transfer sample to proposal
 					s_prop(rand_index(pass, k)) = 1_ik - s_prop(rand_index(pass, k))       !! Flip spin at random index
                     acc_prob = self%prob_ratio(s1=this_sample, s2=s_prop, theta_1=theta)      !! Acceptance probability
-					if ( rands(pass, k) < acc_prob ) then                            !! Roll to update sample and theta
+					if ( rands(pass, k) < acc_prob ) then                                   !! M-H acceptance criterion
                         theta = theta + self%w(:,rand_index(pass,k))*(-2.0_rk*this_sample(rand_index(pass,k)) + 1.0_rk)
-                        this_sample = s_prop                                !! M-H acceptance criterion - update sample
+                        this_sample = s_prop                                                           !! Update sample
                     end if
 				end do
-				markov_chain(:,k) = this_sample                                         !! Final sample to output chain
-				e_local(k) = self%ising_energy(s=this_sample, params=ising_parameters)        !! Local energy to output
+				markov_chain(:,k) = this_sample                                                        !! Output sample
+				e_local(k) = self%ising_energy(s=this_sample, theta=theta, params=ising_parameters)     !! Local energy
 			end do
 		end block stationary_sampling
 
-		energy = sum(e_local%re)/num_samples                                               !! Average of final energies
+		energy = sum(e_local)/num_samples                                                        !! Average of energies
 		sqerr = var(e_local)/num_samples                                                    !! Square error of energies
 	end subroutine metropolis_hastings
 
@@ -234,9 +230,10 @@ module ising_ml
 
         theta_2 = theta_1 + matmul(self%w(:, contributors), s(contributors)) !! Matmul over vector subscript where s/=0
 
-        sum_as = sum( conjg(self%a(contributors))*s(contributors) )                                      !! ∑_j a_j*s_j
+        sum_as = sum( self%a(contributors)*s(contributors) )                                             !! ∑_j a_j s_j
 
-		amplitude_prob_ratio = exp(sum_as + sum(log(cosh(theta_2)*sech(theta_1))))                     !! 𝜓(s_2)/𝜓(s_1)
+		amplitude_prob_ratio = exp(sum_as + sum(log(1.0_rk+exp(theta_2)) - log(1.0_rk+exp(theta_1))))  !! 𝜓(s_2)/𝜓(s_1)
+
 		p = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                                 !! |𝜓(s_2)/𝜓(s_1)|^2
 	end function prob_ratio
 
@@ -254,7 +251,7 @@ module ising_ml
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	impure subroutine train(self, sample_size, ising_parameters, energies, correlations)
+    impure subroutine train(self, sample_size, ising_parameters, energies, correlations)
 		!! Procedure for training Boltzmann machine
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
@@ -263,8 +260,7 @@ module ising_ml
 		real(rk), allocatable, dimension(:,:), intent(out) :: energies, correlations       !! Energies and correlations
 
         integer(ik), allocatable, dimension(:,:) :: chain                                 !! Markov chain storage array
-		complex(rk), allocatable, dimension(:) :: e_local                                 !! Local energy storage array
-		real(rk), allocatable, dimension(:) :: cor                                   !! Spin correlations storage array
+		real(rk), allocatable, dimension(:) :: e_local, cor                        !! Local energies, spin correlations
 		real(rk), allocatable :: energy, sqerr, stderr                                           !! Recording variables
 		integer :: epoch, max_epochs                                                       !! Loop variable, max epochs
 
@@ -306,18 +302,18 @@ module ising_ml
         end if
 	end subroutine train
 
-	pure subroutine gradient_descent(self, markov_chain, e_local, epoch)
+    pure subroutine gradient_descent(self, markov_chain, e_local, epoch)
         !! Procedure for updating weights and biases
 		use lapack95, only: ppsvx                             !! Routine for solving linear systems with packed storage
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
 		integer(ik), contiguous, dimension(:,:), intent(in) :: markov_chain                  !! Markov chain of samples
-		complex(rk), contiguous, dimension(:), intent(in) :: e_local                                  !! Local energies
+		real(rk), contiguous, dimension(:), intent(in) :: e_local                                     !! Local energies
         integer, intent(in) :: epoch                                                                   !! Current epoch
 
+        real(rk), allocatable, dimension(:) :: e_local_cent                                  !! Centered local energies
         real(rk), allocatable, dimension(:,:) :: dlna                                                !! Log derivatives
         complex(rk), allocatable, dimension(:,:) :: dlnb                                             !! Log derivatives
 		complex(rk), allocatable, dimension(:,:,:) :: dlnw                                           !! Log derivatives
-        complex(rk), allocatable, dimension(:) :: e_local_cent                               !! Centered local energies
 		real(rk) :: covar_norm, delta, beta_1, beta_2, step, epsilon        !! Normalization, regularization, ADAM vars
 		integer :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
 
@@ -325,33 +321,33 @@ module ising_ml
 		m = self%h_units                                                                  !! Get number of hidden units
 		num_samples = size(markov_chain, dim=2)                                                !! Get number of samples
         covar_norm = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
-		delta = 0.1_rk                                                                  !! Set regularization parameter
+		delta = 1e-5_rk                                                                 !! Set regularization parameter
         beta_1 = 0.99_rk                                                                 !! Decay rate for first moment
         beta_2 = 0.999_rk                                                               !! Decay rate for second moment
-        step = 0.002_rk                                                                           !! Base learning rate
-        epsilon = 0.00000001_rk                                                !! Parameter to prevent division by zero
+        step = 0.01_rk                                                                            !! Base learning rate
+        epsilon = 1e-8_rk                                                      !! Parameter to prevent division by zero
 
-        e_local_cent = (e_local - cas_sum(e_local)/num_samples)                            !! Center the local energies
+        e_local_cent = e_local - sum(e_local)/num_samples                                  !! Center the local energies
 
-		dlna = transpose(markov_chain)                        !! O_a(k,j) = 𝜕/𝜕a_j ln[𝜓(s_k)] = s_jk, k=1,…,K , j=1,…,n
+		dlna = transpose(markov_chain)                         !! O_a(k,j) = 𝜕/𝜕a_j ln 𝜓(s^k) = s_kj, k=1,…,K , j=1,…,n
 
 		update_a: block !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             real(rk), allocatable, dimension(:,:) :: dlna_cent                                         !! Centered data
-			complex(rk), allocatable, dimension(:) :: forces, sr_matrix, x                      !! Linear system arrays
+			real(rk), allocatable, dimension(:) :: forces, sr_matrix, x                         !! Linear system arrays
 
             allocate( dlna_cent(num_samples, n), forces(n) )         !! Allocate centered data storage, gradient vector
 
             grad: do concurrent (j = 1:n)                                      !! Generalized forces (gradient of E[𝜓])
-                dlna_cent(:,j) = dlna(:,j) - cas_sum(dlna(:,j))/num_samples        !! Center each column about its mean
-                forces(j) = cas_sum(dlna_cent(:,j)*e_local_cent)*covar_norm                       !! F(j) = 𝜕/𝜕a_j E[𝜓]
+                dlna_cent(:,j) = dlna(:,j) - sum(dlna(:,j))/num_samples            !! Center each column about its mean
+                forces(j) = sum(dlna_cent(:,j)*e_local_cent)*covar_norm                           !! F(j) = 𝜕/𝜕a_j E[𝜓]
             end do grad
 
             allocate( sr_matrix((n*(n+1))/2) )                            !! Allocate stochastic reconfiguration matrix
 
             cov_mat: do concurrent (jj = 1:n, j = 1:n, j>=jj) local(ind) shared(sr_matrix)
                 ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                 !! Packed index mapping
-                sr_matrix(ind) = cas_sum(dlna_cent(:,j)*dlna_cent(:,jj))*covar_norm                       !! Covariance
-                if (j == jj) sr_matrix(ind) = sr_matrix(ind)%re + delta              !! Add regularization to diagonals
+                sr_matrix(ind) = sum(dlna_cent(:,j)*dlna_cent(:,jj))*covar_norm                           !! Covariance
+                if (j == jj) sr_matrix(ind) = sr_matrix(ind) + delta                 !! Add regularization to diagonals
             end do cov_mat
 
 			allocate( x, mold=forces )                                                            !! Allocate solutions
@@ -362,18 +358,18 @@ module ising_ml
             self%r_a = beta_2*self%r_a + (1.0_rk - beta_2)*(x**2)                  !! Biased second raw moment estimate
 
             !! Modify gradient with bias-corrected moments:
-            x = step*( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt((self%r_a/(1.0_rk - beta_2**epoch)) + epsilon)
+            x = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%a = self%a - x                                                !! Use gradient descent to update biases
+			self%a = self%a - step*x                                           !! Use gradient descent to update biases
 		end block update_a !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		dlnb = matmul(self%w, markov_chain)                                                               !! 𝜃 - b = ws
 
 		get_effective_angles: do concurrent (k = 1:num_samples)
-            dlnb(:,k) = self%b + dlnb(:,k)                                                !! 𝜃 = b + ws for each sample
+            dlnb(:,k) = exp(conjg(self%b) + dlnb(:,k))                          !! exp(𝜃) = exp(b + ws) for each sample
 		end do get_effective_angles
 
-		dlnb = transpose(tanh(dlnb))                  !! O_b(k,i) = 𝜕/𝜕b_i ln[𝜓(s_k)] = tanh(𝜃(k,i)), k=1,…,K , i=1,…,m
+		dlnb = transpose(dlnb/(1.0_rk + dlnb))                        !! O_b(k,i) = 𝜕/𝜕b_i ln 𝜓(s^k), k=1,…,K , i=1,…,m
 
 		update_b: block !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             complex(rk), allocatable, dimension(:,:) :: dlnb_cent, dlnb_cent_conj                      !! Centered data
@@ -382,16 +378,16 @@ module ising_ml
             allocate( dlnb_cent(num_samples, m), dlnb_cent_conj(num_samples, m), forces(m) ) !! Centered data, gradient
 
             grad: do concurrent (i = 1:m)                                      !! Generalized forces (gradient of E[𝜓])
-                dlnb_cent(:,i) = dlnb(:,i) - cas_sum(dlnb(:,i))/num_samples        !! Center each column about its mean
+                dlnb_cent(:,i) = dlnb(:,i) - sum(dlnb(:,i))/num_samples            !! Center each column about its mean
                 dlnb_cent_conj(:,i) = conjg(dlnb_cent(:,i))                        !! Cache conjugates of centered data
-                forces(i) = cas_sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                  !! F(i) = 𝜕/𝜕b_i E[𝜓]
+                forces(i) = sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                      !! F(i) = 𝜕/𝜕b_i E[𝜓]
             end do grad
 
             allocate( sr_matrix((m*(m+1))/2) )                            !! Allocate stochastic reconfiguration matrix
 
             cov_mat: do concurrent (ii = 1:m, i = 1:m, i>=ii) local(ind) shared(sr_matrix)
                 ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                 !! Packed index mapping
-                sr_matrix(ind) = cas_sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*covar_norm                  !! Covariance
+                sr_matrix(ind) = sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*covar_norm                      !! Covariance
                 if (i == ii) sr_matrix(ind) = sr_matrix(ind)%re + delta              !! Add regularization to diagonals
             end do cov_mat
 
@@ -403,15 +399,15 @@ module ising_ml
             self%r_b = beta_2*self%r_b + (1.0_rk - beta_2)*(x**2)                  !! Biased second raw moment estimate
 
             !! Modify gradient with bias-corrected moments:
-            x = step*( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt((self%r_b/(1.0_rk - beta_2**epoch)) + epsilon)
+            x = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%b = self%b - x                                                !! Use gradient descent to update biases
+			self%b = self%b - step*x                                           !! Use gradient descent to update biases
 		end block update_b !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		allocate( dlnw(num_samples, m, n) )                                              !! k=1,…,K , i=1,…,m , j=1,…,n
 
 		do concurrent (j = 1:n, i = 1:m)
-			dlnw(:,i,j) = dlna(:,j)*dlnb(:,i)                    !! O_w(k,i,j) = 𝜕/𝜕w_ij ln[𝜓(s_k)] = s_jk tanh(𝜃(k,i))
+			dlnw(:,i,j) = dlna(:,j)*dlnb(:,i)    !! O_w(k,i,j) = 𝜕/𝜕w_ij ln 𝜓(s^k) = s_kj exp(𝜃(k,i))/(1 + exp(𝜃(k,i)))
 		end do
 
 		deallocate(dlna, dlnb)                                                                     !! Free local memory
@@ -423,16 +419,16 @@ module ising_ml
             allocate( dlnw_cent(num_samples, m, n), dlnw_cent_conj(num_samples, m, n), forces(m, n) )
 
             grad: do concurrent (j = 1:n, i = 1:m)                             !! Generalized forces (gradient of E[𝜓])
-                dlnw_cent(:,i,j) = dlnw(:,i,j) - cas_sum(dlnw(:,i,j))/num_samples  !! Center each column about its mean
+                dlnw_cent(:,i,j) = dlnw(:,i,j) - sum(dlnw(:,i,j))/num_samples      !! Center each column about its mean
                 dlnw_cent_conj(:,i,j) = conjg(dlnw_cent(:,i,j))                    !! Cache conjugates of centered data
-                forces(i,j) = cas_sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm           !! F(i,j) = 𝜕/𝜕w_ij E[𝜓]
+                forces(i,j) = sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm               !! F(i,j) = 𝜕/𝜕w_ij E[𝜓]
             end do grad
 
             allocate( sr_matrix((m*(m+1))/2, n) )                         !! Allocate stochastic reconfiguration matrix
 
             cov_mat: do concurrent (j = 1:n, ii = 1:m, i = 1:m, i>=ii) local(ind) shared(sr_matrix)
                 ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                 !! Packed index mapping
-                sr_matrix(ind,j) = cas_sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*covar_norm            !! Covariance
+                sr_matrix(ind,j) = sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*covar_norm                !! Covariance
                 if (i == ii) sr_matrix(ind,j) = sr_matrix(ind,j)%re + delta          !! Add regularization to diagonals
             end do cov_mat
 
@@ -446,56 +442,25 @@ module ising_ml
             self%r_w = beta_2*self%r_w + (1.0_rk - beta_2)*(x**2)                  !! Biased second raw moment estimate
 
             !! Modify gradient with bias-corrected moments:
-            x = step*( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt((self%r_w/(1.0_rk - beta_2**epoch)) + epsilon)
+            x = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%w = self%w - x                                               !! Use gradient descent to update weights
+			self%w = self%w - step*x                                          !! Use gradient descent to update weights
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	end subroutine gradient_descent
 
 	!! Supporting Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    pure complex(rk) elemental function sech(z) result(hyperbolic_secant)
-        complex(rk), intent(in) :: z
-        hyperbolic_secant = 2.0_rk/( exp(z) + exp(-z) )
-    end function sech
-
-    pure real(rk) recursive function cas_sum_real(x) result(psum)
-        !! Cascading summation for minimizing accumulation of round-off errors
-        real(rk), contiguous, dimension(:), intent(in) :: x
-        integer :: n, i
-
-        n = size(x)
-        if ( n <= 10 ) then                                                                                !! Base case
-            psum = sum(x)
-        else
-            psum = cas_sum(x(1:n/2)) + cas_sum(x(n/2+1:n))                                        !! Divide and conquer
-        end if
-    end function cas_sum_real
-
-    pure complex(rk) recursive function cas_sum_complex(x) result(psum)
-        !! Cascading summation for minimizing accumulation of round-off errors
-        complex(rk), contiguous, dimension(:), intent(in) :: x
-        integer :: n, i
-
-        n = size(x)
-        if ( n <= 10 ) then                                                                                !! Base case
-            psum = sum(x)
-        else
-            psum = cas_sum(x(1:n/2)) + cas_sum(x(n/2+1:n))                                        !! Divide and conquer
-        end if
-    end function cas_sum_complex
-
     pure real(rk) function var(x) result(variance)
-		!! Function for calculating sample variance of a complex vector using canonical two-pass algorithm
-        complex(rk), contiguous, dimension(:), intent(in) :: x
+		!! Function for calculating sample variance of a real vector using canonical two-pass algorithm
+        real(rk), contiguous, dimension(:), intent(in) :: x
 
-		complex(rk), allocatable, dimension(:) :: x_cent
+		real(rk), allocatable, dimension(:) :: x_cent
 		integer :: n
 
 		n = size(x)
-		x_cent = (x - sum(x)/n)
+		x_cent = x - sum(x)/n
 
-		variance = sum( real(conjg(x_cent)*x_cent, kind=rk) )/(n-1)
+		variance = sum(x_cent**2)/(n-1)
 	end function var
 
     pure function corr(A) result(correlations)
