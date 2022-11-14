@@ -12,26 +12,24 @@ program main
     type(RestrictedBoltzmannMachine) :: psi                                                     !! Neural network class
 
     real(rk), allocatable, dimension(:,:) :: energies, correlations                                 !! Training outputs
-    integer :: spins, hidden_units, sample_size                                                  !! Training parameters
+    integer :: spins, hidden_units                                                               !! Training parameters
     real(rk) :: ising_parameters(2)                                                                 !! Ising parameters
 
     integer(i64) t1, t2                                                                              !! Clock variables
     real(rk) rate, telapse                                                                           !! Clock variables
 
     !! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    call random_init(repeatable=.true., image_distinct=.true.)                   !! Initialize random number generator
+    call random_init(repeatable=.false., image_distinct=.true.)                   !! Initialize random number generator
 
     spins = 2001                                                                         !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
-    sample_size = 25                                                                                 !! Set sample size
     ising_parameters = [-10.0_rk, -0.5_rk]                                  !! Set coupling strength and field strength
 
     psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                            !! Create instance
 
     if ( this_image() == 1 ) call system_clock(t1)                                                       !! Start clock
 
-    call psi%train( sample_size=sample_size, ising_parameters=ising_parameters, &                             !! Inputs
-                    energies=energies, correlations=correlations )                                           !! Outputs
+    call psi%train(ising_parameters=ising_parameters, energies=energies, correlations=correlations )   !! Train network
 
     if ( this_image() == 1 ) then
         call system_clock(t2, count_rate=rate)                                                            !! Stop clock
