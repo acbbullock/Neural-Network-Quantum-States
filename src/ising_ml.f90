@@ -123,20 +123,21 @@ module ising_ml
 
 	!!  Metropolis-Hastings Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine metropolis_hastings(self, num_samples, ising_parameters, markov_chain, e_local, energy, sqerr)
+    impure subroutine metropolis_hastings(self, epoch, params, markov_chain, e_local, energy, sqerr)
 		!! Procedure for generating Markov Chain of samples from distribution |𝜓|^2
 		class(RestrictedBoltzmannMachine), intent(in) :: self                             !! Distribution to be sampled
-		integer, intent(in) :: num_samples                                              !! Number of samples to produce
-        real(rk), dimension(2), intent(in) :: ising_parameters        !! Specifies coupling strength and field strength
+		integer, intent(in) :: epoch                                                                   !! Current epoch
+        real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
 		integer(ik), allocatable, dimension(:,:), intent(out) :: markov_chain                !! Output chain of samples
 		real(rk), allocatable, dimension(:), intent(out) :: e_local                            !! Output local energies
 		real(rk), allocatable, intent(out) :: energy, sqerr                             !! Energy average, square error
 
 		integer(ik), allocatable, dimension(:) :: start_sample               !! Start sample of stationary distribution
         complex(rk), allocatable, dimension(:) :: theta                                                       !! b + ws
-		integer :: n                                                                                 !! Number of spins
+		integer :: n, num_samples                                                 !! Number of spins, number of samples
 
 		n = self%v_units                                                                         !! Get number of spins
+        num_samples = 10                                                            !! Set number of samples to produce
 
 		start_sample = random_sample(n)                                                     !! Initialize random sample
         theta = conjg(self%b) + matmul(self%w, start_sample)                                       !! Get initial theta
@@ -144,12 +145,13 @@ module ising_ml
 		thermalization: block
 			integer(ik), allocatable, dimension(:) :: new_proposal, s_prop                          !! Proposal samples
 			real :: acc_prob, prob, r                                                   !! M-H acceptance probabilities
-			integer :: j                                                                               !! Loop variable
+			integer :: k, j                                                                           !! Loop variables
 
-			do
+			do k = 1, 1000                                                                   !! Maximum number of loops
 				s_prop = start_sample                                                    !! Transfer sample to proposal
 				s_prop(1) = 1_ik - s_prop(1)                                                     !! Flip the first spin
                 acc_prob = self%prob_ratio(s1=start_sample, s2=s_prop, theta_1=theta)         !! Acceptance probability
+
 				get_best_proposal: do j = 2, n                     !! Find proposal with largest acceptance probability
 					new_proposal = s_prop                                                          !! Transfer proposal
 					new_proposal(j) = 1_ik - new_proposal(j)                                          !! Flip j-th spin
@@ -179,7 +181,7 @@ module ising_ml
 			real :: acc_prob                                                              !! M-H acceptance probability
 			integer :: k, pass, passes                                                                !! Loop variables
 
-			passes = 2*n/5                                              !! Number of passes to make on the start sample
+			passes = 2*n - min(2*epoch, 2*n-1)                          !! Number of passes to make on the start sample
 
 			allocate( rands(passes, num_samples) )
 
@@ -199,7 +201,7 @@ module ising_ml
                     end if
 				end do
 				markov_chain(:,k) = this_sample                                                        !! Output sample
-				e_local(k) = self%ising_energy(s=this_sample, theta=theta, params=ising_parameters)     !! Local energy
+				e_local(k) = self%ising_energy(s=this_sample, theta=theta, params=params)               !! Local energy
 			end do
 		end block stationary_sampling
 
@@ -251,11 +253,10 @@ module ising_ml
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine train(self, sample_size, ising_parameters, energies, correlations)
+    impure subroutine train(self, ising_parameters, energies, correlations)
 		!! Procedure for training Boltzmann machine
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-		integer, intent(in) :: sample_size                                                               !! Sample size
         real(rk), dimension(2), intent(in) :: ising_parameters        !! Specifies coupling strength and field strength
 		real(rk), allocatable, dimension(:,:), intent(out) :: energies, correlations       !! Energies and correlations
 
@@ -272,8 +273,8 @@ module ising_ml
 
 		learning: do epoch = 1, max_epochs                                                            !! Begin learning
             call co_sum(self%w); self%w = self%w/num_images()                          !! Average weights across images
-			call self%metropolis_hastings(  num_samples=sample_size, ising_parameters=ising_parameters, &     !! Inputs
-                                            markov_chain=chain, e_local=e_local, energy=energy, sqerr=sqerr ) !! Output
+			call self%metropolis_hastings( epoch=epoch, params=ising_parameters, &                            !! Inputs
+                                           markov_chain=chain, e_local=e_local, energy=energy, sqerr=sqerr ) !! Outputs
 
 			cor = corr(chain)                                                            !! Get local spin correlations
 			call co_sum(energy); energy = energy/num_images()                           !! Average energy across images
@@ -314,7 +315,7 @@ module ising_ml
         real(rk), allocatable, dimension(:,:) :: dlna                                                !! Log derivatives
         complex(rk), allocatable, dimension(:,:) :: dlnb                                             !! Log derivatives
 		complex(rk), allocatable, dimension(:,:,:) :: dlnw                                           !! Log derivatives
-		real(rk) :: covar_norm, delta, beta_1, beta_2, step, epsilon        !! Normalization, regularization, ADAM vars
+		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, step        !! Normalization, regularization, ADAM vars
 		integer :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
 
 		n = self%v_units                                                                         !! Get number of spins
@@ -324,8 +325,12 @@ module ising_ml
 		delta = 1e-5_rk                                                                 !! Set regularization parameter
         beta_1 = 0.99_rk                                                                 !! Decay rate for first moment
         beta_2 = 0.999_rk                                                               !! Decay rate for second moment
-        step = 0.01_rk                                                                            !! Base learning rate
         epsilon = 1e-8_rk                                                      !! Parameter to prevent division by zero
+        if ( n < 2500 ) then
+            step = 0.01_rk                                                                         !! Set learning rate
+        else
+            step = 0.005_rk                                                                        !! Set learning rate
+        end if
 
         e_local_cent = e_local - sum(e_local)/num_samples                                  !! Center the local energies
 
