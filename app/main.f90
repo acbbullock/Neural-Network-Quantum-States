@@ -21,7 +21,7 @@ program main
     !! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     call random_init(repeatable=.false., image_distinct=.true.)                   !! Initialize random number generator
 
-    spins = 2001                                                                         !! Set number of visible units
+    spins = 1001                                                                         !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
     ising_parameters = [-10.0_rk, -0.5_rk]                                  !! Set coupling strength and field strength
 
