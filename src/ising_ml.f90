@@ -79,8 +79,8 @@ module ising_ml
         allocate( self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk, 0.0_rk) )   !! Allocate hidden layer bias arrays
 		allocate( self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk, 0.0_rk) )        !! Allocate weight arrays
 
-		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.001_rk)                              !! Real part
-		self%w%im = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.001_rk)                         !! Imaginary part
+		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.0001_rk)                             !! Real part
+		self%w%im = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.0001_rk)                        !! Imaginary part
 	end subroutine init
 
 	!! Ising Model Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -326,10 +326,10 @@ module ising_ml
         beta_1 = 0.99_rk                                                                 !! Decay rate for first moment
         beta_2 = 0.999_rk                                                               !! Decay rate for second moment
         epsilon = 1e-8_rk                                                      !! Parameter to prevent division by zero
-        if ( n < 2500 ) then
-            step = 0.01_rk                                                                         !! Set learning rate
+        if ( n < 100 ) then
+            step = 1.0_rk/n                                                                            !! Set time step
         else
-            step = 0.005_rk                                                                        !! Set learning rate
+            step = 10.0_rk/n                                                                           !! Set time step
         end if
 
         e_local_cent = e_local - sum(e_local)/num_samples                                  !! Center the local energies
