@@ -29,9 +29,7 @@ The trial state wave-functions $\psi(\alpha):S \to \mathbb{C}$ may be constructe
 where we ignore the normalization factor of the wave-function, and where $\dagger$ represents the matrix conjugate transpose. By the Born rule, the real, normalized probability distribution $p(\alpha):S \to [0,1]$ associated to the wave-function $\psi(\alpha)$ at each $\alpha \in \mathcal{M}$ is defined by $S \ni s \mapsto p(s,\alpha) = |\psi(s,\alpha)|^2/\sum_{s' \in S} |\psi(s',\alpha)|^2 \in [0,1]$.
 
 The variational energy functional $E[\psi(\alpha)]$ associated to the variational state $\ket{\psi(\alpha)}$ at each $\alpha \in \mathcal{M}$ is the statistical expectation $E[\psi(\alpha)] = \langle H \rangle_{\psi(\alpha)}$ of the Hamiltonian $H$ in the state $\ket{\psi(\alpha)}$, given by
-    $$E[\psi(\alpha)] = \frac{\langle \psi(\alpha), H\psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} =
-    \frac{\sum_{s,s' \in S} \psi^\*(s,\alpha) H_{ss'} \psi(s',\alpha)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} =
-    \frac{\sum_{s \in S} |\psi(s,\alpha)|^2 \left(\sum_{s' \in S} H_{ss'} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}\right)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} = \sum_{s \in S} p(s,\alpha) E_{\text{loc}}(s,\alpha)$$
+    $$E[\psi(\alpha)] = \frac{\langle \psi(\alpha), H\psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} = \frac{\sum_{s,s' \in S} \psi^\* (s,\alpha) H_{ss'} \psi(s',\alpha)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} = \frac{\sum_{s \in S} |\psi(s,\alpha)|^2 \left(\sum_{s' \in S} H_{ss'} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}\right)}{\sum_{s' \in S} |\psi(s',\alpha)|^2} = \sum_{s \in S} p(s,\alpha) E_{\text{loc}}(s,\alpha)$$
 where we define the variational local energies $E_{\text{loc}}(s,\alpha) = \sum_{s' \in S} H_{ss'} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}$, with $H_{ss'}$ being the matrix element of $H$ in between the states $\ket{s}$ and $\ket{s'}$. Thus $E[\psi(\alpha)] = \sum_{s \in S} p(s,\alpha) E_{\text{loc}}(s,\alpha)$ is the statistical expectation of the local energies weighted by the real probability distribution $p(\alpha):S \to [0,1]$.
 
 ## Transverse Field Ising Model
