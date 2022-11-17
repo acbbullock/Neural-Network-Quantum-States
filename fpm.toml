@@ -6,7 +6,12 @@ maintainer = "acb.bullock@gmail.com"
 copyright = "© 2022, Austin Bullock & Andrew Wasserbeck"
 
 [build]
-link = ['mkl_blas95_lp64', 'mkl_lapack95_lp64', 'mkl_intel_lp64', 'mkl_intel_thread', 'mkl_core', 'libiomp5md']
+link = ['C:\\"Program Files (x86)"\\Intel\\oneAPI\\mkl\\latest\\lib\\intel64\\mkl_blas95_lp64', 
+        'C:\\"Program Files (x86)"\\Intel\\oneAPI\\mkl\\latest\\lib\\intel64\\mkl_lapack95_lp64', 
+        'C:\\"Program Files (x86)"\\Intel\\oneAPI\\mkl\\latest\\lib\\intel64\\mkl_intel_lp64', 
+        'C:\\"Program Files (x86)"\\Intel\\oneAPI\\mkl\\latest\\lib\\intel64\\mkl_intel_thread', 
+        'C:\\"Program Files (x86)"\\Intel\\oneAPI\\mkl\\latest\\lib\\intel64\\mkl_core', 
+        'C:\\"Program Files (x86)"\\Intel\\oneAPI\\compiler\\latest\\windows\\compiler\\lib\\intel64\\libiomp5md']
 auto-executables = true
 auto-tests = true
 auto-examples = true
