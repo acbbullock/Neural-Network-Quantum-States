@@ -63,7 +63,7 @@ SUBROUTINE metropolis_hastings:
 END SUBROUTINE metropolis_hastings
 ```
 
-In practice, we allow for a thermalization period, or "burn-in" period, during which the sampling process moves the initial random sample into the stationary distribution before we can begin recording samples. As we can see, the acceptance probabilities in the Metropolis-Hastings algorithm and the form of the local energy involve only ratios of the wave-functions $\psi(s,\alpha)$ for different configurations, and therefore we are justified in ignoring the normalization factor in our derivation of $\psi(s,\alpha)$. Once all samples are drawn, we may estimate the cost function as an average of the local energies over the drawn samples.
+In practice, we allow for a thermalization period, or "burn-in" period, during which the sampling process moves the initial random sample into the stationary distribution before we can begin recording samples. As we can see, the acceptance probabilities in the Metropolis-Hastings algorithm and the form of the local energy involve only ratios of the wave-functions $\psi(s,\alpha)$ for different configurations, and therefore we are justified in ignoring the normalization factor in our derivation of $\psi(s,\alpha)$. Once all samples are drawn, we may estimate the energy functional as an average of the local energies over the drawn samples.
 
 The stochastic optimization algorithm is a first order optimization that involves infinitesimal variations to the parameters $\alpha \in \mathcal{M}$ according to the update rule
     $$\alpha \leftarrow \alpha + \delta\alpha$$
