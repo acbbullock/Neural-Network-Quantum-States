@@ -1,6 +1,14 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!  This program demonstrates the use of the module `ising_ml` by instantiating a `RestrictedBoltzmannMachine` and
-!!  training the neural network with the required input/output data.
+!!  This program demonstrates the use of the ising_ml module.
+!!
+!!  To build and run with fpm using ifort on Windows (requires oneAPI Base and HPC toolkits), use the following:
+!!  fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qiopenmp /Qcoarray /Qcoarray-num-images:16 /heap-arrays:0"
+!!  --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
+!!
+!!  To build and run with fpm using ifort on Linux (requires oneAPI Base and HPC toolkits), use the following:
+!!  fpm run --compiler ifort --flag "-O3 -arch CORE-AVX2 -qiopenmp -coarray -coarray-num-images=16 -heap-arrays 0 -liomp5"
+!!  --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a
+!!  ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a"
 !!
 program main
     use, intrinsic :: iso_fortran_env, only: rk=>real64, i64=>int64                            !! Import standard kinds
@@ -9,7 +17,7 @@ program main
     implicit none (type,external)                                                    !! No implicit types or interfaces
 
     !! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    type(RestrictedBoltzmannMachine) :: psi                                                     !! Neural network class
+    type(RestrictedBoltzmannMachine) :: psi                                                           !! Neural network
 
     real(rk), allocatable, dimension(:,:) :: energies, correlations                                 !! Training outputs
     integer :: spins, hidden_units                                                               !! Training parameters
@@ -21,7 +29,7 @@ program main
     !! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     call random_init(repeatable=.false., image_distinct=.true.)                   !! Initialize random number generator
 
-    spins = 1001                                                                         !! Set number of visible units
+    spins = 501                                                                          !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
     ising_parameters = [-10.0_rk, -0.5_rk]                                  !! Set coupling strength and field strength
 
