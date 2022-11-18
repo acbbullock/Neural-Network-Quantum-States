@@ -1,13 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!  This module file contains an implementation of a Restricted Boltzmann Machine with supporting procedures for
-!!  learning ground states of the one-dimensional Ising spin model to demonstrate machine learning techniques
-!!  applied to a prototypical quantum spin system. The only public data is the class `RestrictedBoltzmannMachine`,
-!!  and the only public component of the class is the procedure `train`, which may be called from any program unit
-!!  which uses the module `ising_ml`.
-!!  
-!!  This program unit is conforming to Fortran 2018, built and tested with the Fortran Package Manager 0.7.0 (© 2020
-!!  fpm contributors) using the Intel Fortran Compiler (ifx 2022.2.0) and the Intel Fortran Compiler Classic 
-!!  (ifort 2021.7.0).
+!!  This module file contains an implementation of the stochastic optimization algorithm for learning the ground state
+!!  of the Ising spin model by representing the wave-functions 𝜓(s,α) as a type RestrictedBoltzmannMachine.
 !!  
 !!  The only external dependency is a system installation of LAPACK that supports the lapack95 interfaces, such as
 !!  the Intel MKL distribution of LAPACK.
@@ -121,7 +114,7 @@ module ising_ml
 		energy = e_interaction + e_transverse       !! Local energy is sum of interaction and transverse field energies
 	end function ising_energy
 
-	!!  Metropolis-Hastings Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	!!  Sampling Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     impure subroutine metropolis_hastings(self, epoch, params, markov_chain, e_local, energy, sqerr)
 		!! Procedure for generating Markov Chain of samples from distribution |𝜓|^2
@@ -453,7 +446,7 @@ module ising_ml
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	end subroutine gradient_descent
 
-	!! Supporting Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	!! Supplementary Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     pure real(rk) function var(x) result(variance)
 		!! Function for calculating sample variance of a real vector using canonical two-pass algorithm
