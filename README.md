@@ -117,7 +117,7 @@ whose formal solution is
     $$\frac{d \alpha}{d\tau}(\tau) = - S^{-1}(\alpha) F(\alpha)$$
 such that
     $$\alpha(\tau + \delta \tau) \approx \alpha(\tau) + \delta\alpha(\tau) = \alpha(\tau) + \delta \tau \frac{d \alpha}{d\tau}(\tau) = \alpha(\tau) - \delta \tau S^{-1}(\alpha) F(\alpha)$$
-is the change in the parameters $\alpha(\tau) \in \mathcal{M}$ due to the non-unitary, imaginary-time evolution of the state $\ket{\psi(\alpha(\tau))}$ over the interval $[\tau, \tau + \delta \tau]$.
+is the infinitesimal change in the parameters $\alpha(\tau) \in \mathcal{M}$ due to the non-unitary, imaginary-time evolution of the state $\ket{\psi(\alpha(\tau))}$ over the interval $[\tau, \tau + \delta \tau]$.
 
 It must be noted that the initialization of the parameters can have a dramatic effect on the performance of the algorithm. The initial state $\ket{\psi(\alpha(0))}$ must be chosen such that $\langle \psi_0, \psi(\alpha(0)) \rangle \neq 0$, or else learning is not possible. The more overlap there is with the ground state, the more efficient the algorithm will be. With at least some overlap, we will expect that $\ket{\psi(\alpha(\tau))} \to \ket{\psi_0}$ as $\tau \to \infty$ for a sufficiently small time step $\delta\tau$. This can be seen by noting the change in the energy functional over the interval $[\tau, \tau + \delta \tau]$, by taking the expectation of $H$ in the state $\ket{\psi(\alpha(\tau + \delta\tau))} \approx \ket{\psi(\alpha(\tau))} - \delta \tau \Delta H \ket{\psi(\alpha(\tau))} = \ket{\psi(\alpha(\tau))} + \delta \tau \Delta \frac{d}{d\tau} \ket{\psi(\alpha(\tau))}$, i.e.
     $$E[\psi(\alpha(\tau + \delta\tau))] = E[\psi(\alpha(\tau))] - 2\delta\tau F^\dagger(\alpha) S^{-1}(\alpha) F(\alpha) + \mathcal{O}(\delta\tau^2)$$
