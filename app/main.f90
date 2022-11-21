@@ -37,7 +37,7 @@ program main
 
     if ( this_image() == 1 ) call system_clock(t1)                                                       !! Start clock
 
-    call psi%train(ising_params=ising_params, energies=energies, correlations=correlations)            !! Train network
+    call psi%optimize(ising_params=ising_params, energies=energies, correlations=correlations)    !! Learn ground state
 
     if ( this_image() == 1 ) then
         call system_clock(t2, count_rate=rate)                                                            !! Stop clock
