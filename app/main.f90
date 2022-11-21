@@ -29,9 +29,9 @@ program main
     !! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     call random_init(repeatable=.false., image_distinct=.true.)                   !! Initialize random number generator
 
-    spins = 501                                                                          !! Set number of visible units
+    spins = 1001                                                                         !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
-    ising_params = [-10.0_rk, -0.5_rk]                                      !! Set coupling strength and field strength
+    ising_params = [0.5_rk, 0.1_rk]                                         !! Set coupling strength and field strength
 
     psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                            !! Create instance
 
