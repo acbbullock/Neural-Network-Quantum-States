@@ -44,7 +44,7 @@ program main
         telapse = real((t2-t1), kind=rk)/rate                                     !! Total elapsed wall clock time in s
 
         print*
-        print*, 'Elapsed wall clock time: ', real(telapse), ' seconds for n = ', spins, ' spins.'
+        print*, 'Elapsed wall clock time:', real(telapse), 'seconds for n =', spins, 'spins.'
         print*
 
         call csvwrite(energies, 'energies.csv')                                               !! Write energies to file

@@ -270,7 +270,7 @@ module ising_ml
         max_epochs = 1000                                                                         !! Set maximum epochs
         start_sample = random_sample(n)                                                     !! Initialize random sample
 
-		allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                      !! Allocate output arrays
+		if ( this_image() == 1 ) allocate( energies(max_epochs, 2), correlations(n, max_epochs) )   !! Allocate outputs
 
 		learning: do epoch = 1, max_epochs                                                            !! Begin learning
             call co_sum(self%w); self%w = self%w/num_images()                          !! Average weights across images
@@ -283,11 +283,11 @@ module ising_ml
 			call co_sum(sqerr); stderr = sqrt(sqerr)/num_images()                        !! Average error across images
 			call co_sum(corrs); corrs = corrs/num_images()                        !! Average correlations across images
 
-			energies(epoch,:) = [energy, stderr]                                   !! Record energy and error to output
-			correlations(:,epoch) = corrs                                              !! Record correlations to output
-
             if ( this_image() == 1 ) then
-                print*, 'E = ', energy, '±', stderr, 'on epoch', epoch                               !! Print progress
+                energies(epoch,:) = [energy, stderr]                               !! Record energy and error to output
+			    correlations(:,epoch) = corrs                                          !! Record correlations to output
+
+                print*, 'E =', energy, '±', stderr, 'on epoch', epoch                                 !! Print progress
 				if ( ieee_is_nan(energy) ) error stop 'Numerical instability... terminating'       !! Error termination
 				sync images (*)                                                              !! Respond to other images
             else
