@@ -58,9 +58,9 @@ module ising_ml
 		if ( this_image() == 1 ) then
 			if (.not. allocated(self%v_units)) error stop 'Structure not declared... terminating'  !! Error termination
 			sync images(*)                                                                   !! Respond to other images
+        else
+            sync images (1)                                                           !! Wait for response from image 1
 		end if
-
-		if ( this_image() /= 1 ) sync images (1)                                      !! Wait for response from image 1
 		
 		if ( allocated(self%a) ) deallocate( self%p_a, self%r_a, self%p_b, self%r_b, self%p_w, self%r_w, &
                                              self%a, self%b, self%w )                     !! Reset components if needed
@@ -72,8 +72,8 @@ module ising_ml
         allocate( self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk, 0.0_rk) )   !! Allocate hidden layer bias arrays
 		allocate( self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk, 0.0_rk) )        !! Allocate weight arrays
 
-		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.0001_rk)                             !! Real part
-		self%w%im = gauss_matrix(dims=shape(self%w), mu=0.0_rk, sig=0.0001_rk)                        !! Imaginary part
+		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.01_rk, sig=1e-4_rk)                   !! Initialize real part
+		self%w%im = gauss_matrix(dims=shape(self%w), mu=-0.005_rk, sig=1e-5_rk)            !! Initialize imaginary part
 	end subroutine init
 
 	!! Ising Model Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,8 +108,8 @@ module ising_ml
             sum(log(1.0_rk + exp(theta + self%w(:,j)*s_unit(j))) - log(arg_theta)) )   !! Forgets im part on assignment
 		end do get_field_couplings
 
-		e_interaction = J_str*sum(neighbor_couplings)                      !! Local energy due to neighbor interactions
-		e_transverse = B_str*sum(field_couplings)                               !! Local energy due to transverse field
+		e_interaction = -J_str*sum(neighbor_couplings)                     !! Local energy due to neighbor interactions
+		e_transverse = -B_str*sum(field_couplings)                              !! Local energy due to transverse field
 
 		energy = e_interaction + e_transverse       !! Local energy is sum of interaction and transverse field energies
 	end function ising_energy
