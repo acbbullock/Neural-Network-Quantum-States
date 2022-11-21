@@ -79,7 +79,7 @@ for some small time step $\delta \tau > 0$, where the matrix $S(\alpha)$ is know
     $$S_{kl}(\alpha) = \langle \Delta \partial_k^\dagger \Delta \partial_l \rangle_{\psi(\alpha)} = \langle \partial_k^\dagger \partial_l \rangle_{\psi(\alpha)} - \langle \partial_k^\dagger \rangle_{\psi(\alpha)} \langle \partial_l \rangle_{\psi(\alpha)} = \frac{\langle \partial_k \psi(\alpha), \partial_l \psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} - \frac{\langle \partial_k \psi(\alpha), \psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} \frac{\langle \psi(\alpha), \partial_l \psi(\alpha) \rangle}{\langle \psi(\alpha), \psi(\alpha) \rangle} = \sum_{s \in S} p(s,\alpha) O_k^\*(s,\alpha) O_l(s,\alpha) - \bigg[ \sum_{s \in S} p(s,\alpha) O_k^\*(s,\alpha) \bigg] \bigg[ \sum_{s \in S} p(s,\alpha) O_l(s,\alpha) \bigg] \approx \frac{1}{N} \sum_{s \in \tilde{S}} O_k^\*(s,\alpha) O_l(s,\alpha) - \bigg[ \frac{1}{N} \sum_{s \in \tilde{S}} O_k^\*(s,\alpha) \bigg] \bigg[ \frac{1}{N} \sum_{s \in \tilde{S}} O_l(s,\alpha) \bigg]$$
 of the derivative deviations.
 
-## Derivation
+## Derivation of Optimization Algorithm
 
 Let $V$ be a neighborhood of a point $\alpha \in \mathcal{M}$ with a local chart of coordinate functions $\alpha_l:\mathcal{M} \to \mathbb{C}$ such that $\alpha_l(\alpha) = 0$ is the origin of the local coordinate system. To derive the stochastic optimization update rule, we first expand the function $\ket{\psi}:\mathcal{M} \to \mathcal{H}$ in a Taylor series
     $$\ket{\psi} = \ket{\psi(\alpha)} + \sum_l \frac{\partial}{\partial \alpha_l} \ket{\psi(\alpha)} \alpha_l + \frac{1}{2} \sum_{kl} \frac{\partial^2}{\partial \alpha_k \partial \alpha_l} \ket{\psi(\alpha)} \alpha_k \alpha_l + \cdots$$
