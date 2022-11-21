@@ -27,10 +27,10 @@ module ising_ml
 			private
 			procedure, pass, public :: train                                !! Procedure for training Boltzmann machine
             procedure, pass :: init                                     !! Procedure for initializing Boltzmann machine
-			procedure, pass :: metropolis_hastings             !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
+			procedure, pass :: sample_distribution             !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
             procedure, pass :: prob_ratio                     !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
             procedure, pass :: ising_energy                    !! Computes Ising local energy for given configuration s
-            procedure, pass :: gradient_descent                            !! Procedure for updating weights and biases
+            procedure, pass :: stochastic_optimization                     !! Procedure for updating weights and biases
 	end type RestrictedBoltzmannMachine
 
 	interface RestrictedBoltzmannMachine                                         !! Interface for structure constructor
@@ -116,31 +116,31 @@ module ising_ml
 
 	!!  Sampling Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine metropolis_hastings(self, epoch, params, markov_chain, e_local, energy, sqerr)
-		!! Procedure for generating Markov Chain of samples from distribution |𝜓|^2
+    impure subroutine sample_distribution(self, epoch, params, start_sample, samples, e_local, corrs, energy, sqerr)
+		!! Markov Chain Monte Carlo procedure for sampling |𝜓|^2 with Metropolis-Hastings algorithm
 		class(RestrictedBoltzmannMachine), intent(in) :: self                             !! Distribution to be sampled
 		integer, intent(in) :: epoch                                                                   !! Current epoch
         real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
-		integer(ik), allocatable, dimension(:,:), intent(out) :: markov_chain                !! Output chain of samples
-		real(rk), allocatable, dimension(:), intent(out) :: e_local                            !! Output local energies
+        integer(ik), contiguous, dimension(:), intent(inout) :: start_sample          !! Sample to begin thermalization
+		integer(ik), allocatable, dimension(:,:), intent(out) :: samples                              !! Output samples
+		real(rk), allocatable, dimension(:), intent(out) :: e_local, corrs       !! Local energies, sample correlations
 		real(rk), allocatable, intent(out) :: energy, sqerr                             !! Energy average, square error
 
-		integer(ik), allocatable, dimension(:) :: start_sample               !! Start sample of stationary distribution
         complex(rk), allocatable, dimension(:) :: theta                                                       !! b + ws
 		integer :: n, num_samples                                                 !! Number of spins, number of samples
 
 		n = self%v_units                                                                         !! Get number of spins
         num_samples = 10                                                            !! Set number of samples to produce
-
-		start_sample = random_sample(n)                                                     !! Initialize random sample
         theta = conjg(self%b) + matmul(self%w, start_sample)                                       !! Get initial theta
 
 		thermalization: block
 			integer(ik), allocatable, dimension(:) :: new_proposal, s_prop                          !! Proposal samples
 			real :: acc_prob, prob, r                                                   !! M-H acceptance probabilities
-			integer :: k, j                                                                           !! Loop variables
+			integer :: k, j, max_thermal_time                                                         !! Loop variables
 
-			do k = 1, 1000                                                                   !! Maximum number of loops
+            max_thermal_time = 2001 - 2*epoch                                      !! Set time limit for thermalization
+
+			thermalize: do k = 1, max_thermal_time
 				s_prop = start_sample                                                    !! Transfer sample to proposal
 				s_prop(1) = 1_ik - s_prop(1)                                                     !! Flip the first spin
                 acc_prob = self%prob_ratio(s1=start_sample, s2=s_prop, theta_1=theta)         !! Acceptance probability
@@ -155,52 +155,57 @@ module ising_ml
 					end if
 				end do get_best_proposal
 
-                call random_number(r)                                                   !! Sample from uniform on [0,1)
+                call random_number(r)                                      !! Sample from uniform distribution on [0,1)
 				if ( r < acc_prob ) then                                                    !! M-H acceptance criterion
                     start_sample = s_prop                                                              !! Update sample
                     theta = conjg(self%b) + matmul(self%w, start_sample)                                !! Update theta
                 else
                     exit thermalization                                           !! Sample is sufficiently thermalized
                 end if
-			end do
+			end do thermalize
 		end block thermalization
 
-		allocate( markov_chain(n, num_samples), e_local(num_samples) )                        !! Allocate output arrays
+		allocate( samples(n, num_samples), e_local(num_samples) )                             !! Allocate output arrays
 
 		stationary_sampling: block
 			integer(ik), allocatable, dimension(:) :: this_sample, s_prop                      !! Sample storage arrays
-			integer, allocatable, dimension(:,:) :: rand_index                                        !! Random indices
-			real, allocatable, dimension(:,:) :: rands                                                !! Random numbers
+			integer, allocatable, dimension(:,:) :: rind                                              !! Random indices
+			real, allocatable, dimension(:,:) :: r                                                    !! Random numbers
 			real :: acc_prob                                                              !! M-H acceptance probability
 			integer :: k, pass, passes                                                                !! Loop variables
 
 			passes = 2*n - min(2*epoch, 2*n-1)                          !! Number of passes to make on the start sample
 
-			allocate( rands(passes, num_samples) )
+			allocate( r(passes, num_samples) )                                                 !! Allocate rand storage
 
-			call random_number(rands)                                                           !! Get randoms on [0,1)
-			rand_index = floor(n*rands) + 1                                         !! Generate random indices in [1,n]
-			call random_number(rands)                                                             !! Repopulate randoms
+			call random_number(r)                                                               !! Get randoms on [0,1)
+			rind = floor(n*r) + 1                                                   !! Generate random indices in [1,n]
+			call random_number(r)                                                                 !! Repopulate randoms
 
-			do concurrent (k = 1:num_samples) local(theta, this_sample, s_prop, acc_prob) shared(markov_chain, e_local)
+			do concurrent (k = 1:num_samples) local(theta,this_sample,s_prop,acc_prob) shared(r,rind,samples,e_local)
 				this_sample = start_sample                                                     !! Transfer start sample
-				do pass = 1, passes
+
+				metropolis_hastings: do pass = 1, passes
 					s_prop = this_sample                                                 !! Transfer sample to proposal
-					s_prop(rand_index(pass, k)) = 1_ik - s_prop(rand_index(pass, k))       !! Flip spin at random index
+					s_prop(rind(pass, k)) = 1_ik - s_prop(rind(pass, k))                   !! Flip spin at random index
                     acc_prob = self%prob_ratio(s1=this_sample, s2=s_prop, theta_1=theta)      !! Acceptance probability
-					if ( rands(pass, k) < acc_prob ) then                                   !! M-H acceptance criterion
-                        theta = theta + self%w(:,rand_index(pass,k))*(-2.0_rk*this_sample(rand_index(pass,k)) + 1.0_rk)
+
+					if ( r(pass, k) < acc_prob ) then                                       !! M-H acceptance criterion
+                        theta = theta + self%w(:,rind(pass,k))*(-2.0_rk*this_sample(rind(pass,k)) + 1.0_rk)   !! Update
                         this_sample = s_prop                                                           !! Update sample
                     end if
-				end do
-				markov_chain(:,k) = this_sample                                                        !! Output sample
-				e_local(k) = self%ising_energy(s=this_sample, theta=theta, params=params)               !! Local energy
+				end do metropolis_hastings
+
+				samples(:,k) = this_sample                                                 !! Transfer sample to output
+				e_local(k) = self%ising_energy(s=this_sample, theta=theta, params=params)     !! Local energy of sample
 			end do
 		end block stationary_sampling
 
+        corrs = corr(samples)                                                                    !! Sample correlations
 		energy = sum(e_local)/num_samples                                                        !! Average of energies
 		sqerr = var(e_local)/num_samples                                                    !! Square error of energies
-	end subroutine metropolis_hastings
+        start_sample = samples(:,num_samples)               !! Record stationary sample to begin next round of sampling
+	end subroutine sample_distribution
 
     pure real function prob_ratio(self, s1, s2, theta_1) result(p)
 		!! Function for computing the ratio of probabilities |𝜓(s_2)/𝜓(s_1)|^2 for two given configurations
@@ -246,48 +251,52 @@ module ising_ml
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine train(self, ising_parameters, energies, correlations)
+    impure subroutine train(self, ising_params, energies, correlations)
 		!! Procedure for training Boltzmann machine
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        real(rk), dimension(2), intent(in) :: ising_parameters        !! Specifies coupling strength and field strength
+        real(rk), dimension(2), intent(in) :: ising_params            !! Specifies coupling strength and field strength
 		real(rk), allocatable, dimension(:,:), intent(out) :: energies, correlations       !! Energies and correlations
 
-        integer(ik), allocatable, dimension(:,:) :: chain                                 !! Markov chain storage array
-		real(rk), allocatable, dimension(:) :: e_local, cor                        !! Local energies, spin correlations
+        integer(ik), allocatable, dimension(:,:) :: samples                                     !! Sample storage array
+        integer(ik), allocatable, dimension(:) :: start_sample                          !! Start sample for Monte Carlo
+		real(rk), allocatable, dimension(:) :: e_local, corrs                    !! Local energies, sample correlations
 		real(rk), allocatable :: energy, sqerr, stderr                                           !! Recording variables
-		integer :: epoch, max_epochs                                                       !! Loop variable, max epochs
+		integer :: epoch, max_epochs, n                                   !! Loop variable, max epochs, number of spins
 
 		call self%init()                                                                !! Initialize Boltzmann machine
 
+        n = self%v_units                                                                         !! Get number of spins
         max_epochs = 1000                                                                         !! Set maximum epochs
+        start_sample = random_sample(n)                                                     !! Initialize random sample
 
-		allocate( energies(max_epochs, 2), correlations(self%v_units, max_epochs) )          !! Allocate storage arrays
+		allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                      !! Allocate output arrays
 
 		learning: do epoch = 1, max_epochs                                                            !! Begin learning
             call co_sum(self%w); self%w = self%w/num_images()                          !! Average weights across images
-			call self%metropolis_hastings( epoch=epoch, params=ising_parameters, &                            !! Inputs
-                                           markov_chain=chain, e_local=e_local, energy=energy, sqerr=sqerr ) !! Outputs
 
-			cor = corr(chain)                                                            !! Get local spin correlations
+			call self%sample_distribution( epoch=epoch, params=ising_params, start_sample=start_sample, &     !! Inputs
+                                           samples=samples, e_local=e_local, corrs=corrs, &            !! Array outputs
+                                           energy=energy, sqerr=sqerr )                               !! Scalar outputs
+
 			call co_sum(energy); energy = energy/num_images()                           !! Average energy across images
-			call co_sum(sqerr); stderr = sqrt(sqerr)/num_images()                       !! Standard error across images
-			call co_sum(cor); cor = cor/num_images()                  !! Average correlations elementally across images
+			call co_sum(sqerr); stderr = sqrt(sqerr)/num_images()                        !! Average error across images
+			call co_sum(corrs); corrs = corrs/num_images()                        !! Average correlations across images
 
-			energies(epoch,:) = [energy, stderr]                                             !! Record energy and error
-			correlations(:,epoch) = cor                                                          !! Record correlations
+			energies(epoch,:) = [energy, stderr]                                   !! Record energy and error to output
+			correlations(:,epoch) = corrs                                              !! Record correlations to output
 
             if ( this_image() == 1 ) then
-                print*, 'E = ', energy, 'pm', stderr, 'on epoch', epoch                               !! Print progress
+                print*, 'E = ', energy, '±', stderr, 'on epoch', epoch                               !! Print progress
 				if ( ieee_is_nan(energy) ) error stop 'Numerical instability... terminating'       !! Error termination
 				sync images (*)                                                              !! Respond to other images
+            else
+                sync images (1)                                                       !! Wait for response from image 1
 			end if
 
-			if ( this_image() /= 1 ) sync images (1)                                  !! Wait for response from image 1
+            if ( all(abs(corrs) > 0.98_rk) .or. (epoch == max_epochs) ) exit learning                !! Exit conditions
 
-            if ( all(abs(cor) > 0.98_rk) .or. (epoch == max_epochs) ) exit learning                   !! Exit condition
-
-			call self%gradient_descent(markov_chain=chain, e_local=e_local, epoch=epoch)              !! Update network
+			call self%stochastic_optimization(epoch=epoch, e_local=e_local, samples=samples)       !! Update parameters
 		end do learning
 
         if ( this_image() == 1 ) then
@@ -296,38 +305,39 @@ module ising_ml
         end if
 	end subroutine train
 
-    pure subroutine gradient_descent(self, markov_chain, e_local, epoch)
+    pure subroutine stochastic_optimization(self, epoch, e_local, samples)
         !! Procedure for updating weights and biases
 		use lapack95, only: ppsvx                             !! Routine for solving linear systems with packed storage
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-		integer(ik), contiguous, dimension(:,:), intent(in) :: markov_chain                  !! Markov chain of samples
-		real(rk), contiguous, dimension(:), intent(in) :: e_local                                     !! Local energies
         integer, intent(in) :: epoch                                                                   !! Current epoch
+        real(rk), contiguous, dimension(:), intent(in) :: e_local                                     !! Local energies
+		integer(ik), contiguous, dimension(:,:), intent(in) :: samples                                !! Network inputs
 
         real(rk), allocatable, dimension(:) :: e_local_cent                                  !! Centered local energies
         real(rk), allocatable, dimension(:,:) :: dlna                                                !! Log derivatives
         complex(rk), allocatable, dimension(:,:) :: dlnb                                             !! Log derivatives
 		complex(rk), allocatable, dimension(:,:,:) :: dlnw                                           !! Log derivatives
-		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, step        !! Normalization, regularization, ADAM vars
+		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dt          !! Normalization, regularization, ADAM vars
 		integer :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
 
 		n = self%v_units                                                                         !! Get number of spins
 		m = self%h_units                                                                  !! Get number of hidden units
-		num_samples = size(markov_chain, dim=2)                                                !! Get number of samples
+		num_samples = size(samples, dim=2)                                                     !! Get number of samples
         covar_norm = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
 		delta = 1e-5_rk                                                                 !! Set regularization parameter
         beta_1 = 0.99_rk                                                                 !! Decay rate for first moment
         beta_2 = 0.999_rk                                                               !! Decay rate for second moment
         epsilon = 1e-8_rk                                                      !! Parameter to prevent division by zero
+
         if ( n < 100 ) then
-            step = 1.0_rk/n                                                                            !! Set time step
+            dt = 1.0_rk/n                                                                              !! Set time step
         else
-            step = 10.0_rk/n                                                                           !! Set time step
+            dt = 10.0_rk/n                                                                             !! Set time step
         end if
 
         e_local_cent = e_local - sum(e_local)/num_samples                                  !! Center the local energies
 
-		dlna = transpose(markov_chain)                         !! O_a(k,j) = 𝜕/𝜕a_j ln 𝜓(s^k) = s_kj, k=1,…,K , j=1,…,n
+		dlna = transpose(samples)                              !! O_a(k,j) = 𝜕/𝜕a_j ln 𝜓(s^k) = s_kj, k=1,…,K , j=1,…,n
 
 		update_a: block !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             real(rk), allocatable, dimension(:,:) :: dlna_cent                                         !! Centered data
@@ -358,10 +368,10 @@ module ising_ml
             !! Modify gradient with bias-corrected moments:
             x = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%a = self%a - step*x                                           !! Use gradient descent to update biases
+			self%a = self%a - dt*x                                                             !! Update visible biases
 		end block update_a !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-		dlnb = matmul(self%w, markov_chain)                                                               !! 𝜃 - b = ws
+		dlnb = matmul(self%w, samples)                                                                    !! 𝜃 - b = ws
 
 		get_effective_angles: do concurrent (k = 1:num_samples)
             dlnb(:,k) = exp(conjg(self%b) + dlnb(:,k))                          !! exp(𝜃) = exp(b + ws) for each sample
@@ -399,7 +409,7 @@ module ising_ml
             !! Modify gradient with bias-corrected moments:
             x = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%b = self%b - step*x                                           !! Use gradient descent to update biases
+			self%b = self%b - dt*x                                                              !! Update hidden biases
 		end block update_b !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		allocate( dlnw(num_samples, m, n) )                                              !! k=1,…,K , i=1,…,m , j=1,…,n
@@ -442,9 +452,9 @@ module ising_ml
             !! Modify gradient with bias-corrected moments:
             x = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%w = self%w - step*x                                          !! Use gradient descent to update weights
+			self%w = self%w - dt*x                                                                    !! Update weights
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	end subroutine gradient_descent
+	end subroutine stochastic_optimization
 
 	!! Supplementary Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -461,24 +471,24 @@ module ising_ml
 		variance = sum(x_cent**2)/(n-1)
 	end function var
 
-    pure function corr(A) result(correlations)
-		!! Function for calculating spin-spin correlations
-		integer(ik), contiguous, dimension(:,:), intent(in) :: A                                     !! Input spin data
+    pure function corr(samples) result(correlations)
+		!! Function for calculating spin-spin correlations of sampled configurations
+		integer(ik), contiguous, dimension(:,:), intent(in) :: samples                                 !! Input samples
 		real(rk), allocatable, dimension(:) :: correlations                                      !! Output correlations
 
-		integer(ik), allocatable, dimension(:,:) :: B                                              !! Transformed spins
+		integer(ik), allocatable, dimension(:,:) :: S                                              !! Transformed spins
 		integer(ik), allocatable, dimension(:) :: ref_spin                                            !! Reference spin
 		integer :: n, num_samples, j, agrees, disagrees                 !! Size and loop variables, agreement variables
 
-		n = size(A, dim=1)                                                                       !! Get number of spins
-        num_samples = size(A, dim=2)                                                           !! Get number of samples
-		B = transpose(A)                                                                      !! Lay spins down columns
-		ref_spin = B(:,n/2+1)                                                           !! Set middle spin as reference
+		n = size(samples, dim=1)                                                                 !! Get number of spins
+        num_samples = size(samples, dim=2)                                                     !! Get number of samples
+		S = transpose(samples)                                                                !! Lay spins down columns
+		ref_spin = S(:,n/2+1)                                                           !! Set middle spin as reference
 
 		allocate( correlations(n), source=1.0_rk )
 
 		get_correlations: do concurrent (j = 1:n, j /= n/2+1) local(agrees, disagrees) shared(correlations)
-            agrees = count( B(:,j)==ref_spin )                                              !! Get number of agreements
+            agrees = count( S(:,j)==ref_spin )                                              !! Get number of agreements
             disagrees = num_samples - agrees                                             !! Get number of disagreements
             correlations(j) = real(agrees - disagrees, kind=rk)/num_samples                 !! Mean agreement on [-1,1]
 		end do get_correlations

@@ -21,7 +21,7 @@ program main
 
     real(rk), allocatable, dimension(:,:) :: energies, correlations                                 !! Training outputs
     integer :: spins, hidden_units                                                               !! Training parameters
-    real(rk) :: ising_parameters(2)                                                                 !! Ising parameters
+    real(rk) :: ising_params(2)                                                                     !! Ising parameters
 
     integer(i64) t1, t2                                                                              !! Clock variables
     real(rk) rate, telapse                                                                           !! Clock variables
@@ -31,13 +31,13 @@ program main
 
     spins = 501                                                                          !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
-    ising_parameters = [-10.0_rk, -0.5_rk]                                  !! Set coupling strength and field strength
+    ising_params = [-10.0_rk, -0.5_rk]                                      !! Set coupling strength and field strength
 
     psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                            !! Create instance
 
     if ( this_image() == 1 ) call system_clock(t1)                                                       !! Start clock
 
-    call psi%train(ising_parameters=ising_parameters, energies=energies, correlations=correlations )   !! Train network
+    call psi%train(ising_params=ising_params, energies=energies, correlations=correlations)            !! Train network
 
     if ( this_image() == 1 ) then
         call system_clock(t2, count_rate=rate)                                                            !! Stop clock
