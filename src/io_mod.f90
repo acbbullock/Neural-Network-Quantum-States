@@ -561,17 +561,17 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            write(unit=number_string, fmt='(f16.8)') x(i)
-            write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                write(unit=number_string, fmt='(f16.8)') x(i)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            write(unit=number_string, fmt='(f16.8)') x(i)
-            write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                write(unit=number_string, fmt='(f16.8)') x(i)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+            end do
         end if
 
         close(file_unit)
@@ -586,17 +586,17 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            write(unit=number_string, fmt='(f16.8)') x(i)
-            write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                write(unit=number_string, fmt='(f16.8)') x(i)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            write(unit=number_string, fmt='(f16.8)') x(i)
-            write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                write(unit=number_string, fmt='(f16.8)') x(i)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+            end do
         end if
 
         close(file_unit)
@@ -612,31 +612,31 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            do j = lbound(x,dim=2), ubound(x,dim=2)
-            if ( j < ubound(x,dim=2) ) then
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
-            else
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-            end if
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                do j = lbound(x,dim=2), ubound(x,dim=2)
+                if ( j < ubound(x,dim=2) ) then
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
+                else
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+                end if
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            do j = lbound(x,dim=2), ubound(x,dim=2)
-            if ( j < ubound(x,dim=2) ) then
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
-            else
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-            end if
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                do j = lbound(x,dim=2), ubound(x,dim=2)
+                if ( j < ubound(x,dim=2) ) then
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
+                else
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+                end if
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -651,31 +651,31 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            do j = lbound(x,dim=2), ubound(x,dim=2)
-            if ( j < ubound(x,dim=2) ) then
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
-            else
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-            end if
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                do j = lbound(x,dim=2), ubound(x,dim=2)
+                if ( j < ubound(x,dim=2) ) then
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
+                else
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+                end if
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            do j = lbound(x,dim=2), ubound(x,dim=2)
-            if ( j < ubound(x,dim=2) ) then
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
-            else
-                write(unit=number_string, fmt='(f16.8)') x(i,j)
-                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-            end if
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                do j = lbound(x,dim=2), ubound(x,dim=2)
+                if ( j < ubound(x,dim=2) ) then
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
+                else
+                    write(unit=number_string, fmt='(f16.8)') x(i,j)
+                    write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+                end if
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -691,17 +691,17 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            write(unit=number_string, fmt='(i12)') x(i)
-            write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                write(unit=number_string, fmt='(i12)') x(i)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            write(unit=number_string, fmt='(i12)') x(i)
-            write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                write(unit=number_string, fmt='(i12)') x(i)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+            end do
         end if
 
         close(file_unit)
@@ -717,31 +717,31 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            do j = lbound(x,dim=2), ubound(x,dim=2)
-            if ( j < ubound(x,dim=2) ) then
-                write(unit=number_string, fmt='(i12)') x(i,j)
-                write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
-            else
-                write(unit=number_string, fmt='(i12)') x(i,j)
-                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-            end if
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                do j = lbound(x,dim=2), ubound(x,dim=2)
+                if ( j < ubound(x,dim=2) ) then
+                    write(unit=number_string, fmt='(i12)') x(i,j)
+                    write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
+                else
+                    write(unit=number_string, fmt='(i12)') x(i,j)
+                    write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+                end if
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-        do i = lbound(x,dim=1), ubound(x,dim=1)
-            do j = lbound(x,dim=2), ubound(x,dim=2)
-            if ( j < ubound(x,dim=2) ) then
-                write(unit=number_string, fmt='(i12)') x(i,j)
-                write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
-            else
-                write(unit=number_string, fmt='(i12)') x(i,j)
-                write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
-            end if
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+            do i = lbound(x,dim=1), ubound(x,dim=1)
+                do j = lbound(x,dim=2), ubound(x,dim=2)
+                if ( j < ubound(x,dim=2) ) then
+                    write(unit=number_string, fmt='(i12)') x(i,j)
+                    write(unit=file_unit, fmt='(a,a)', advance='no') trim(adjustl(number_string)), ','
+                else
+                    write(unit=number_string, fmt='(i12)') x(i,j)
+                    write(unit=file_unit, fmt='(a)') trim(adjustl(number_string))
+                end if
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -756,16 +756,16 @@ submodule (io_mod) text_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
-        write(unit=file_unit, fmt='(a)') string
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', action='write', access='sequential', position='rewind' )
+            write(unit=file_unit, fmt='(a)') string
         else
-        if ( (.not. present(append)) .or. (.not. append) ) then
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
-            write(unit=file_unit, fmt='(a)') string
-        else if ( append ) then
-            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='write', access='sequential', position='append' )
-            write(unit=file_unit, fmt='(a)') string
-        end if
+            if ( (.not. present(append)) .or. (.not. append) ) then
+                open( newunit=file_unit, file=file_name, status='replace', form='formatted', action='write', access='sequential', position='rewind' )
+                write(unit=file_unit, fmt='(a)') string
+            else if ( append ) then
+                open( newunit=file_unit, file=file_name, status='old', form='formatted', action='write', access='sequential', position='append' )
+                write(unit=file_unit, fmt='(a)') string
+            end if
         end if
 
         close(file_unit)
@@ -782,18 +782,16 @@ submodule (io_mod) text_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', &
-                access='sequential', position='rewind' )
-        rows = number_of_rows_in_file(file_unit)
-        allocate( into(rows) )
-        do i = 1, rows
-            read(unit=file_unit, fmt=*, iostat=status) into(i)
-        end do
+            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', access='sequential', position='rewind' )
+            rows = number_of_rows_in_file(file_unit)
+            allocate( into(rows) )
+            do i = 1, rows
+                read(unit=file_unit, fmt=*, iostat=status) into(i)
+            end do
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -808,18 +806,16 @@ submodule (io_mod) text_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', &
-                access='sequential', position='rewind' )
-        rows = number_of_rows_in_file(file_unit)
-        allocate( into(rows) )
-        do i = 1, rows
-            read(unit=file_unit, fmt=*, iostat=status) into(i)
-        end do
+            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', access='sequential', position='rewind' )
+            rows = number_of_rows_in_file(file_unit)
+            allocate( into(rows) )
+            do i = 1, rows
+                read(unit=file_unit, fmt=*, iostat=status) into(i)
+            end do
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -835,19 +831,17 @@ submodule (io_mod) text_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', &
-                access='sequential', position='rewind' )
-        rows = number_of_rows_in_file(file_unit)
-        columns = number_of_columns_in_file(file_unit)
-        allocate( into(rows,columns) )
-        do i = 1, rows
-            read(unit=file_unit, fmt=*, iostat=status) into(i,:)
-        end do
+            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', access='sequential', position='rewind' )
+            rows = number_of_rows_in_file(file_unit)
+            columns = number_of_columns_in_file(file_unit)
+            allocate( into(rows,columns) )
+            do i = 1, rows
+                read(unit=file_unit, fmt=*, iostat=status) into(i,:)
+            end do
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -862,19 +856,17 @@ submodule (io_mod) text_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', &
-                access='sequential', position='rewind' )
-        rows = number_of_rows_in_file(file_unit)
-        columns = number_of_columns_in_file(file_unit)
-        allocate( into(rows,columns) )
-        do i = 1, rows
-            read(unit=file_unit, fmt=*, iostat=status) into(i,:)
-        end do
+            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', access='sequential', position='rewind' )
+            rows = number_of_rows_in_file(file_unit)
+            columns = number_of_columns_in_file(file_unit)
+            allocate( into(rows,columns) )
+            do i = 1, rows
+                read(unit=file_unit, fmt=*, iostat=status) into(i,:)
+            end do
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -890,18 +882,16 @@ submodule (io_mod) text_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', &
-                access='sequential', position='rewind' )
-        rows = number_of_rows_in_file(file_unit)
-        allocate( into(rows) )
-        do i = 1, rows
-            read(unit=file_unit, fmt=*, iostat=status) into(i)
-        end do
+            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', access='sequential', position='rewind' )
+            rows = number_of_rows_in_file(file_unit)
+            allocate( into(rows) )
+            do i = 1, rows
+                read(unit=file_unit, fmt=*, iostat=status) into(i)
+            end do
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -917,19 +907,17 @@ submodule (io_mod) text_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', &
-                access='sequential', position='rewind' )
-        rows = number_of_rows_in_file(file_unit)
-        columns = number_of_columns_in_file(file_unit)
-        allocate( into(rows,columns) )
-        do i = 1, rows
-            read(unit=file_unit, fmt=*, iostat=status) into(i,:)
-        end do
+            open( newunit=file_unit, file=file_name, status='old', form='formatted', action='read', access='sequential', position='rewind' )
+            rows = number_of_rows_in_file(file_unit)
+            columns = number_of_columns_in_file(file_unit)
+            allocate( into(rows,columns) )
+            do i = 1, rows
+                read(unit=file_unit, fmt=*, iostat=status) into(i,:)
+            end do
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -985,10 +973,10 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         end if
 
@@ -1003,10 +991,10 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         end if
         
@@ -1022,15 +1010,15 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         end if
 
         close(file_unit)
@@ -1044,15 +1032,15 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         end if
 
         close(file_unit)
@@ -1067,19 +1055,19 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1093,19 +1081,19 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1120,23 +1108,23 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=4), ubound(x, dim=4)
-            do j = lbound(x, dim=3), ubound(x, dim=3)
-                do k = lbound(x, dim=2), ubound(x, dim=2)
-                    write(unit=file_unit) x(:,k,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=4), ubound(x, dim=4)
+                do j = lbound(x, dim=3), ubound(x, dim=3)
+                    do k = lbound(x, dim=2), ubound(x, dim=2)
+                        write(unit=file_unit) x(:,k,j,i)
+                    end do
                 end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=4), ubound(x, dim=4)
-            do j = lbound(x, dim=3), ubound(x, dim=3)
-                do k = lbound(x, dim=2), ubound(x, dim=2)
-                    write(unit=file_unit) x(:,k,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=4), ubound(x, dim=4)
+                do j = lbound(x, dim=3), ubound(x, dim=3)
+                    do k = lbound(x, dim=2), ubound(x, dim=2)
+                        write(unit=file_unit) x(:,k,j,i)
+                    end do
                 end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1150,23 +1138,23 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=4), ubound(x, dim=4)
-            do j = lbound(x, dim=3), ubound(x, dim=3)
-                do k = lbound(x, dim=2), ubound(x, dim=2)
-                    write(unit=file_unit) x(:,k,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=4), ubound(x, dim=4)
+                do j = lbound(x, dim=3), ubound(x, dim=3)
+                    do k = lbound(x, dim=2), ubound(x, dim=2)
+                        write(unit=file_unit) x(:,k,j,i)
+                    end do
                 end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=4), ubound(x, dim=4)
-            do j = lbound(x, dim=3), ubound(x, dim=3)
-                do k = lbound(x, dim=2), ubound(x, dim=2)
-                    write(unit=file_unit) x(:,k,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=4), ubound(x, dim=4)
+                do j = lbound(x, dim=3), ubound(x, dim=3)
+                    do k = lbound(x, dim=2), ubound(x, dim=2)
+                        write(unit=file_unit) x(:,k,j,i)
+                    end do
                 end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1181,27 +1169,27 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=5), ubound(x, dim=5)
-            do j = lbound(x, dim=4), ubound(x, dim=4)
-                do k = lbound(x, dim=3), ubound(x, dim=3)
-                    do l = lbound(x, dim=2), ubound(x, dim=2)
-                        write(unit=file_unit) x(:,l,k,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=5), ubound(x, dim=5)
+                do j = lbound(x, dim=4), ubound(x, dim=4)
+                    do k = lbound(x, dim=3), ubound(x, dim=3)
+                        do l = lbound(x, dim=2), ubound(x, dim=2)
+                            write(unit=file_unit) x(:,l,k,j,i)
+                        end do
                     end do
                 end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=5), ubound(x, dim=5)
-            do j = lbound(x, dim=4), ubound(x, dim=4)
-                do k = lbound(x, dim=3), ubound(x, dim=3)
-                    do l = lbound(x, dim=2), ubound(x, dim=2)
-                        write(unit=file_unit) x(:,l,k,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=5), ubound(x, dim=5)
+                do j = lbound(x, dim=4), ubound(x, dim=4)
+                    do k = lbound(x, dim=3), ubound(x, dim=3)
+                        do l = lbound(x, dim=2), ubound(x, dim=2)
+                            write(unit=file_unit) x(:,l,k,j,i)
+                        end do
                     end do
                 end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1215,27 +1203,27 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=5), ubound(x, dim=5)
-            do j = lbound(x, dim=4), ubound(x, dim=4)
-                do k = lbound(x, dim=3), ubound(x, dim=3)
-                    do l = lbound(x, dim=2), ubound(x, dim=2)
-                        write(unit=file_unit) x(:,l,k,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=5), ubound(x, dim=5)
+                do j = lbound(x, dim=4), ubound(x, dim=4)
+                    do k = lbound(x, dim=3), ubound(x, dim=3)
+                        do l = lbound(x, dim=2), ubound(x, dim=2)
+                            write(unit=file_unit) x(:,l,k,j,i)
+                        end do
                     end do
                 end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=5), ubound(x, dim=5)
-            do j = lbound(x, dim=4), ubound(x, dim=4)
-                do k = lbound(x, dim=3), ubound(x, dim=3)
-                    do l = lbound(x, dim=2), ubound(x, dim=2)
-                        write(unit=file_unit) x(:,l,k,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=5), ubound(x, dim=5)
+                do j = lbound(x, dim=4), ubound(x, dim=4)
+                    do k = lbound(x, dim=3), ubound(x, dim=3)
+                        do l = lbound(x, dim=2), ubound(x, dim=2)
+                            write(unit=file_unit) x(:,l,k,j,i)
+                        end do
                     end do
                 end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1250,10 +1238,10 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         end if
 
@@ -1268,10 +1256,10 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         end if
 
@@ -1286,10 +1274,10 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         end if
 
@@ -1304,10 +1292,10 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
             write(unit=file_unit) x
         end if
 
@@ -1323,15 +1311,15 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         end if
 
         close(file_unit)
@@ -1345,15 +1333,15 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         end if
 
         close(file_unit)
@@ -1367,15 +1355,15 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         end if
 
         close(file_unit)
@@ -1389,15 +1377,15 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=2), ubound(x, dim=2)
-            write(unit=file_unit) x(:,i)
-        end do
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=2), ubound(x, dim=2)
+                write(unit=file_unit) x(:,i)
+            end do
         end if
 
         close(file_unit)
@@ -1412,19 +1400,19 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1438,19 +1426,19 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1464,19 +1452,19 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1490,19 +1478,19 @@ submodule (io_mod) binary_io
         file_unit = output_unit
 
         if ( .not. exists ) then
-        open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         else
-        open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
-        do i = lbound(x, dim=3), ubound(x, dim=3)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                write(unit=file_unit) x(:,j,i)
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', action='write', access='stream' )
+            do i = lbound(x, dim=3), ubound(x, dim=3)
+                do j = lbound(x, dim=2), ubound(x, dim=2)
+                    write(unit=file_unit) x(:,j,i)
+                end do
             end do
-        end do
         end if
 
         close(file_unit)
@@ -1518,14 +1506,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1539,14 +1526,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1561,14 +1547,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1582,14 +1567,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1604,14 +1588,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1625,14 +1608,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1647,14 +1629,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1668,14 +1649,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1690,14 +1670,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1711,14 +1690,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1733,14 +1711,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1754,14 +1731,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1775,14 +1751,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1796,14 +1771,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1818,14 +1792,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1839,14 +1812,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1860,14 +1832,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1881,14 +1852,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1903,14 +1873,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1924,14 +1893,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1945,14 +1913,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
@@ -1966,14 +1933,13 @@ submodule (io_mod) binary_io
         file_unit = input_unit
 
         if ( exists ) then
-        open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
-        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
-        read(unit=file_unit, iostat=status) into
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', action='read', access='stream' )
+            allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+            read(unit=file_unit, iostat=status) into
         else
-        write(*,*)
-        write(*,*) 'Error reading file "'//file_name//'". No such file exists.'
-        write(*,*)
-        stop
+            write(*,*)
+            error stop 'Error reading file "'//file_name//'". No such file exists.'
+            write(*,*)
         end if
 
         close(file_unit)
