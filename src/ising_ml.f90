@@ -23,9 +23,9 @@ module ising_ml
 		real(rk), allocatable, dimension(:) :: p_a, r_a                                            !! ADAM arrays for a
 		complex(rk), allocatable, dimension(:) :: p_b, r_b                                         !! ADAM arrays for b
 		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
-		contains                                                                     !! Type-bound procedures (methods)
+		contains
 			private
-			procedure, pass, public :: train                                !! Procedure for training Boltzmann machine
+			procedure, pass, public :: optimize !! Public facing procedure for optimizing wave-function to ground state
             procedure, pass :: init                                     !! Procedure for initializing Boltzmann machine
 			procedure, pass :: sample_distribution             !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
             procedure, pass :: prob_ratio                     !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
@@ -62,8 +62,9 @@ module ising_ml
             sync images (1)                                                           !! Wait for response from image 1
 		end if
 		
-		if ( allocated(self%a) ) deallocate( self%p_a, self%r_a, self%p_b, self%r_b, self%p_w, self%r_w, &
-                                             self%a, self%b, self%w )                     !! Reset components if needed
+		if ( allocated(self%a) ) deallocate( self%a, self%p_a, self%r_a, &
+                                             self%b, self%p_b, self%r_b, &
+                                             self%w, self%p_w, self%r_w )                 !! Reset components if needed
 
 		n = self%v_units                                                                         !! Get number of spins
 		m = self%h_units                                                                  !! Get number of hidden units
@@ -86,7 +87,7 @@ module ising_ml
         real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
 
         real(rk), allocatable, dimension(:) :: s_unit, neighbor_couplings, field_couplings        !! s -> ±1, couplings
-		complex(rk), allocatable, dimension(:) :: arg_theta                                           !! 1 + exp(theta)
+		complex(rk), allocatable, dimension(:) :: arg_theta                                               !! 1 + exp(𝜃)
 		real(rk), allocatable :: e_interaction, e_transverse             !! Interaction energy, transverse field energy
         real(rk), allocatable :: J_str, B_str                       !! Ising model coupling strength and field strength
 		integer :: j, n, m                                                            !! Loop variable, number of spins
@@ -126,12 +127,12 @@ module ising_ml
 		real(rk), allocatable, dimension(:), intent(out) :: e_local, corrs       !! Local energies, sample correlations
 		real(rk), allocatable, intent(out) :: energy, sqerr                             !! Energy average, square error
 
-        complex(rk), allocatable, dimension(:) :: theta                                                       !! b + ws
+        complex(rk), allocatable, dimension(:) :: theta                                                   !! 𝜃 = b + ws
 		integer :: n, num_samples                                                 !! Number of spins, number of samples
 
 		n = self%v_units                                                                         !! Get number of spins
         num_samples = 10                                                            !! Set number of samples to produce
-        theta = conjg(self%b) + matmul(self%w, start_sample)                                       !! Get initial theta
+        theta = conjg(self%b) + matmul(self%w, start_sample)                                           !! Get initial 𝜃
 
 		thermalization: block
 			integer(ik), allocatable, dimension(:) :: new_proposal, s_prop                          !! Proposal samples
@@ -158,7 +159,7 @@ module ising_ml
                 call random_number(r)                                      !! Sample from uniform distribution on [0,1)
 				if ( r < acc_prob ) then                                                    !! M-H acceptance criterion
                     start_sample = s_prop                                                              !! Update sample
-                    theta = conjg(self%b) + matmul(self%w, start_sample)                                !! Update theta
+                    theta = conjg(self%b) + matmul(self%w, start_sample)                                    !! Update 𝜃
                 else
                     exit thermalization                                           !! Sample is sufficiently thermalized
                 end if
@@ -191,7 +192,7 @@ module ising_ml
                     acc_prob = self%prob_ratio(s1=this_sample, s2=s_prop, theta_1=theta)      !! Acceptance probability
 
 					if ( r(pass, k) < acc_prob ) then                                       !! M-H acceptance criterion
-                        theta = theta + self%w(:,rind(pass,k))*(-2.0_rk*this_sample(rind(pass,k)) + 1.0_rk)   !! Update
+                        theta = theta + self%w(:,rind(pass,k))*(-2.0_rk*this_sample(rind(pass,k)) + 1.0_rk) !! Update 𝜃
                         this_sample = s_prop                                                           !! Update sample
                     end if
 				end do metropolis_hastings
@@ -251,8 +252,8 @@ module ising_ml
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine train(self, ising_params, energies, correlations)
-		!! Procedure for training Boltzmann machine
+    impure subroutine optimize(self, ising_params, energies, correlations)
+		!! Top-level public procedure for optimizing wave-function to ground state
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
         real(rk), dimension(2), intent(in) :: ising_params            !! Specifies coupling strength and field strength
@@ -303,7 +304,7 @@ module ising_ml
             energies = energies(1:epoch,:)                                         !! Dynamic reallocation - truncation
             correlations = correlations(:,1:epoch)                                 !! Dynamic reallocation - truncation
         end if
-	end subroutine train
+	end subroutine optimize
 
     pure subroutine stochastic_optimization(self, epoch, e_local, samples)
         !! Procedure for updating weights and biases
