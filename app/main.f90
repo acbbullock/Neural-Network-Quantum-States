@@ -11,43 +11,25 @@
 !!  ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a"
 !!
 program main
-    use, intrinsic :: iso_fortran_env, only: rk=>real64, i64=>int64                            !! Import standard kinds
-    use io_mod, only: csvwrite                                                                        !! I/O procedures
+    use, intrinsic :: iso_fortran_env, only: rk=>real64                                        !! Import standard kinds
     use ising_ml, only: RestrictedBoltzmannMachine                                                    !! Neural network
     implicit none (type,external)                                                    !! No implicit types or interfaces
 
     !! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     type(RestrictedBoltzmannMachine) :: psi                                                           !! Neural network
 
-    real(rk), allocatable, dimension(:,:) :: energies, correlations                                 !! Training outputs
-    integer :: spins, hidden_units                                                               !! Training parameters
-    real(rk) :: ising_params(2)                                                                     !! Ising parameters
-
-    integer(i64) t1, t2                                                                              !! Clock variables
-    real(rk) rate, telapse                                                                           !! Clock variables
+    integer :: spins, hidden_units                                                  !! Number of spins and hidden units
+    real(rk) :: ising_strengths(2)                                                      !! Coupling and field strengths
 
     !! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     call random_init(repeatable=.false., image_distinct=.true.)                   !! Initialize random number generator
 
     spins = 1001                                                                         !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
-    ising_params = [0.5_rk, 0.1_rk]                                         !! Set coupling strength and field strength
+    ising_strengths = [0.5_rk, 0.1_rk]                                      !! Set coupling strength and field strength
 
     psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                            !! Create instance
 
-    if ( this_image() == 1 ) call system_clock(t1)                                                       !! Start clock
+    call psi%optimize(ising_strengths=ising_strengths)                                            !! Learn ground state
 
-    call psi%optimize(ising_params=ising_params, energies=energies, correlations=correlations)    !! Learn ground state
-
-    if ( this_image() == 1 ) then
-        call system_clock(t2, count_rate=rate)                                                            !! Stop clock
-        telapse = real((t2-t1), kind=rk)/rate                                     !! Total elapsed wall clock time in s
-
-        print*
-        print*, 'Elapsed wall clock time:', real(telapse), 'seconds for n =', spins, 'spins.'
-        print*
-
-        call csvwrite(energies, 'energies.csv')                                               !! Write energies to file
-        call csvwrite(correlations, 'correlations.csv')                                   !! Write correlations to file
-    end if
 end program main

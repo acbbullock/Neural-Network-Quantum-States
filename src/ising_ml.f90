@@ -6,14 +6,16 @@
 !!  the Intel MKL distribution of LAPACK.
 !!
 module ising_ml
-    use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8                              !! Import standard kinds
+    use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public
 
 	!! Public APIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public :: RestrictedBoltzmannMachine
 
-	!! Class Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	!! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    character(len=1), parameter :: nl = new_line('')                                              !! New line character
+
 	type RestrictedBoltzmannMachine                     !! Custom class for implementing a Restricted Boltzmann Machine
 		private
 		integer, allocatable :: v_units, h_units                                             !! Number of layer neurons
@@ -23,6 +25,7 @@ module ising_ml
 		real(rk), allocatable, dimension(:) :: p_a, r_a                                            !! ADAM arrays for a
 		complex(rk), allocatable, dimension(:) :: p_b, r_b                                         !! ADAM arrays for b
 		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
+        character(len=1) :: alignment = 'F'                                       !! Default to ferromagnetic alignment
 		contains
 			private
 			procedure, pass, public :: optimize !! Public facing procedure for optimizing wave-function to ground state
@@ -49,7 +52,7 @@ module ising_ml
 		self%h_units = h_units                  !! Set number of hidden units (chosen arbitrarily to optimize learning)
 	end function new
 
-    impure subroutine init(self)
+    subroutine init(self)
 		!! Procedure for initialization
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
 
@@ -79,12 +82,12 @@ module ising_ml
 
 	!! Ising Model Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    pure real(rk) function ising_energy(self, s, theta, params) result(energy)
+    pure real(rk) function ising_energy(self, s, theta, ising_strengths) result(energy)
 		!! Function for calculating local energy of configuration s in Ising model
 		class(RestrictedBoltzmannMachine), intent(in) :: self                                      !! Boltzmann machine
 		integer(ik), contiguous, dimension(:), intent(in) :: s                                   !! Configuration input
         complex(rk), contiguous, dimension(:), intent(in) :: theta                            !! Cached value of b + ws
-        real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
+        real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
 
         real(rk), allocatable, dimension(:) :: s_unit, neighbor_couplings, field_couplings        !! s -> ±1, couplings
 		complex(rk), allocatable, dimension(:) :: arg_theta                                               !! 1 + exp(𝜃)
@@ -94,8 +97,8 @@ module ising_ml
 
 		n = self%v_units                                                                         !! Get number of spins
 		m = self%h_units                                                                  !! Get number of hidden units
-        J_str = params(1)                                                                      !! Set coupling strength
-        B_str = params(2)                                                                         !! Set field strength
+        J_str = abs(ising_strengths(1))                                                        !! Set coupling strength
+        B_str = abs(ising_strengths(2))                                                           !! Set field strength
 
         s_unit = -2.0_rk*s + 1.0_rk                                                            !! Map {0,1} -> {1.,-1.}
         neighbor_couplings = s_unit(1:n-1)*s_unit(2:n)                                    !! Nearest neighbor couplings
@@ -117,11 +120,11 @@ module ising_ml
 
 	!!  Sampling Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine sample_distribution(self, epoch, params, start_sample, samples, e_local, corrs, energy, sqerr)
+    subroutine sample_distribution(self, epoch, ising_strengths, start_sample, samples, e_local, corrs, energy, sqerr)
 		!! Markov Chain Monte Carlo procedure for sampling |𝜓|^2 with Metropolis-Hastings algorithm
 		class(RestrictedBoltzmannMachine), intent(in) :: self                             !! Distribution to be sampled
 		integer, intent(in) :: epoch                                                                   !! Current epoch
-        real(rk), dimension(2), intent(in) :: params                  !! Specifies coupling strength and field strength
+        real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
         integer(ik), contiguous, dimension(:), intent(inout) :: start_sample          !! Sample to begin thermalization
 		integer(ik), allocatable, dimension(:,:), intent(out) :: samples                              !! Output samples
 		real(rk), allocatable, dimension(:), intent(out) :: e_local, corrs       !! Local energies, sample correlations
@@ -131,7 +134,7 @@ module ising_ml
 		integer :: n, num_samples                                                 !! Number of spins, number of samples
 
 		n = self%v_units                                                                         !! Get number of spins
-        num_samples = 10                                                            !! Set number of samples to produce
+        num_samples = 15                                                            !! Set number of samples to produce
         theta = conjg(self%b) + matmul(self%w, start_sample)                                           !! Get initial 𝜃
 
 		thermalization: block
@@ -198,11 +201,11 @@ module ising_ml
 				end do metropolis_hastings
 
 				samples(:,k) = this_sample                                                 !! Transfer sample to output
-				e_local(k) = self%ising_energy(s=this_sample, theta=theta, params=params)     !! Local energy of sample
+				e_local(k) = self%ising_energy(s=this_sample, theta=theta, ising_strengths=ising_strengths) !! E_loc(s)
 			end do
 		end block stationary_sampling
 
-        corrs = corr(samples)                                                                    !! Sample correlations
+        corrs = corr(samples=samples, alignment=self%alignment)         !! Spin correlations given alignment 'F' or 'A'
 		energy = sum(e_local)/num_samples                                                        !! Average of energies
 		sqerr = var(e_local)/num_samples                                                    !! Square error of energies
         start_sample = samples(:,num_samples)               !! Record stationary sample to begin next round of sampling
@@ -238,7 +241,7 @@ module ising_ml
 		p = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                                 !! |𝜓(s_2)/𝜓(s_1)|^2
 	end function prob_ratio
 
-	impure function random_sample(n) result(s_random)
+	function random_sample(n) result(s_random)
 		!! Function for generating a random spin configuration
 		integer, intent(in) :: n                                                 !! Length of configuration to generate
 		integer(ik), allocatable :: s_random(:)                                                     !! Generated sample
@@ -252,31 +255,50 @@ module ising_ml
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    impure subroutine optimize(self, ising_params, energies, correlations)
+    subroutine optimize(self, ising_strengths)
 		!! Top-level public procedure for optimizing wave-function to ground state
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
+        use io_mod, only: echo, csvwrite                                                              !! I/O procedures
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        real(rk), dimension(2), intent(in) :: ising_params            !! Specifies coupling strength and field strength
-		real(rk), allocatable, dimension(:,:), intent(out) :: energies, correlations       !! Energies and correlations
+        real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
 
-        integer(ik), allocatable, dimension(:,:) :: samples                                     !! Sample storage array
+		real(rk), allocatable, dimension(:,:) :: energies, correlations                    !! Energies and correlations
         integer(ik), allocatable, dimension(:) :: start_sample                          !! Start sample for Monte Carlo
+        integer(ik), allocatable, dimension(:,:) :: samples                                     !! Sample storage array
 		real(rk), allocatable, dimension(:) :: e_local, corrs                    !! Local energies, sample correlations
-		real(rk), allocatable :: energy, sqerr, stderr                                           !! Recording variables
+		real(rk), allocatable :: energy, sqerr, stderr, tau, acc                                 !! Recording variables
 		integer :: epoch, max_epochs, n                                   !! Loop variable, max epochs, number of spins
+
+        integer(i64) t1, t2                                                                          !! Clock variables
+        real(rk) rate, telapse                                                                       !! Clock variables
+        character(len=16) :: epoch_str, tau_str, energy_str, stderr_str                          !! For internal writes
+        character(len=16) :: telapse_str, n_str, acc_str, J_str, B_str                           !! For internal writes
+        character(len=:), allocatable :: outstr, outfile                                       !! For writing to output
 
 		call self%init()                                                                !! Initialize Boltzmann machine
 
-        n = self%v_units                                                                         !! Get number of spins
+        if ( ising_strengths(1) < 0.0_rk ) self%alignment = 'A'                      !! Check sign of coupling strength
+
         max_epochs = 1000                                                                         !! Set maximum epochs
+        n = self%v_units                                                                         !! Get number of spins
         start_sample = random_sample(n)                                                     !! Initialize random sample
 
-		if ( this_image() == 1 ) allocate( energies(max_epochs, 2), correlations(n, max_epochs) )   !! Allocate outputs
+        outfile = 'output.txt'                                                               !! Set name of output file
+
+		if ( this_image() == 1 ) then
+            allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                  !! Allocate output arrays
+
+            outstr = nl//'Stochastic Optimization - Ising Model: |ψ(α(τ))⟩ → |ψ₀⟩ as τ → ∞'// &
+                     nl//'----------------------------------------------------------------'//nl
+            call echo(string=outstr, file_name=outfile, append=.false.); write(*,'(a)') outstr
+
+            call system_clock(t1)                                                                        !! Start clock
+        end if
 
 		learning: do epoch = 1, max_epochs                                                            !! Begin learning
             call co_sum(self%w); self%w = self%w/num_images()                          !! Average weights across images
 
-			call self%sample_distribution( epoch=epoch, params=ising_params, start_sample=start_sample, &     !! Inputs
+			call self%sample_distribution( epoch=epoch, ising_strengths=ising_strengths, start_sample=start_sample, &
                                            samples=samples, e_local=e_local, corrs=corrs, &            !! Array outputs
                                            energy=energy, sqerr=sqerr )                               !! Scalar outputs
 
@@ -288,21 +310,51 @@ module ising_ml
                 energies(epoch,:) = [energy, stderr]                               !! Record energy and error to output
 			    correlations(:,epoch) = corrs                                          !! Record correlations to output
 
-                print*, 'E =', energy, '±', stderr, 'on epoch', epoch                                 !! Print progress
+                !! Write progress report:
+                tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                              !! Current time
+                write(unit=epoch_str, fmt='(i16)') epoch
+                write(unit=tau_str, fmt='(f16.3)') tau
+                write(unit=energy_str, fmt='(f16.3)') energy
+                write(unit=stderr_str, fmt='(f16.3)') stderr
+                outstr = '    Epoch '//trim(adjustl(epoch_str))//': E[ψ(α(τ='//trim(adjustl(tau_str))//'))] = ' &
+                              //trim(adjustl(energy_str))//' ± '//trim(adjustl(stderr_str))
+                call echo(string=outstr, file_name=outfile, append=.true.); write(*,'(a)') outstr
+
 				if ( ieee_is_nan(energy) ) error stop 'Numerical instability... terminating'       !! Error termination
 				sync images (*)                                                              !! Respond to other images
             else
                 sync images (1)                                                       !! Wait for response from image 1
 			end if
 
-            if ( all(abs(corrs) > 0.98_rk) .or. (epoch == max_epochs) ) exit learning                !! Exit conditions
+            if ( all(abs(corrs) > 0.99_rk) .or. (epoch == max_epochs) ) exit learning                !! Exit conditions
 
 			call self%stochastic_optimization(epoch=epoch, e_local=e_local, samples=samples)       !! Update parameters
 		end do learning
 
         if ( this_image() == 1 ) then
+            call system_clock(t2, count_rate=rate)                                                        !! Stop clock
+            telapse = real((t2-t1), kind=rk)/rate                                 !! Total elapsed wall clock time in s
+
+            acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)             !! Get ground state accuracy
+
+            write(unit=telapse_str, fmt='(f16.3)') telapse
+            write(unit=n_str, fmt='(i16)') n
+            write(unit=acc_str, fmt='(f16.6)') acc
+            write(unit=J_str, fmt='(f16.1)') ising_strengths(1)
+            write(unit=B_str, fmt='(f16.1)') ising_strengths(2)
+
+            outstr = nl//'    Optimization time: '//trim(adjustl(telapse_str))//' seconds for &
+                              n = '//trim(adjustl(n_str))//' spins.'// &
+                     nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//trim(adjustl(energy_str))//' ± ' &
+                              //trim(adjustl(stderr_str))//' for J = '//trim(adjustl(J_str))//', &
+                              B = '//trim(adjustl(B_str))// &
+                     nl//'    Ground state accuracy: '//trim(adjustl(acc_str))//nl
+            call echo(string=outstr, file_name=outfile, append=.true.); write(*,'(a)') outstr
+
             energies = energies(1:epoch,:)                                         !! Dynamic reallocation - truncation
             correlations = correlations(:,1:epoch)                                 !! Dynamic reallocation - truncation
+            call csvwrite(energies, 'energies.csv')                                           !! Write energies to file
+            call csvwrite(correlations, 'correlations.csv')                               !! Write correlations to file
         end if
 	end subroutine optimize
 
@@ -318,7 +370,7 @@ module ising_ml
         real(rk), allocatable, dimension(:,:) :: dlna                                                !! Log derivatives
         complex(rk), allocatable, dimension(:,:) :: dlnb                                             !! Log derivatives
 		complex(rk), allocatable, dimension(:,:,:) :: dlnw                                           !! Log derivatives
-		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dt          !! Normalization, regularization, ADAM vars
+		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dtau        !! Normalization, regularization, ADAM vars
 		integer :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
 
 		n = self%v_units                                                                         !! Get number of spins
@@ -331,9 +383,9 @@ module ising_ml
         epsilon = 1e-8_rk                                                      !! Parameter to prevent division by zero
 
         if ( n < 100 ) then
-            dt = 1.0_rk/n                                                                              !! Set time step
+            dtau = 1.0_rk/n                                                                            !! Set time step
         else
-            dt = 10.0_rk/n                                                                             !! Set time step
+            dtau = 10.0_rk/n                                                                           !! Set time step
         end if
 
         e_local_cent = e_local - sum(e_local)/num_samples                                  !! Center the local energies
@@ -369,7 +421,7 @@ module ising_ml
             !! Modify gradient with bias-corrected moments:
             x = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%a = self%a - dt*x                                                             !! Update visible biases
+			self%a = self%a - dtau*x                                                           !! Update visible biases
 		end block update_a !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		dlnb = matmul(self%w, samples)                                                                    !! 𝜃 - b = ws
@@ -410,7 +462,7 @@ module ising_ml
             !! Modify gradient with bias-corrected moments:
             x = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%b = self%b - dt*x                                                              !! Update hidden biases
+			self%b = self%b - dtau*x                                                            !! Update hidden biases
 		end block update_b !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		allocate( dlnw(num_samples, m, n) )                                              !! k=1,…,K , i=1,…,m , j=1,…,n
@@ -453,7 +505,7 @@ module ising_ml
             !! Modify gradient with bias-corrected moments:
             x = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )
 
-			self%w = self%w - dt*x                                                                    !! Update weights
+			self%w = self%w - dtau*x                                                                  !! Update weights
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	end subroutine stochastic_optimization
 
@@ -472,9 +524,10 @@ module ising_ml
 		variance = sum(x_cent**2)/(n-1)
 	end function var
 
-    pure function corr(samples) result(correlations)
-		!! Function for calculating spin-spin correlations of sampled configurations
+    pure function corr(samples, alignment) result(correlations)
+		!! Function for calculating spin-spin correlations of sampled configurations given alignment 'F' or 'A'
 		integer(ik), contiguous, dimension(:,:), intent(in) :: samples                                 !! Input samples
+        character(len=1), intent(in) :: alignment                                          !! Spin alignment 'F' or 'A'
 		real(rk), allocatable, dimension(:) :: correlations                                      !! Output correlations
 
 		integer(ik), allocatable, dimension(:,:) :: S                                              !! Transformed spins
@@ -489,13 +542,14 @@ module ising_ml
 		allocate( correlations(n), source=1.0_rk )
 
 		get_correlations: do concurrent (j = 1:n, j /= n/2+1) local(agrees, disagrees) shared(correlations)
+            if ( (alignment == 'A') .and. (mod(j,2) == 0) ) S(:,j) = 1_ik - S(:,j)    !! Conform spins to 'A' alignment
             agrees = count( S(:,j)==ref_spin )                                              !! Get number of agreements
             disagrees = num_samples - agrees                                             !! Get number of disagreements
             correlations(j) = real(agrees - disagrees, kind=rk)/num_samples                 !! Mean agreement on [-1,1]
 		end do get_correlations
 	end function corr
 
-    impure function gauss_matrix(dims, mu, sig) result(gauss_sample_matrix)
+    function gauss_matrix(dims, mu, sig) result(gauss_sample_matrix)
         !! Samples random numbers from the standard Normal (Gaussian) Distribution with the given mean and sigma.
         !! Uses the Acceptance-complement ratio from W. Hoermann and G. Derflinger.
         !! This is one of the fastest existing methods for generating normal random variables.
