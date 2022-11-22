@@ -12,7 +12,7 @@
 !!
 program main
     use, intrinsic :: iso_fortran_env, only: rk=>real64                                        !! Import standard kinds
-    use ising_ml, only: RestrictedBoltzmannMachine                                                    !! Neural network
+    use nnqs, only: RestrictedBoltzmannMachine                                                        !! Neural network
     implicit none (type,external)                                                    !! No implicit types or interfaces
 
     !! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
