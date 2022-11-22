@@ -5,7 +5,7 @@
 !!  The only external dependency is a system installation of LAPACK that supports the lapack95 interfaces, such as
 !!  the Intel MKL distribution of LAPACK.
 !!
-module ising_ml
+module nnqs
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public
@@ -664,4 +664,4 @@ module ising_ml
             end do rows
         end do columns
     end function gauss_matrix
-end module ising_ml
+end module nnqs

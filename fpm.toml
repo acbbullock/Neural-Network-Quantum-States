@@ -1,4 +1,4 @@
-name = "ising_ml"
+name = "nnqs"
 version = "0.5.0"
 license = "MIT"
 author = "Austin C Bullock, Andrew Wasserbeck"
