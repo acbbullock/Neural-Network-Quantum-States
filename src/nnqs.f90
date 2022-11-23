@@ -1,10 +1,7 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!---------------------------------------------------------------------------------------------------------------------
 !!  This module file contains an implementation of the stochastic optimization algorithm for learning the ground state
 !!  of the Ising spin model by representing the wave-functions 𝜓(s,α) as a type RestrictedBoltzmannMachine.
-!!  
-!!  The only external dependency is a system installation of LAPACK that supports the lapack95 interfaces, such as
-!!  the Intel MKL distribution of LAPACK.
-!!
+!!---------------------------------------------------------------------------------------------------------------------
 module nnqs
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
 	implicit none (type,external)                                                    !! No implicit types or interfaces
@@ -285,8 +282,8 @@ module nnqs
 
         outfile = 'output.txt'                                                               !! Set name of output file
 
-		if ( this_image() == 1 ) then
-            allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                  !! Allocate output arrays
+		if ( this_image() == 1 ) then                                                              !! Do I/O on image 1
+            allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                 !! Allocate storage arrays
 
             outstr = nl//'Stochastic Optimization - Ising Model: |ψ(α(τ))⟩ → |ψ₀⟩ as τ → ∞'// &
                      nl//'----------------------------------------------------------------'//nl
@@ -306,9 +303,9 @@ module nnqs
 			call co_sum(sqerr); stderr = sqrt(sqerr)/num_images()                        !! Average error across images
 			call co_sum(corrs); corrs = corrs/num_images()                        !! Average correlations across images
 
-            if ( this_image() == 1 ) then
-                energies(epoch,:) = [energy, stderr]                               !! Record energy and error to output
-			    correlations(:,epoch) = corrs                                          !! Record correlations to output
+            if ( this_image() == 1 ) then                                                          !! Do I/O on image 1
+                energies(epoch,:) = [energy, stderr]                              !! Record energy and error to storage
+			    correlations(:,epoch) = corrs                                         !! Record correlations to storage
 
                 !! Write progress report:
                 tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                              !! Current time
@@ -331,7 +328,7 @@ module nnqs
 			call self%stochastic_optimization(epoch=epoch, e_local=e_local, samples=samples)       !! Update parameters
 		end do learning
 
-        if ( this_image() == 1 ) then
+        if ( this_image() == 1 ) then                                                              !! Do I/O on image 1
             call system_clock(t2, count_rate=rate)                                                        !! Stop clock
             telapse = real((t2-t1), kind=rk)/rate                                 !! Total elapsed wall clock time in s
 
@@ -351,10 +348,8 @@ module nnqs
                      nl//'    Ground state accuracy: '//trim(adjustl(acc_str))//nl
             call echo(string=outstr, file_name=outfile, append=.true.); write(*,'(a)') outstr
 
-            energies = energies(1:epoch,:)                                         !! Dynamic reallocation - truncation
-            correlations = correlations(:,1:epoch)                                 !! Dynamic reallocation - truncation
-            call csvwrite(energies, 'energies.csv')                                           !! Write energies to file
-            call csvwrite(correlations, 'correlations.csv')                               !! Write correlations to file
+            call csvwrite(energies(1:epoch,:), 'energies.csv')                                !! Write energies to file
+            call csvwrite(correlations(:,1:epoch), 'correlations.csv')                    !! Write correlations to file
         end if
 	end subroutine optimize
 
