@@ -1,5 +1,15 @@
 # Learning Quantum States with Neural Networks
 
+Sections:
+
+1. [Introduction](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#introduction)
+2. [Restricted Boltzmann Machines](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#restricted-boltzmann-machines)
+3. [Neural Network Quantum States](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#neural-network-quantum-states)
+4. [Transverse Field Ising Model](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#transverse-field-ising-model)
+5. [Stochastic Optimization](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#stochastic-optimization)
+6. [Derivation of Optimization Algorithm](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#derivation-of-optimization-algorithm)
+7. [Building with fpm](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#building-with-fpm)
+
 ## Introduction
 
 Quantum mechanics emerges from classical mechanics by the relaxation of the requirement of commutativity among the observables as assumed by classical probability theory. The most immediate and striking consequence of this relaxation is the insufficiency of real-valued probability distributions to encode the interference phenomena observed by experiment. In response, we generalize the notion of probability distributions from real-valued distributions over the set of possible outcomes which combine convexly, to complex-valued distributions over the set of possible outcomes which combine linearly. The complex-valued probabilities are able to encode the observed interference patterns in their relative phases. Such quantum probability distributions do not describe mutually exclusive outcomes in which only one outcome exists prior to measurement, but rather describes outcomes in which all possible outcomes simultaneously exist prior to measurement and which interfere in a wave-like manner.
@@ -122,3 +132,23 @@ is the infinitesimal change in the parameters $\alpha(\tau) \in \mathcal{M}$ due
 It must be noted that the initialization of the parameters can have a dramatic effect on the performance of the algorithm. The initial state $\ket{\psi(\alpha(0))}$ must be chosen such that $\langle \psi_0, \psi(\alpha(0)) \rangle \neq 0$, or else learning is not possible. The more overlap there is with the ground state, the more efficient the algorithm will be. With at least some overlap, we will expect that $\ket{\psi(\alpha(\tau))} \to \ket{\psi_0}$ as $\tau \to \infty$ for a sufficiently small time step $\delta\tau$. This can be seen by noting the change in the energy functional over the interval $[\tau, \tau + \delta \tau]$, by taking the expectation of $H$ in the state $\ket{\psi(\alpha(\tau + \delta\tau))} \approx \ket{\psi(\alpha(\tau))} - \delta \tau \Delta H \ket{\psi(\alpha(\tau))} = \ket{\psi(\alpha(\tau))} + \delta \tau \Delta \frac{d}{d\tau} \ket{\psi(\alpha(\tau))}$, i.e.
     $$E[\psi(\alpha(\tau + \delta\tau))] = E[\psi(\alpha(\tau))] - 2\delta\tau F^\dagger(\alpha) S^{-1}(\alpha) F(\alpha) + \mathcal{O}(\delta\tau^2)$$
 where $\mathcal{O}(\delta\tau^2)$ denotes the term involving $\delta\tau^2$. Since $\delta\tau > 0$ and $S(\alpha)$ is positive-definite, the second term will be strictly negative, such that the change in energy $E[\psi(\alpha(\tau + \delta\tau))] - E[\psi(\alpha(\tau))] < 0$ for a sufficiently small time step $\delta\tau$.
+
+## Building with fpm
+
+The only external dependency of this project is a system installation of LAPACK that supports the lapack95 interfaces, such as the Intel MKL distribution of LAPACK. With a system installation of [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html) Base and HPC toolkits (including MKL), the project can be built and run on Windows 10/11 and Linux with the Fortran Package Manager [fpm](https://github.com/fortran-lang/fpm) from the project root using a single command, assuming the shell environment has sourced the oneAPI environment variables beforehand.
+
+On Windows, the project can be built and run using the command
+
+```powershell
+fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qiopenmp /Qcoarray /Qcoarray-num-images:n /heap-arrays:0" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
+```
+
+for a CPU with the AVX2 instruction set extension for best performance, where `n` is the number of images to use. The `O3` flag enables the highest optimization level, the `arch` flag specifies which instruction sets to target, the `Qiopenmp` flag generates multi-threaded code based on OpenMP directives, the `Qcoarray` flag enables the coarray feature of Fortran 2008 with `Qcoarray-num-images:n` specifying the number of images to use, and the `heap-arrays:0` flag puts all automatic arrays on the heap, which may be necessary to avoid stack overflows for larger systems but can be omitted for smaller systems. The link flag specifies the MKL and OpenMP runtime libraries for static linking.
+
+Similarly, the project may be built and run on Linux using the command
+
+```bash
+fpm run --compiler ifort --flag "-O3 -arch CORE-AVX2 -qiopenmp -coarray -coarray-num-images=n -heap-arrays 0" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5"
+```
+
+with identical features.
