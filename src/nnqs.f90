@@ -4,6 +4,8 @@
 !!---------------------------------------------------------------------------------------------------------------------
 module nnqs
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
+    use io_mod, only: nl, str, csvwrite, datwrite                                                     !! I/O procedures
+    use lapack95, only: ppsvx                                 !! Routine for solving linear systems with packed storage
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public
 
@@ -11,18 +13,16 @@ module nnqs
 	public :: RestrictedBoltzmannMachine
 
 	!! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    character(len=1), parameter :: nl = new_line('')                                              !! New line character
-
 	type RestrictedBoltzmannMachine                     !! Custom class for implementing a Restricted Boltzmann Machine
 		private
-		integer, allocatable :: v_units, h_units                                             !! Number of layer neurons
+        character(len=1) :: alignment = 'N'                                              !! For setting spin alignments
+		integer, allocatable :: v_units, h_units                                   !! Number of visble and hidden units
 		real(rk), allocatable, dimension(:) :: a                                                !! Visible layer biases
 		complex(rk), allocatable, dimension(:) :: b                                              !! Hidden layer biases
         complex(rk), allocatable, dimension(:,:) :: w                                                        !! Weights
 		real(rk), allocatable, dimension(:) :: p_a, r_a                                            !! ADAM arrays for a
 		complex(rk), allocatable, dimension(:) :: p_b, r_b                                         !! ADAM arrays for b
 		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
-        character(len=1) :: alignment = 'F'                                       !! Default to ferromagnetic alignment
 		contains
 			private
 			procedure, pass, public :: optimize !! Public facing procedure for optimizing wave-function to ground state
@@ -252,12 +252,12 @@ module nnqs
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    subroutine optimize(self, ising_strengths)
+    subroutine optimize(self, ising_strengths, energies_file, correlations_file)
 		!! Top-level public procedure for optimizing wave-function to ground state
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
-        use io_mod, only: echo, csvwrite                                                              !! I/O procedures
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
         real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
+        character(len=*), optional, intent(in) :: energies_file, correlations_file                 !! File name outputs
 
 		real(rk), allocatable, dimension(:,:) :: energies, correlations                    !! Energies and correlations
         integer(ik), allocatable, dimension(:) :: start_sample                          !! Start sample for Monte Carlo
@@ -268,26 +268,24 @@ module nnqs
 
         integer(i64) t1, t2                                                                          !! Clock variables
         real(rk) rate, telapse                                                                       !! Clock variables
-        character(len=16) :: epoch_str, tau_str, energy_str, stderr_str                          !! For internal writes
-        character(len=16) :: telapse_str, n_str, acc_str, J_str, B_str                           !! For internal writes
-        character(len=:), allocatable :: outstr, outfile                                       !! For writing to output
 
 		call self%init()                                                                !! Initialize Boltzmann machine
 
-        if ( ising_strengths(1) < 0.0_rk ) self%alignment = 'A'                      !! Check sign of coupling strength
+        if ( ising_strengths(1) < 0.0_rk ) then                                      !! Check sign of coupling strength
+            self%alignment = 'A'                                                         !! Anti-ferromagnetic if J < 0
+        else
+            self%alignment = 'F'                                                              !! Ferromagnetic if J > 0
+        end if
 
         max_epochs = 1000                                                                         !! Set maximum epochs
         n = self%v_units                                                                         !! Get number of spins
         start_sample = random_sample(n)                                                     !! Initialize random sample
 
-        outfile = 'output.txt'                                                               !! Set name of output file
-
-		if ( this_image() == 1 ) then                                                              !! Do I/O on image 1
+		if ( this_image() == 1 ) then                                                      !! Do preparation on image 1
             allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                 !! Allocate storage arrays
 
-            outstr = nl//'Stochastic Optimization - Ising Model: |ψ(α(τ))⟩ → |ψ₀⟩ as τ → ∞'// &
-                     nl//'----------------------------------------------------------------'//nl
-            call echo(string=outstr, file_name=outfile, append=.false.); write(*,'(a)') outstr
+            write(*,'(a)') nl//'Stochastic Optimization - Ising Model: |ψ(α(τ))⟩ → |ψ₀⟩ as τ → ∞'// &
+                           nl//'----------------------------------------------------------------'//nl
 
             call system_clock(t1)                                                                        !! Start clock
         end if
@@ -303,19 +301,14 @@ module nnqs
 			call co_sum(sqerr); stderr = sqrt(sqerr)/num_images()                        !! Average error across images
 			call co_sum(corrs); corrs = corrs/num_images()                        !! Average correlations across images
 
-            if ( this_image() == 1 ) then                                                          !! Do I/O on image 1
+            if ( this_image() == 1 ) then                                       !! Do data recording and I/O on image 1
                 energies(epoch,:) = [energy, stderr]                              !! Record energy and error to storage
 			    correlations(:,epoch) = corrs                                         !! Record correlations to storage
 
                 !! Write progress report:
                 tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                              !! Current time
-                write(unit=epoch_str, fmt='(i16)') epoch
-                write(unit=tau_str, fmt='(f16.3)') tau
-                write(unit=energy_str, fmt='(f16.3)') energy
-                write(unit=stderr_str, fmt='(f16.3)') stderr
-                outstr = '    Epoch '//trim(adjustl(epoch_str))//': E[ψ(α(τ='//trim(adjustl(tau_str))//'))] = ' &
-                              //trim(adjustl(energy_str))//' ± '//trim(adjustl(stderr_str))
-                call echo(string=outstr, file_name=outfile, append=.true.); write(*,'(a)') outstr
+                write(*,'(a)') '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau,3)//'))] = ' &
+                                    //str(energy,3)//' ± '//str(stderr,3)
 
 				if ( ieee_is_nan(energy) ) error stop 'Numerical instability... terminating'       !! Error termination
 				sync images (*)                                                              !! Respond to other images
@@ -328,34 +321,38 @@ module nnqs
 			call self%stochastic_optimization(epoch=epoch, e_local=e_local, samples=samples)       !! Update parameters
 		end do learning
 
-        if ( this_image() == 1 ) then                                                              !! Do I/O on image 1
+        if ( this_image() == 1 ) then                                             !! Do finalization and I/O on image 1
             call system_clock(t2, count_rate=rate)                                                        !! Stop clock
             telapse = real((t2-t1), kind=rk)/rate                                 !! Total elapsed wall clock time in s
 
             acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)             !! Get ground state accuracy
 
-            write(unit=telapse_str, fmt='(f16.3)') telapse
-            write(unit=n_str, fmt='(i16)') n
-            write(unit=acc_str, fmt='(f16.6)') acc
-            write(unit=J_str, fmt='(f16.1)') ising_strengths(1)
-            write(unit=B_str, fmt='(f16.1)') ising_strengths(2)
+            write(*,'(a)') nl//'    Optimization time: '//str(telapse,3)//' seconds for n = '//str(n)//' spins.'// &
+                           nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy,3)//' ± '//str(stderr,3)// &
+                                    ' for J = '//str(ising_strengths(1),1)//', B = '//str(ising_strengths(2),1)// &
+                           nl//'    Ground state accuracy: '//str(acc,6)//nl
 
-            outstr = nl//'    Optimization time: '//trim(adjustl(telapse_str))//' seconds for &
-                              n = '//trim(adjustl(n_str))//' spins.'// &
-                     nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//trim(adjustl(energy_str))//' ± ' &
-                              //trim(adjustl(stderr_str))//' for J = '//trim(adjustl(J_str))//', &
-                              B = '//trim(adjustl(B_str))// &
-                     nl//'    Ground state accuracy: '//trim(adjustl(acc_str))//nl
-            call echo(string=outstr, file_name=outfile, append=.true.); write(*,'(a)') outstr
+            !! Write data to files:
+            if ( present(energies_file) ) then
+                if ( energies_file(len(energies_file)-2:len(energies_file)) == 'dat' ) then                  !! If .dat
+                    call datwrite(energies(1:epoch,:), energies_file)                       !! Write unformatted binary
+                else
+                    call csvwrite(energies(1:epoch,:), energies_file, header=['Energy', 'Error'])    !! Write text file
+                end if
+            end if
 
-            call csvwrite(energies(1:epoch,:), 'energies.csv')                                !! Write energies to file
-            call csvwrite(correlations(:,1:epoch), 'correlations.csv')                    !! Write correlations to file
+            if ( present(correlations_file) ) then
+                if ( correlations_file(len(correlations_file)-2:len(correlations_file)) == 'dat' ) then      !! If .dat
+                    call datwrite(correlations(:,1:epoch), correlations_file)               !! Write unformatted binary
+                else
+                    call csvwrite(correlations(:,1:epoch), correlations_file, header=['Epoch'])      !! Write text file
+                end if
+            end if
         end if
 	end subroutine optimize
 
     pure subroutine stochastic_optimization(self, epoch, e_local, samples)
         !! Procedure for updating weights and biases
-		use lapack95, only: ppsvx                             !! Routine for solving linear systems with packed storage
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
         integer, intent(in) :: epoch                                                                   !! Current epoch
         real(rk), contiguous, dimension(:), intent(in) :: e_local                                     !! Local energies
