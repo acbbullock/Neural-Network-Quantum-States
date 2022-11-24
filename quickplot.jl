@@ -1,10 +1,10 @@
 using CSV, DataFrames, StatsPlots
 
 function main()
-  energies = CSV.read("energies.csv", DataFrame, header=["energies", "errors"])
-  correlations = CSV.read("correlations.csv", DataFrame, header=false)
+  energies = CSV.read("energies.csv", DataFrame, header=1)
+  correlations = CSV.read("correlations.csv", DataFrame, header=true)
 
-  @df energies plot( :energies, leg=false, title="n = "*string(nrow(correlations)), xlabel="epoch", ylabel="⟨H⟩", 
+  @df energies plot( :Energy, leg=false, title="n = "*string(nrow(correlations)), xlabel="epoch", ylabel="⟨H⟩", 
                      dpi=300 )
   savefig("energies.png")
 
