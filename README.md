@@ -1,6 +1,6 @@
 # Learning Quantum States with Neural Networks
 
-Sections:
+## Contents
 
 1. [Introduction](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#introduction)
 2. [Restricted Boltzmann Machines](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#restricted-boltzmann-machines)
