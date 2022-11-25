@@ -4,7 +4,7 @@
 !!---------------------------------------------------------------------------------------------------------------------
 module nnqs
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
-    use io_mod, only: nl, str, csvwrite, datwrite                                                     !! I/O procedures
+    use io_mod, only: nl, str, ext_of, text_ext, binary_ext, to_text, to_binary, to_str !! I/O procedures and constants
     use lapack95, only: ppsvx                                 !! Routine for solving linear systems with packed storage
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public
@@ -25,12 +25,12 @@ module nnqs
 		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
 		contains
 			private
-			procedure, pass, public :: optimize !! Public facing procedure for optimizing wave-function to ground state
+			procedure, pass, public :: stochastic_optimization      !! Public facing procedure for finding ground state
             procedure, pass :: init                                     !! Procedure for initializing Boltzmann machine
 			procedure, pass :: sample_distribution             !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
             procedure, pass :: prob_ratio                     !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
             procedure, pass :: ising_energy                    !! Computes Ising local energy for given configuration s
-            procedure, pass :: stochastic_optimization                     !! Procedure for updating weights and biases
+            procedure, pass :: propagate                                   !! Procedure for updating weights and biases
 	end type RestrictedBoltzmannMachine
 
 	interface RestrictedBoltzmannMachine                                         !! Interface for structure constructor
@@ -252,8 +252,8 @@ module nnqs
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    subroutine optimize(self, ising_strengths, energies_file, correlations_file)
-		!! Top-level public procedure for optimizing wave-function to ground state
+    subroutine stochastic_optimization(self, ising_strengths, energies_file, correlations_file)
+		!! Top-level public procedure for evolving variational state to ground state
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
         real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
@@ -318,7 +318,7 @@ module nnqs
 
             if ( all(abs(corrs) > 0.99_rk) .or. (epoch == max_epochs) ) exit learning                !! Exit conditions
 
-			call self%stochastic_optimization(epoch=epoch, e_local=e_local, samples=samples)       !! Update parameters
+			call self%propagate(epoch=epoch, e_local=e_local, samples=samples)                     !! Update parameters
 		end do learning
 
         if ( this_image() == 1 ) then                                             !! Do finalization and I/O on image 1
@@ -334,25 +334,33 @@ module nnqs
 
             !! Write data to files:
             if ( present(energies_file) ) then
-                if ( energies_file(len(energies_file)-2:len(energies_file)) == 'dat' ) then                  !! If .dat
-                    call datwrite(energies(1:epoch,:), energies_file)                       !! Write unformatted binary
+                if ( any(text_ext == ext_of(energies_file)) ) then
+                    call to_text(energies(1:epoch,:), energies_file, header=['Energy', 'Error'])     !! Write text file
+                else if ( any(binary_ext == ext_of(energies_file)) ) then
+                    call to_binary(energies(1:epoch,:), energies_file)                      !! Write unformatted binary
                 else
-                    call csvwrite(energies(1:epoch,:), energies_file, header=['Energy', 'Error'])    !! Write text file
+                    write(*,'(a)') nl//'Unsupported file extension for file "'//energies_file//'". Skipping...'// &
+                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')// &
+                                   to_str(binary_ext, delim=' ')//nl
                 end if
             end if
 
             if ( present(correlations_file) ) then
-                if ( correlations_file(len(correlations_file)-2:len(correlations_file)) == 'dat' ) then      !! If .dat
-                    call datwrite(correlations(:,1:epoch), correlations_file)               !! Write unformatted binary
+                if ( any(text_ext == ext_of(correlations_file)) ) then
+                    call to_text(correlations(:,1:epoch), correlations_file, header=['Epoch'])       !! Write text file
+                else if ( any(binary_ext == ext_of(correlations_file)) ) then
+                    call to_binary(correlations(:,1:epoch), correlations_file)              !! Write unformatted binary
                 else
-                    call csvwrite(correlations(:,1:epoch), correlations_file, header=['Epoch'])      !! Write text file
+                    write(*,'(a)') nl//'Unsupported file extension for file "'//correlations_file//'". Skipping...'// &
+                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')// &
+                                   to_str(binary_ext, delim=' ')//nl
                 end if
             end if
         end if
-	end subroutine optimize
+	end subroutine stochastic_optimization
 
-    pure subroutine stochastic_optimization(self, epoch, e_local, samples)
-        !! Procedure for updating weights and biases
+    pure subroutine propagate(self, epoch, e_local, samples)
+        !! Procedure for updating parameters according to stochastic optimization update rule
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
         integer, intent(in) :: epoch                                                                   !! Current epoch
         real(rk), contiguous, dimension(:), intent(in) :: e_local                                     !! Local energies
@@ -499,7 +507,7 @@ module nnqs
 
 			self%w = self%w - dtau*x                                                                  !! Update weights
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	end subroutine stochastic_optimization
+	end subroutine propagate
 
 	!! Supplementary Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
