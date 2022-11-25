@@ -1,7 +1,7 @@
 test
 build
-correlations.csv
-energies.csv
+*.csv
+*.dat
 *.png
 *.gif
 todo.md
