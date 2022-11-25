@@ -98,14 +98,16 @@ module io_mod
             character(len=*), intent(in), optional :: header
         end subroutine to_text_1dr32
 
-        module impure subroutine to_text_2dr64(x, file_name, header)
+        module impure subroutine to_text_2dr64(x, file_name, delim, header)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
             character(len=*), contiguous, dimension(:), intent(in), optional :: header
         end subroutine to_text_2dr64
-        module impure subroutine to_text_2dr32(x, file_name, header)
+        module impure subroutine to_text_2dr32(x, file_name, delim, header)
             real(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
             character(len=*), contiguous, dimension(:), intent(in), optional :: header
         end subroutine to_text_2dr32
 
@@ -130,24 +132,28 @@ module io_mod
             character(len=*), intent(in), optional :: header
         end subroutine to_text_1di8
 
-        module impure subroutine to_text_2di64(x, file_name, header)
+        module impure subroutine to_text_2di64(x, file_name, delim, header)
             integer(int64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
             character(len=*), contiguous, dimension(:), intent(in), optional :: header
         end subroutine to_text_2di64
-        module impure subroutine to_text_2di32(x, file_name, header)
+        module impure subroutine to_text_2di32(x, file_name, delim, header)
             integer(int32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
             character(len=*), contiguous, dimension(:), intent(in), optional :: header
         end subroutine to_text_2di32
-        module impure subroutine to_text_2di16(x, file_name, header)
+        module impure subroutine to_text_2di16(x, file_name, delim, header)
             integer(int16), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
             character(len=*), contiguous, dimension(:), intent(in), optional :: header
         end subroutine to_text_2di16
-        module impure subroutine to_text_2di8(x, file_name, header)
+        module impure subroutine to_text_2di8(x, file_name, delim, header)
             integer(int8), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
             character(len=*), contiguous, dimension(:), intent(in), optional :: header
         end subroutine to_text_2di8
     end interface
@@ -193,6 +199,47 @@ module io_mod
             integer(int8), intent(in) :: number
             character(len=:), allocatable :: number_str
         end function str_i8
+    end interface
+
+    !! stringvar = to_str(x=, delim='') where rank(x)=1 and kind(x)=char,r64,r32,i64,i32,i16,i8
+    interface to_str                                                                               !! Submodule text_io
+        module pure function to_str_charvec(x, delim) result(x_str)
+            character(len=*), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_charvec
+
+        module pure function to_str_1dr64(x, delim) result(x_str)
+            real(real64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_1dr64
+        module pure function to_str_1dr32(x, delim) result(x_str)
+            real(real32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_1dr32
+
+        module pure function to_str_1di64(x, delim) result(x_str)
+            integer(int64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_1di64
+        module pure function to_str_1di32(x, delim) result(x_str)
+            integer(int32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_1di32
+        module pure function to_str_1di16(x, delim) result(x_str)
+            integer(int16), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_1di16
+        module pure function to_str_1di8(x, delim) result(x_str)
+            integer(int8), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_1di8
     end interface
 
     !! call from_text(file_name='', into=)
@@ -504,19 +551,6 @@ module io_mod
         ext = trim(adjustl(file_name(i+1:l)))
     end function ext_of
 
-    pure function to_str(x, delim) result(x_str)
-        character(len=*), dimension(:), intent(in) :: x
-        character(len=*), intent(in) :: delim
-        character(len=:), allocatable :: x_str
-
-        integer :: i
-
-        x_str = ''
-        do i = 1, size(x)
-            x_str = x_str//trim(adjustl(x(i)))//delim
-        end do
-    end function to_str
-
 end module io_mod
 
 submodule (io_mod) debugging
@@ -723,6 +757,7 @@ submodule (io_mod) text_io
     module procedure to_text_2dr64
         logical exists
         integer file_unit, i, j
+        character(len=:), allocatable :: delim_
 
         if ( .not. any(text_ext == ext_of(file_name)) ) then
             error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
@@ -741,36 +776,30 @@ submodule (io_mod) text_io
                   action='write', access='sequential', position='rewind' )
         end if
 
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
         if ( present(header) ) then
             if ( size(header) == 1 ) then
                 do j = lbound(x, dim=2), ubound(x, dim=2)
                     if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//' '//str(j)//','
+                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
                     else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//' '//str(j)
+                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
                     end if
                 end do
             else if ( size(header) == size(x, dim=2) ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(j)))//','
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(j)))
-                    end if
-                end do
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
             else
                 write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
             end if
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                if ( j < ubound(x, dim=2) ) then
-                    write(unit=file_unit, fmt='(a)', advance='no') str(x(i,j), d=15)//','
-                else
-                    write(unit=file_unit, fmt='(a)') str(x(i,j), d=15)
-                end if
-            end do
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
         end do
 
         close(file_unit)
@@ -778,6 +807,7 @@ submodule (io_mod) text_io
     module procedure to_text_2dr32
         logical exists
         integer file_unit, i, j
+        character(len=:), allocatable :: delim_
 
         if ( .not. any(text_ext == ext_of(file_name)) ) then
             error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
@@ -796,36 +826,30 @@ submodule (io_mod) text_io
                   action='write', access='sequential', position='rewind' )
         end if
 
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
         if ( present(header) ) then
             if ( size(header) == 1 ) then
                 do j = lbound(x, dim=2), ubound(x, dim=2)
                     if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//' '//str(j)//','
+                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
                     else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//' '//str(j)
+                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
                     end if
                 end do
             else if ( size(header) == size(x, dim=2) ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(j)))//','
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(j)))
-                    end if
-                end do
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
             else
                 write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
             end if
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                if ( j < ubound(x, dim=2) ) then
-                    write(unit=file_unit, fmt='(a)', advance='no') str(x(i,j), d=7)//','
-                else
-                    write(unit=file_unit, fmt='(a)') str(x(i,j), d=7)
-                end if
-            end do
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
         end do
 
         close(file_unit)
@@ -959,6 +983,7 @@ submodule (io_mod) text_io
     module procedure to_text_2di64
         logical exists
         integer file_unit, i, j
+        character(len=:), allocatable :: delim_
 
         if ( .not. any(text_ext == ext_of(file_name)) ) then
             error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
@@ -977,36 +1002,30 @@ submodule (io_mod) text_io
                   action='write', access='sequential', position='rewind' )
         end if
 
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
         if ( present(header) ) then
             if ( size(header) == 1 ) then
                 do j = lbound(x, dim=2), ubound(x, dim=2)
                     if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//' '//str(j)//','
+                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
                     else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//' '//str(j)
+                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
                     end if
                 end do
             else if ( size(header) == size(x, dim=2) ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(j)))//','
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(j)))
-                    end if
-                end do
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
             else
                 write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
             end if
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                if ( j < ubound(x, dim=2) ) then
-                    write(unit=file_unit, fmt='(a)', advance='no') str(x(i,j))//','
-                else
-                    write(unit=file_unit, fmt='(a)') str(x(i,j))
-                end if
-            end do
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
         end do
 
         close(file_unit)
@@ -1014,6 +1033,7 @@ submodule (io_mod) text_io
     module procedure to_text_2di32
         logical exists
         integer file_unit, i, j
+        character(len=:), allocatable :: delim_
 
         if ( .not. any(text_ext == ext_of(file_name)) ) then
             error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
@@ -1032,36 +1052,30 @@ submodule (io_mod) text_io
                   action='write', access='sequential', position='rewind' )
         end if
 
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
         if ( present(header) ) then
             if ( size(header) == 1 ) then
                 do j = lbound(x, dim=2), ubound(x, dim=2)
                     if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//' '//str(j)//','
+                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
                     else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//' '//str(j)
+                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
                     end if
                 end do
             else if ( size(header) == size(x, dim=2) ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(j)))//','
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(j)))
-                    end if
-                end do
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
             else
                 write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
             end if
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                if ( j < ubound(x, dim=2) ) then
-                    write(unit=file_unit, fmt='(a)', advance='no') str(x(i,j))//','
-                else
-                    write(unit=file_unit, fmt='(a)') str(x(i,j))
-                end if
-            end do
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
         end do
 
         close(file_unit)
@@ -1069,6 +1083,7 @@ submodule (io_mod) text_io
     module procedure to_text_2di16
         logical exists
         integer file_unit, i, j
+        character(len=:), allocatable :: delim_
 
         if ( .not. any(text_ext == ext_of(file_name)) ) then
             error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
@@ -1087,36 +1102,30 @@ submodule (io_mod) text_io
                   action='write', access='sequential', position='rewind' )
         end if
 
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
         if ( present(header) ) then
             if ( size(header) == 1 ) then
                 do j = lbound(x, dim=2), ubound(x, dim=2)
                     if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//' '//str(j)//','
+                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
                     else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//' '//str(j)
+                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
                     end if
                 end do
             else if ( size(header) == size(x, dim=2) ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(j)))//','
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(j)))
-                    end if
-                end do
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
             else
                 write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
             end if
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                if ( j < ubound(x, dim=2) ) then
-                    write(unit=file_unit, fmt='(a)', advance='no') str(x(i,j))//','
-                else
-                    write(unit=file_unit, fmt='(a)') str(x(i,j))
-                end if
-            end do
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
         end do
 
         close(file_unit)
@@ -1124,6 +1133,7 @@ submodule (io_mod) text_io
     module procedure to_text_2di8
         logical exists
         integer file_unit, i, j
+        character(len=:), allocatable :: delim_
 
         if ( .not. any(text_ext == ext_of(file_name)) ) then
             error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
@@ -1142,36 +1152,30 @@ submodule (io_mod) text_io
                   action='write', access='sequential', position='rewind' )
         end if
 
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
         if ( present(header) ) then
             if ( size(header) == 1 ) then
                 do j = lbound(x, dim=2), ubound(x, dim=2)
                     if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//' '//str(j)//','
+                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
                     else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//' '//str(j)
+                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
                     end if
                 end do
             else if ( size(header) == size(x, dim=2) ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(j)))//','
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(j)))
-                    end if
-                end do
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
             else
                 write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
             end if
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            do j = lbound(x, dim=2), ubound(x, dim=2)
-                if ( j < ubound(x, dim=2) ) then
-                    write(unit=file_unit, fmt='(a)', advance='no') str(x(i,j))//','
-                else
-                    write(unit=file_unit, fmt='(a)') str(x(i,j))
-                end if
-            end do
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
         end do
 
         close(file_unit)
@@ -1312,6 +1316,72 @@ submodule (io_mod) text_io
         write(unit=str_tmp, fmt='(i4)') number
         number_str = trim(adjustl(str_tmp))
     end procedure str_i8
+
+    module procedure to_str_charvec
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//trim(adjustl(x(i)))//delim
+        end do
+        x_str = x_str//trim(adjustl(x(size(x))))
+    end procedure to_str_charvec
+
+    module procedure to_str_1dr64
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i), d=15)//delim
+        end do
+        x_str = x_str//str(x(size(x)), d=15)
+    end procedure to_str_1dr64
+    module procedure to_str_1dr32
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i), d=7)//delim
+        end do
+        x_str = x_str//str(x(size(x)), d=7)
+    end procedure to_str_1dr32
+
+    module procedure to_str_1di64
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i))//delim
+        end do
+        x_str = x_str//str(x(size(x)))
+    end procedure to_str_1di64
+    module procedure to_str_1di32
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i))//delim
+        end do
+        x_str = x_str//str(x(size(x)))
+    end procedure to_str_1di32
+    module procedure to_str_1di16
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i))//delim
+        end do
+        x_str = x_str//str(x(size(x)))
+    end procedure to_str_1di16
+    module procedure to_str_1di8
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i))//delim
+        end do
+        x_str = x_str//str(x(size(x)))
+    end procedure to_str_1di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure from_text_1dr64
