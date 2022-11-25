@@ -21,10 +21,10 @@ program main
 
     psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                            !! Create instance
 
-    call psi%optimize( ising_strengths=ising_strengths, &                                                !! Input [J,B]
-                       energies_file='energies.csv', &                                        !! Output energies to csv
-                       correlations_file='correlations.csv' )                             !! Output correlations to csv
+    call psi%stochastic_optimization( ising_strengths=ising_strengths, &                                 !! Input [J,B]
+                                      energies_file='energies.csv', &                         !! Output energies to csv
+                                      correlations_file='correlations.csv' )              !! Output correlations to csv
 
-    !! Note file outputs are optional, .dat binary output also supported, and any text file format is supported.
+    !! Note file outputs are optional, many text and binary file extensions also supported.
 
 end program main
