@@ -340,7 +340,7 @@ module nnqs
                     call to_binary(energies(1:epoch,:), energies_file)                      !! Write unformatted binary
                 else
                     write(*,'(a)') nl//'Unsupported file extension for file "'//energies_file//'". Skipping...'// &
-                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')// &
+                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')//' '// &
                                    to_str(binary_ext, delim=' ')//nl
                 end if
             end if
@@ -352,7 +352,7 @@ module nnqs
                     call to_binary(correlations(:,1:epoch), correlations_file)              !! Write unformatted binary
                 else
                     write(*,'(a)') nl//'Unsupported file extension for file "'//correlations_file//'". Skipping...'// &
-                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')// &
+                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')//' '// &
                                    to_str(binary_ext, delim=' ')//nl
                 end if
             end if
