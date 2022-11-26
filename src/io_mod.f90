@@ -1,6 +1,8 @@
 !!---------------------------------------------------------------------------------------------------------------------
-!!  This module file contains common i/o operations for arrays of real and integer type. Common operations include
-!!  printing arrays to stdout with a specified format, reading/writing arrays from/to csv files and binary files.
+!!  This module file contains common i/o procedures for arrays of real and integer type. Common operations include
+!!  printing arrays to stdout with a specified format, reading/writing arrays from/to text files and binary files.
+!!  Convenience functions for number -> string conversion are provided as well as vector -> string conversion with
+!!  a specified delimiter.
 !!---------------------------------------------------------------------------------------------------------------------
 module io_mod
     use, intrinsic :: iso_fortran_env, only: real64, real32, int64, int32, int16, int8, input_unit, output_unit
@@ -8,9 +10,9 @@ module io_mod
     private
 
     !! Public APIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public :: aprint, to_text, from_text, to_binary, from_binary, to_str                                   !! Array I/O
+    public :: aprint, to_file, from_file, to_str                                                           !! Array I/O
     public :: ext_of, echo, str                                                                           !! String I/O
-    public :: nl, text_ext, binary_ext                                                                     !! Constants
+    public :: nl                                                                                           !! Constants
 
     !! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     character(len=1), parameter :: nl = new_line('')                                              !! New line character
@@ -19,8 +21,8 @@ module io_mod
     character(len=*), dimension(*), parameter :: binary_ext = ['dat', 'bin']
 
     !! call aprint(x=, fmt=)
-    !! rank(x) = 1,2 and kind(x) = r64,r32,i64,i32,i16,i8, & character(len=*)
-    interface aprint                                                                             !! Submodule debugging
+    !! rank(x) = 1,2 and kind(x) = r64,r32,i64,i32,i16,i8,char
+    interface aprint                                                                        !! Submodule array_printing
         module impure subroutine aprint_1dr64(x, fmt)
             real(real64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: fmt
@@ -84,94 +86,9 @@ module io_mod
         end subroutine aprint_2dchar
     end interface
 
-    !! call to_text(x=, file_name='')
-    !! rank(x) = 1,2 and kind(x) = r64,r32,i32
-    interface to_text                                                                              !! Submodule text_io
-        module impure subroutine to_text_1dr64(x, file_name, header)
-            real(real64), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: header
-        end subroutine to_text_1dr64
-        module impure subroutine to_text_1dr32(x, file_name, header)
-            real(real32), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: header
-        end subroutine to_text_1dr32
-
-        module impure subroutine to_text_2dr64(x, file_name, delim, header)
-            real(real64), dimension(:,:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
-            character(len=*), contiguous, dimension(:), intent(in), optional :: header
-        end subroutine to_text_2dr64
-        module impure subroutine to_text_2dr32(x, file_name, delim, header)
-            real(real32), dimension(:,:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
-            character(len=*), contiguous, dimension(:), intent(in), optional :: header
-        end subroutine to_text_2dr32
-
-        module impure subroutine to_text_1di64(x, file_name, header)
-            integer(int64), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: header
-        end subroutine to_text_1di64
-        module impure subroutine to_text_1di32(x, file_name, header)
-            integer(int32), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: header
-        end subroutine to_text_1di32
-        module impure subroutine to_text_1di16(x, file_name, header)
-            integer(int16), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: header
-        end subroutine to_text_1di16
-        module impure subroutine to_text_1di8(x, file_name, header)
-            integer(int8), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: header
-        end subroutine to_text_1di8
-
-        module impure subroutine to_text_2di64(x, file_name, delim, header)
-            integer(int64), dimension(:,:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
-            character(len=*), contiguous, dimension(:), intent(in), optional :: header
-        end subroutine to_text_2di64
-        module impure subroutine to_text_2di32(x, file_name, delim, header)
-            integer(int32), dimension(:,:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
-            character(len=*), contiguous, dimension(:), intent(in), optional :: header
-        end subroutine to_text_2di32
-        module impure subroutine to_text_2di16(x, file_name, delim, header)
-            integer(int16), dimension(:,:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
-            character(len=*), contiguous, dimension(:), intent(in), optional :: header
-        end subroutine to_text_2di16
-        module impure subroutine to_text_2di8(x, file_name, delim, header)
-            integer(int8), dimension(:,:), intent(in) :: x
-            character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
-            character(len=*), contiguous, dimension(:), intent(in), optional :: header
-        end subroutine to_text_2di8
-    end interface
-
-    !! call echo(string=, file_name='')
-    !! type(string) = character(len=*)
-    !! append affects only existing files - file will be replaced unless append=.true.
-    interface echo                                                                                 !! Submodule text_io
-        module impure subroutine echo_string(string, file_name, append)
-            character(len=*), intent(in) :: string
-            character(len=*), intent(in) :: file_name
-            logical, optional, intent(in) :: append
-        end subroutine echo_string
-    end interface
-
     !! stringvar = str(number=, d=) for kind(number)=r64,r32 and kind(d)=i32 where d is the number of decimals to use
     !! stringvar = str(number=) where kind(number)=i64,i32,i16,i8
-    interface str                                                                                  !! Submodule text_io
+    interface str                                                                              !! Submodule internal_io
         module pure function str_r64(number, d) result(number_str)
             real(real64), intent(in) :: number
             integer, intent(in) :: d
@@ -202,7 +119,7 @@ module io_mod
     end interface
 
     !! stringvar = to_str(x=, delim='') where rank(x)=1 and kind(x)=char,r64,r32,i64,i32,i16,i8
-    interface to_str                                                                               !! Submodule text_io
+    interface to_str                                                                           !! Submodule internal_io
         module pure function to_str_charvec(x, delim) result(x_str)
             character(len=*), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: delim
@@ -242,8 +159,348 @@ module io_mod
         end function to_str_1di8
     end interface
 
-    !! call from_text(file_name='', into=)
-    !! rank(into) = 1,2 for kind(into) = r64,r32,i32
+    !! call to_file(x=, file_name='', header=['']) where rank(x)=1 and kind(x)=r64,r32,i64,i32,i16,i8
+    !! call to_file(x=, file_name='', delim='', header=['']) where rank(x)=2 and kind(x)=r64,r32,i64,i32,i16,i8
+    !! call to_file(x=, file_name='') where rank(x)=3 and kind(x)=r64,r32,i64,i32,i16,i8
+    !! call to_file(x=, file_name='') where rank(x)=4,5 and kind(x)=r64,r32
+    interface to_file                                                                              !! Submodule file_io
+        module impure subroutine to_file_1dr64(x, file_name, header)
+            real(real64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_1dr64
+        module impure subroutine to_file_1dr32(x, file_name, header)
+            real(real32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_1dr32
+
+        module impure subroutine to_file_2dr64(x, file_name, delim, header)
+            real(real64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_2dr64
+        module impure subroutine to_file_2dr32(x, file_name, delim, header)
+            real(real32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_2dr32
+
+        module impure subroutine to_file_3dr64(x, file_name)
+            real(real64), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3dr64
+        module impure subroutine to_file_3dr32(x, file_name)
+            real(real32), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3dr32
+
+        module impure subroutine to_file_4dr64(x, file_name)
+            real(real64), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_4dr64
+        module impure subroutine to_file_4dr32(x, file_name)
+            real(real32), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_4dr32
+
+        module impure subroutine to_file_5dr64(x, file_name)
+            real(real64), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_5dr64
+        module impure subroutine to_file_5dr32(x, file_name)
+            real(real32), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_5dr32
+
+        module impure subroutine to_file_1di64(x, file_name, header)
+            integer(int64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_1di64
+        module impure subroutine to_file_1di32(x, file_name, header)
+            integer(int32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_1di32
+        module impure subroutine to_file_1di16(x, file_name, header)
+            integer(int16), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_1di16
+        module impure subroutine to_file_1di8(x, file_name, header)
+            integer(int8), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_1di8
+
+        module impure subroutine to_file_2di64(x, file_name, delim, header)
+            integer(int64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_2di64
+        module impure subroutine to_file_2di32(x, file_name, delim, header)
+            integer(int32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_2di32
+        module impure subroutine to_file_2di16(x, file_name, delim, header)
+            integer(int16), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_2di16
+        module impure subroutine to_file_2di8(x, file_name, delim, header)
+            integer(int8), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_file_2di8
+
+        module impure subroutine to_file_3di64(x, file_name)
+            integer(int64), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3di64
+        module impure subroutine to_file_3di32(x, file_name)
+            integer(int32), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3di32
+        module impure subroutine to_file_3di16(x, file_name)
+            integer(int16), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3di16
+        module impure subroutine to_file_3di8(x, file_name)
+            integer(int8), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3di8
+    end interface
+
+    !! call from_file(file_name='', into=, header=, data_shape=[])
+    !!   where rank(into)=1,2 and kind(into)=r64,r32,i64,i32,i16,i8
+    !! call from_file(file_name='', into=, data_shape=[]) where rank(into)=3 and kind(into)=r64,r32,i64,i32,i16,i8
+    !! call from_file(file_name='', into=, data_shape=[]) where rank(into)=4,5 and kind(into)=r64,r32
+    interface from_file                                                                            !! Submodule file_io
+        module impure subroutine from_file_1dr64(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(1)
+        end subroutine from_file_1dr64
+        module impure subroutine from_file_1dr32(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(1)
+        end subroutine from_file_1dr32
+
+        module impure subroutine from_file_2dr64(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(2)
+        end subroutine from_file_2dr64
+        module impure subroutine from_file_2dr32(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(2)
+        end subroutine from_file_2dr32
+
+        module impure subroutine from_file_3dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(3)
+        end subroutine from_file_3dr64
+        module impure subroutine from_file_3dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(3)
+        end subroutine from_file_3dr32
+
+        module impure subroutine from_file_4dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(4)
+        end subroutine from_file_4dr64
+        module impure subroutine from_file_4dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(4)
+        end subroutine from_file_4dr32
+
+        module impure subroutine from_file_5dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(5)
+        end subroutine from_file_5dr64
+        module impure subroutine from_file_5dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(5)
+        end subroutine from_file_5dr32
+
+        module impure subroutine from_file_1di64(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(1)
+        end subroutine from_file_1di64
+        module impure subroutine from_file_1di32(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(1)
+        end subroutine from_file_1di32
+        module impure subroutine from_file_1di16(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(1)
+        end subroutine from_file_1di16
+        module impure subroutine from_file_1di8(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(1)
+        end subroutine from_file_1di8
+
+        module impure subroutine from_file_2di64(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(2)
+        end subroutine from_file_2di64
+        module impure subroutine from_file_2di32(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(2)
+        end subroutine from_file_2di32
+        module impure subroutine from_file_2di16(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(2)
+        end subroutine from_file_2di16
+        module impure subroutine from_file_2di8(file_name, into, header, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            integer, intent(in), optional :: data_shape(2)
+        end subroutine from_file_2di8
+
+        module impure subroutine from_file_3di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(3)
+        end subroutine from_file_3di64
+        module impure subroutine from_file_3di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(3)
+        end subroutine from_file_3di32
+        module impure subroutine from_file_3di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(3)
+        end subroutine from_file_3di16
+        module impure subroutine from_file_3di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, intent(in) :: data_shape(3)
+        end subroutine from_file_3di8
+    end interface
+
+    !! call echo(string=, file_name='')
+    !! type(string) = character(len=*)
+    !! append affects only existing files - file will be replaced unless append=.true.
+    interface echo                                                                                 !! Submodule text_io
+        module impure subroutine echo_string(string, file_name, append)
+            character(len=*), intent(in) :: string
+            character(len=*), intent(in) :: file_name
+            logical, optional, intent(in) :: append
+        end subroutine echo_string
+    end interface
+
+    !! call to_text(x=, file_name='', header=['']) where rank(x)=1 and kind(x)=r64,r32,i64,i32,i16,i8
+    !! call to_text(x=, file_name='', delim='', header=['']) where rank(x)=2 and kind(x)=r64,r32,i64,i32,i16,i8
+    interface to_text                                                                              !! Submodule text_io
+        module impure subroutine to_text_1dr64(x, file_name, header)
+            real(real64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_1dr64
+        module impure subroutine to_text_1dr32(x, file_name, header)
+            real(real32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_1dr32
+
+        module impure subroutine to_text_2dr64(x, file_name, delim, header)
+            real(real64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_2dr64
+        module impure subroutine to_text_2dr32(x, file_name, delim, header)
+            real(real32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_2dr32
+
+        module impure subroutine to_text_1di64(x, file_name, header)
+            integer(int64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_1di64
+        module impure subroutine to_text_1di32(x, file_name, header)
+            integer(int32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_1di32
+        module impure subroutine to_text_1di16(x, file_name, header)
+            integer(int16), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_1di16
+        module impure subroutine to_text_1di8(x, file_name, header)
+            integer(int8), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_1di8
+
+        module impure subroutine to_text_2di64(x, file_name, delim, header)
+            integer(int64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_2di64
+        module impure subroutine to_text_2di32(x, file_name, delim, header)
+            integer(int32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_2di32
+        module impure subroutine to_text_2di16(x, file_name, delim, header)
+            integer(int16), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_2di16
+        module impure subroutine to_text_2di8(x, file_name, delim, header)
+            integer(int8), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), intent(in), optional :: delim
+            character(len=*), contiguous, dimension(:), intent(in), optional :: header
+        end subroutine to_text_2di8
+    end interface
+
+    !! call from_text(file_name='', into=, header=) where rank(into)=1,2 and kind(into)=r64,r32,i64,i32,i16,i8
     interface from_text                                                                            !! Submodule text_io
         module impure subroutine from_text_1dr64(file_name, into, header)
             character(len=*), intent(in) :: file_name
@@ -419,119 +676,119 @@ module io_mod
         module impure subroutine from_binary_1dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(1)
+            integer, intent(in) :: data_shape(1)
         end subroutine from_binary_1dr64
         module impure subroutine from_binary_1dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(1)
+            integer, intent(in) :: data_shape(1)
         end subroutine from_binary_1dr32
 
         module impure subroutine from_binary_2dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(2)
+            integer, intent(in) :: data_shape(2)
         end subroutine from_binary_2dr64
         module impure subroutine from_binary_2dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(2)
+            integer, intent(in) :: data_shape(2)
         end subroutine from_binary_2dr32
 
         module impure subroutine from_binary_3dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(3)
+            integer, intent(in) :: data_shape(3)
         end subroutine from_binary_3dr64
         module impure subroutine from_binary_3dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(3)
+            integer, intent(in) :: data_shape(3)
         end subroutine from_binary_3dr32
 
         module impure subroutine from_binary_4dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(4)
+            integer, intent(in) :: data_shape(4)
         end subroutine from_binary_4dr64
         module impure subroutine from_binary_4dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:,:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(4)
+            integer, intent(in) :: data_shape(4)
         end subroutine from_binary_4dr32
 
         module impure subroutine from_binary_5dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(5)
+            integer, intent(in) :: data_shape(5)
         end subroutine from_binary_5dr64
         module impure subroutine from_binary_5dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:,:,:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(5)
+            integer, intent(in) :: data_shape(5)
         end subroutine from_binary_5dr32
 
         module impure subroutine from_binary_1di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(1)
+            integer, intent(in) :: data_shape(1)
         end subroutine from_binary_1di64
         module impure subroutine from_binary_1di32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(1)
+            integer, intent(in) :: data_shape(1)
         end subroutine from_binary_1di32
         module impure subroutine from_binary_1di16(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(1)
+            integer, intent(in) :: data_shape(1)
         end subroutine from_binary_1di16
         module impure subroutine from_binary_1di8(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(1)
+            integer, intent(in) :: data_shape(1)
         end subroutine from_binary_1di8
 
         module impure subroutine from_binary_2di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(2)
+            integer, intent(in) :: data_shape(2)
         end subroutine from_binary_2di64
         module impure subroutine from_binary_2di32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(2)
+            integer, intent(in) :: data_shape(2)
         end subroutine from_binary_2di32
         module impure subroutine from_binary_2di16(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(2)
+            integer, intent(in) :: data_shape(2)
         end subroutine from_binary_2di16
         module impure subroutine from_binary_2di8(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(2)
+            integer, intent(in) :: data_shape(2)
         end subroutine from_binary_2di8
 
         module impure subroutine from_binary_3di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(3)
+            integer, intent(in) :: data_shape(3)
         end subroutine from_binary_3di64
         module impure subroutine from_binary_3di32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(3)
+            integer, intent(in) :: data_shape(3)
         end subroutine from_binary_3di32
         module impure subroutine from_binary_3di16(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(3)
+            integer, intent(in) :: data_shape(3)
         end subroutine from_binary_3di16
         module impure subroutine from_binary_3di8(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:,:,:), intent(out) :: into
-            integer(int32), intent(in) :: data_shape(3)
+            integer, intent(in) :: data_shape(3)
         end subroutine from_binary_3di8
     end interface
 
@@ -553,10 +810,10 @@ module io_mod
 
 end module io_mod
 
-submodule (io_mod) debugging
+submodule (io_mod) array_printing
     contains
     module procedure aprint_1dr64
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -565,7 +822,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_1dr64
     module procedure aprint_1dr32
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -575,7 +832,7 @@ submodule (io_mod) debugging
     end procedure aprint_1dr32
 
     module procedure aprint_2dr64
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -584,7 +841,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_2dr64
     module procedure aprint_2dr32
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -594,7 +851,7 @@ submodule (io_mod) debugging
     end procedure aprint_2dr32
 
     module procedure aprint_1di64
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -603,7 +860,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_1di64
     module procedure aprint_1di32
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -612,7 +869,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_1di32
     module procedure aprint_1di16
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -621,7 +878,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_1di16
     module procedure aprint_1di8
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -631,7 +888,7 @@ submodule (io_mod) debugging
     end procedure aprint_1di8
 
     module procedure aprint_2di64
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -640,7 +897,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_2di64
     module procedure aprint_2di32
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -649,7 +906,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_2di32
     module procedure aprint_2di16
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -658,7 +915,7 @@ submodule (io_mod) debugging
         write(*,*)
     end procedure aprint_2di16
     module procedure aprint_2di8
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -668,7 +925,7 @@ submodule (io_mod) debugging
     end procedure aprint_2di8
 
     module procedure aprint_1dchar
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -678,7 +935,7 @@ submodule (io_mod) debugging
     end procedure aprint_1dchar
 
     module procedure aprint_2dchar
-        integer i
+        integer :: i
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
             write(*, fmt='(a)', advance='no') '    '
@@ -686,527 +943,10 @@ submodule (io_mod) debugging
         end do
         write(*,*)
     end procedure aprint_2dchar
-end submodule debugging
+end submodule array_printing
 
-submodule (io_mod) text_io
+submodule (io_mod) internal_io
     contains
-    !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    module procedure to_text_1dr64
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(header) ) then
-            write(unit=file_unit, fmt='(a)') header
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i), d=15)
-        end do
-
-        close(file_unit)
-    end procedure to_text_1dr64
-    module procedure to_text_1dr32
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(header) ) then
-            write(unit=file_unit, fmt='(a)') header
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i), d=7)
-        end do
-
-        close(file_unit)
-    end procedure to_text_1dr32
-
-    module procedure to_text_2dr64
-        logical exists
-        integer file_unit, i, j
-        character(len=:), allocatable :: delim_
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(delim) ) then
-            delim_ = delim
-        else
-            delim_ = ','
-        end if
-
-        if ( present(header) ) then
-            if ( size(header) == 1 ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
-                    end if
-                end do
-            else if ( size(header) == size(x, dim=2) ) then
-                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
-            else
-                write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
-            end if
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
-        end do
-
-        close(file_unit)
-    end procedure to_text_2dr64
-    module procedure to_text_2dr32
-        logical exists
-        integer file_unit, i, j
-        character(len=:), allocatable :: delim_
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(delim) ) then
-            delim_ = delim
-        else
-            delim_ = ','
-        end if
-
-        if ( present(header) ) then
-            if ( size(header) == 1 ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
-                    end if
-                end do
-            else if ( size(header) == size(x, dim=2) ) then
-                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
-            else
-                write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
-            end if
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
-        end do
-
-        close(file_unit)
-    end procedure to_text_2dr32
-
-    module procedure to_text_1di64
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(header) ) then
-            write(unit=file_unit, fmt='(a)') header
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
-
-        close(file_unit)
-    end procedure to_text_1di64
-    module procedure to_text_1di32
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(header) ) then
-            write(unit=file_unit, fmt='(a)') header
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
-
-        close(file_unit)
-    end procedure to_text_1di32
-    module procedure to_text_1di16
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(header) ) then
-            write(unit=file_unit, fmt='(a)') header
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
-
-        close(file_unit)
-    end procedure to_text_1di16
-    module procedure to_text_1di8
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(header) ) then
-            write(unit=file_unit, fmt='(a)') header
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
-
-        close(file_unit)
-    end procedure to_text_1di8
-
-    module procedure to_text_2di64
-        logical exists
-        integer file_unit, i, j
-        character(len=:), allocatable :: delim_
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(delim) ) then
-            delim_ = delim
-        else
-            delim_ = ','
-        end if
-
-        if ( present(header) ) then
-            if ( size(header) == 1 ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
-                    end if
-                end do
-            else if ( size(header) == size(x, dim=2) ) then
-                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
-            else
-                write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
-            end if
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
-        end do
-
-        close(file_unit)
-    end procedure to_text_2di64
-    module procedure to_text_2di32
-        logical exists
-        integer file_unit, i, j
-        character(len=:), allocatable :: delim_
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(delim) ) then
-            delim_ = delim
-        else
-            delim_ = ','
-        end if
-
-        if ( present(header) ) then
-            if ( size(header) == 1 ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
-                    end if
-                end do
-            else if ( size(header) == size(x, dim=2) ) then
-                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
-            else
-                write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
-            end if
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
-        end do
-
-        close(file_unit)
-    end procedure to_text_2di32
-    module procedure to_text_2di16
-        logical exists
-        integer file_unit, i, j
-        character(len=:), allocatable :: delim_
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(delim) ) then
-            delim_ = delim
-        else
-            delim_ = ','
-        end if
-
-        if ( present(header) ) then
-            if ( size(header) == 1 ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
-                    end if
-                end do
-            else if ( size(header) == size(x, dim=2) ) then
-                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
-            else
-                write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
-            end if
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
-        end do
-
-        close(file_unit)
-    end procedure to_text_2di16
-    module procedure to_text_2di8
-        logical exists
-        integer file_unit, i, j
-        character(len=:), allocatable :: delim_
-
-        if ( .not. any(text_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_text.'// &
-                       nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-        end if
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        end if
-
-        if ( present(delim) ) then
-            delim_ = delim
-        else
-            delim_ = ','
-        end if
-
-        if ( present(header) ) then
-            if ( size(header) == 1 ) then
-                do j = lbound(x, dim=2), ubound(x, dim=2)
-                    if ( j < ubound(x, dim=2) ) then
-                        write(unit=file_unit, fmt='(a)', advance='no') trim(adjustl(header(1)))//str(j)//delim_
-                    else
-                        write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))//str(j)
-                    end if
-                end do
-            else if ( size(header) == size(x, dim=2) ) then
-                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
-            else
-                write(*,*) nl//'Header length mismatch... omitting header for file '//file_name//nl
-            end if
-        end if
-
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
-        end do
-
-        close(file_unit)
-    end procedure to_text_2di8
-
-    module procedure echo_string
-        logical exists
-        integer file_unit
-
-        inquire( file=file_name, exist=exists )
-
-        file_unit = output_unit
-
-        if ( .not. exists ) then
-            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
-                  action='write', access='sequential', position='rewind' )
-        else
-            if ( (.not. present(append)) .or. (.not. append) ) then
-                open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
-                      action='write', access='sequential', position='rewind' )
-            else if ( append ) then
-                open( newunit=file_unit, file=file_name, status='old', form='formatted', &
-                      action='write', access='sequential', position='append' )
-            end if
-        end if
-
-        write(unit=file_unit, fmt='(a)') string
-
-        close(file_unit)
-    end procedure echo_string
-
     module procedure str_r64
         real(real64) :: comparison_number
         integer :: i, max_decimals, decimals
@@ -1382,26 +1122,1389 @@ submodule (io_mod) text_io
         end do
         x_str = x_str//str(x(size(x)))
     end procedure to_str_1di8
+end submodule internal_io
+
+submodule (io_mod) file_io
+    contains
+    !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure to_file_1dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_1dr64
+    module procedure to_file_1dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_1dr32
+
+    module procedure to_file_2dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(delim) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, delim=delim, header=header)
+            else if ( present(delim) .and. (.not. present(header)) ) then
+                call to_text(x=x, file_name=file_name, delim=delim)
+            else if ( (.not. present(delim)) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delimiter not supported for file type "'//ext//'".'//nl
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_2dr64
+    module procedure to_file_2dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(delim) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, delim=delim, header=header)
+            else if ( present(delim) .and. (.not. present(header)) ) then
+                call to_text(x=x, file_name=file_name, delim=delim)
+            else if ( (.not. present(delim)) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delimiter not supported for file type "'//ext//'".'//nl
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_2dr32
+
+    module procedure to_file_3dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_3dr64
+    module procedure to_file_3dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_3dr32
+
+    module procedure to_file_4dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_4dr64
+    module procedure to_file_4dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_4dr32
+
+    module procedure to_file_5dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_5dr64
+    module procedure to_file_5dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_5dr32
+
+    module procedure to_file_1di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_1di64
+    module procedure to_file_1di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_1di32
+    module procedure to_file_1di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_1di16
+    module procedure to_file_1di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_1di8
+
+    module procedure to_file_2di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(delim) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, delim=delim, header=header)
+            else if ( present(delim) .and. (.not. present(header)) ) then
+                call to_text(x=x, file_name=file_name, delim=delim)
+            else if ( (.not. present(delim)) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delimiter not supported for file type "'//ext//'".'//nl
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_2di64
+    module procedure to_file_2di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(delim) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, delim=delim, header=header)
+            else if ( present(delim) .and. (.not. present(header)) ) then
+                call to_text(x=x, file_name=file_name, delim=delim)
+            else if ( (.not. present(delim)) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delimiter not supported for file type "'//ext//'".'//nl
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_2di32
+    module procedure to_file_2di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(delim) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, delim=delim, header=header)
+            else if ( present(delim) .and. (.not. present(header)) ) then
+                call to_text(x=x, file_name=file_name, delim=delim)
+            else if ( (.not. present(delim)) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delimiter not supported for file type "'//ext//'".'//nl
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_2di16
+    module procedure to_file_2di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(delim) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, delim=delim, header=header)
+            else if ( present(delim) .and. (.not. present(header)) ) then
+                call to_text(x=x, file_name=file_name, delim=delim)
+            else if ( (.not. present(delim)) .and. present(header) ) then
+                call to_text(x=x, file_name=file_name, header=header)
+            else
+                call to_text(x=x, file_name=file_name)
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delimiter not supported for file type "'//ext//'".'//nl
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'//nl
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_2di8
+
+    module procedure to_file_3di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_3di64
+    module procedure to_file_3di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_3di32
+    module procedure to_file_3di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_3di16
+    module procedure to_file_3di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure to_file_3di8
+
+    !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_file_1dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_1dr64
+    module procedure from_file_1dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_1dr32
+
+    module procedure from_file_2dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_2dr64
+    module procedure from_file_2dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_2dr32
+
+    module procedure from_file_3dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_3dr64
+    module procedure from_file_3dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_3dr32
+
+    module procedure from_file_4dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_4dr64
+    module procedure from_file_4dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_4dr32
+
+    module procedure from_file_5dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_5dr64
+    module procedure from_file_5dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_5dr32
+
+    module procedure from_file_1di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_1di64
+    module procedure from_file_1di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_1di32
+    module procedure from_file_1di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_1di16
+    module procedure from_file_1di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_1di8
+
+    module procedure from_file_2di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_2di64
+    module procedure from_file_2di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_2di32
+    module procedure from_file_2di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_2di16
+    module procedure from_file_2di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( present(data_shape) ) write(*,'(a)') nl//'WARNING: data_shape not supported for &
+                                                           file type "'//ext//'".'//nl
+            if ( present(header) ) then
+                call from_text(file_name=file_name, into=into, header=header)
+            else
+                error stop nl//'FATAL: header presence must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for &
+                                                       file type "'//ext//'".'//nl
+            if ( present(data_shape) ) then
+                call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+            else
+                error stop nl//'FATAL: data_shape must be specified when reading from file type "'//ext//'".'//nl
+            end if
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                       to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_2di8
+
+    module procedure from_file_3di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_3di64
+    module procedure from_file_3di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_3di32
+    module procedure from_file_3di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_3di16
+    module procedure from_file_3di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                       nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')//nl
+        end if
+    end procedure from_file_3di8
+end submodule file_io
+
+submodule (io_mod) text_io
+    contains
+    !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure echo_string
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            if ( (.not. present(append)) .or. (.not. append) ) then
+                open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                      action='write', access='sequential', position='rewind' )
+            else if ( append ) then
+                open( newunit=file_unit, file=file_name, status='old', form='formatted', &
+                      action='write', access='sequential', position='append' )
+            end if
+        end if
+
+        write(unit=file_unit, fmt='(a)') string
+
+        close(file_unit)
+    end procedure echo_string
+
+    module procedure to_text_1dr64
+        logical :: exists
+        integer :: file_unit, i
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') str(x(i), d=15)
+        end do
+
+        close(file_unit)
+    end procedure to_text_1dr64
+    module procedure to_text_1dr32
+        logical :: exists
+        integer :: file_unit, i
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') str(x(i), d=7)
+        end do
+
+        close(file_unit)
+    end procedure to_text_1dr32
+
+    module procedure to_text_2dr64
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: delim_, label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                label = trim(adjustl(header(1)))
+                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim_
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+            else if ( size(header) == size(x, dim=2) ) then
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//') or '// & 
+                                   '('//str(size(x, dim=2))//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dr64
+    module procedure to_text_2dr32
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: delim_, label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                label = trim(adjustl(header(1)))
+                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim_
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+            else if ( size(header) == size(x, dim=2) ) then
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//') or '// & 
+                                   '('//str(size(x, dim=2))//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dr32
+
+    module procedure to_text_1di64
+        logical :: exists
+        integer :: file_unit, i
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') str(x(i))
+        end do
+
+        close(file_unit)
+    end procedure to_text_1di64
+    module procedure to_text_1di32
+        logical :: exists
+        integer :: file_unit, i
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') str(x(i))
+        end do
+
+        close(file_unit)
+    end procedure to_text_1di32
+    module procedure to_text_1di16
+        logical :: exists
+        integer :: file_unit, i
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') str(x(i))
+        end do
+
+        close(file_unit)
+    end procedure to_text_1di16
+    module procedure to_text_1di8
+        logical :: exists
+        integer :: file_unit, i
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') str(x(i))
+        end do
+
+        close(file_unit)
+    end procedure to_text_1di8
+
+    module procedure to_text_2di64
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: delim_, label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                label = trim(adjustl(header(1)))
+                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim_
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+            else if ( size(header) == size(x, dim=2) ) then
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//') or '// & 
+                                   '('//str(size(x, dim=2))//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2di64
+    module procedure to_text_2di32
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: delim_, label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                label = trim(adjustl(header(1)))
+                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim_
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+            else if ( size(header) == size(x, dim=2) ) then
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//') or '// & 
+                                   '('//str(size(x, dim=2))//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2di32
+    module procedure to_text_2di16
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: delim_, label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                label = trim(adjustl(header(1)))
+                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim_
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+            else if ( size(header) == size(x, dim=2) ) then
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//') or '// & 
+                                   '('//str(size(x, dim=2))//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2di16
+    module procedure to_text_2di8
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: delim_, label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( present(delim) ) then
+            delim_ = delim
+        else
+            delim_ = ','
+        end if
+
+        if ( present(header) ) then
+            if ( size(header) == 1 ) then
+                label = trim(adjustl(header(1)))
+                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim_
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+            else if ( size(header) == size(x, dim=2) ) then
+                write(unit=file_unit, fmt='(a)') to_str(header, delim=delim_)
+            else
+                write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                               nl//'Header for this data must have size ('//str(1)//') or '// & 
+                                   '('//str(size(x, dim=2))//').'//nl
+            end if
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim_)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure from_text_1dr64
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1420,23 +2523,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_1dr64
     module procedure from_text_1dr32
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1456,23 +2555,19 @@ submodule (io_mod) text_io
     end procedure from_text_1dr32
 
     module procedure from_text_2dr64
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows, columns
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows, columns
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1492,23 +2587,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_2dr64
     module procedure from_text_2dr32
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows, columns
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows, columns
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1529,23 +2620,19 @@ submodule (io_mod) text_io
     end procedure from_text_2dr32
 
     module procedure from_text_1di64
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1564,23 +2651,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_1di64
     module procedure from_text_1di32
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1599,23 +2682,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_1di32
     module procedure from_text_1di16
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1634,23 +2713,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_1di16
     module procedure from_text_1di8
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1670,23 +2745,19 @@ submodule (io_mod) text_io
     end procedure from_text_1di8
 
     module procedure from_text_2di64
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows, columns
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows, columns
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1706,23 +2777,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_2di64
     module procedure from_text_2di32
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows, columns
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows, columns
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1742,23 +2809,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_2di32
     module procedure from_text_2di16
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows, columns
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows, columns
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1778,23 +2841,19 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure from_text_2di16
     module procedure from_text_2di8
-        logical exists
-        integer(int32) file_unit, status, i
-        integer(int32) rows, columns
+        logical :: exists
+        integer :: file_unit, status, i
+        integer :: rows, columns
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(text_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_text.'// &
-                           nl//'Try one of the following: '//to_str(text_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='formatted', &
                   action='read', access='sequential', position='rewind' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         rows = number_of_rows_in_file(file_unit)
@@ -1857,13 +2916,8 @@ submodule (io_mod) binary_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure to_binary_1dr64
-        logical exists
-        integer file_unit
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit
 
         inquire( file=file_name, exist=exists )
 
@@ -1882,13 +2936,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_1dr64
     module procedure to_binary_1dr32
-        logical exists
-        integer file_unit
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit
 
         inquire( file=file_name, exist=exists )
 
@@ -1908,13 +2957,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_1dr32
 
     module procedure to_binary_2dr64
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i
 
         inquire( file=file_name, exist=exists )
 
@@ -1935,13 +2979,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_2dr64
     module procedure to_binary_2dr32
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i
 
         inquire( file=file_name, exist=exists )
 
@@ -1963,13 +3002,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_2dr32
 
     module procedure to_binary_3dr64
-        logical exists
-        integer file_unit, i, j
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j
 
         inquire( file=file_name, exist=exists )
 
@@ -1992,13 +3026,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_3dr64
     module procedure to_binary_3dr32
-        logical exists
-        integer file_unit, i, j
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j
 
         inquire( file=file_name, exist=exists )
 
@@ -2022,13 +3051,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_3dr32
 
     module procedure to_binary_4dr64
-        logical exists
-        integer file_unit, i, j, k
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j, k
 
         inquire( file=file_name, exist=exists )
 
@@ -2053,13 +3077,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_4dr64
     module procedure to_binary_4dr32
-        logical exists
-        integer file_unit, i, j, k
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j, k
 
         inquire( file=file_name, exist=exists )
 
@@ -2085,13 +3104,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_4dr32
 
     module procedure to_binary_5dr64
-        logical exists
-        integer file_unit, i, j, k, l
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j, k, l
 
         inquire( file=file_name, exist=exists )
 
@@ -2118,13 +3132,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_5dr64
     module procedure to_binary_5dr32
-        logical exists
-        integer file_unit, i, j, k, l
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j, k, l
 
         inquire( file=file_name, exist=exists )
 
@@ -2152,13 +3161,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_5dr32
 
     module procedure to_binary_1di64
-        logical exists
-        integer file_unit
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit
 
         inquire( file=file_name, exist=exists )
 
@@ -2177,13 +3181,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_1di64
     module procedure to_binary_1di32
-        logical exists
-        integer file_unit
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit
 
         inquire( file=file_name, exist=exists )
 
@@ -2202,13 +3201,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_1di32
     module procedure to_binary_1di16
-        logical exists
-        integer file_unit
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit
 
         inquire( file=file_name, exist=exists )
 
@@ -2227,13 +3221,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_1di16
     module procedure to_binary_1di8
-        logical exists
-        integer file_unit
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit
 
         inquire( file=file_name, exist=exists )
 
@@ -2253,13 +3242,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_1di8
 
     module procedure to_binary_2di64
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i
 
         inquire( file=file_name, exist=exists )
 
@@ -2280,13 +3264,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_2di64
     module procedure to_binary_2di32
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i
 
         inquire( file=file_name, exist=exists )
 
@@ -2307,13 +3286,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_2di32
     module procedure to_binary_2di16
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i
 
         inquire( file=file_name, exist=exists )
 
@@ -2334,13 +3308,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_2di16
     module procedure to_binary_2di8
-        logical exists
-        integer file_unit, i
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i
 
         inquire( file=file_name, exist=exists )
 
@@ -2362,13 +3331,8 @@ submodule (io_mod) binary_io
     end procedure to_binary_2di8
 
     module procedure to_binary_3di64
-        logical exists
-        integer file_unit, i, j
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j
 
         inquire( file=file_name, exist=exists )
 
@@ -2391,13 +3355,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_3di64
     module procedure to_binary_3di32
-        logical exists
-        integer file_unit, i, j
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j
 
         inquire( file=file_name, exist=exists )
 
@@ -2420,13 +3379,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_3di32
     module procedure to_binary_3di16
-        logical exists
-        integer file_unit, i, j
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j
 
         inquire( file=file_name, exist=exists )
 
@@ -2449,13 +3403,8 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_3di16
     module procedure to_binary_3di8
-        logical exists
-        integer file_unit, i, j
-
-        if ( .not. any(binary_ext == ext_of(file_name)) ) then
-            error stop nl//'Unsupported file extension for file "'//file_name//'" in call to to_binary.'// &
-                       nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-        end if
+        logical :: exists
+        integer :: file_unit, i, j
 
         inquire( file=file_name, exist=exists )
 
@@ -2480,22 +3429,18 @@ submodule (io_mod) binary_io
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure from_binary_1dr64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1)) )
@@ -2504,22 +3449,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_1dr64
     module procedure from_binary_1dr32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1)) )
@@ -2529,22 +3470,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_1dr32
 
     module procedure from_binary_2dr64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2)) )
@@ -2553,22 +3490,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_2dr64
     module procedure from_binary_2dr32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2)) )
@@ -2578,22 +3511,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_2dr32
 
     module procedure from_binary_3dr64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
@@ -2602,22 +3531,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_3dr64
     module procedure from_binary_3dr32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
@@ -2627,22 +3552,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_3dr32
 
     module procedure from_binary_4dr64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
@@ -2651,22 +3572,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_4dr64
     module procedure from_binary_4dr32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
@@ -2676,22 +3593,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_4dr32
 
     module procedure from_binary_5dr64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
@@ -2700,22 +3613,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_5dr64
     module procedure from_binary_5dr32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
@@ -2725,22 +3634,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_5dr32
 
     module procedure from_binary_1di64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1)) )
@@ -2749,22 +3654,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_1di64
     module procedure from_binary_1di32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1)) )
@@ -2773,22 +3674,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_1di32
     module procedure from_binary_1di16
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1)) )
@@ -2797,22 +3694,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_1di16
     module procedure from_binary_1di8
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1)) )
@@ -2822,22 +3715,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_1di8
 
     module procedure from_binary_2di64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2)) )
@@ -2846,22 +3735,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_2di64
     module procedure from_binary_2di32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2)) )
@@ -2870,22 +3755,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_2di32
     module procedure from_binary_2di16
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2)) )
@@ -2894,22 +3775,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_2di16
     module procedure from_binary_2di8
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2)) )
@@ -2919,22 +3796,18 @@ submodule (io_mod) binary_io
     end procedure from_binary_2di8
 
     module procedure from_binary_3di64
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
@@ -2943,22 +3816,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_3di64
     module procedure from_binary_3di32
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
@@ -2967,22 +3836,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_3di32
     module procedure from_binary_3di16
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
@@ -2991,22 +3856,18 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_3di16
     module procedure from_binary_3di8
-        logical exists
-        integer file_unit, status
+        logical :: exists
+        integer :: file_unit, status
 
         inquire( file=file_name, exist=exists )
 
         file_unit = input_unit
 
         if ( exists ) then
-            if ( .not. any(binary_ext == ext_of(file_name)) ) then
-                error stop nl//'Unsupported file extension for file "'//file_name//'" in call to from_binary.'// &
-                           nl//'Try one of the following: '//to_str(binary_ext, delim=' ')//nl
-            end if
             open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
                   action='read', access='stream' )
         else
-            error stop nl//'Error reading file "'//file_name//'". No such file exists.'//nl
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'//nl
         end if
 
         allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
