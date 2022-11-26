@@ -4,7 +4,7 @@
 !!---------------------------------------------------------------------------------------------------------------------
 module nnqs
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
-    use io_mod, only: nl, str, ext_of, text_ext, binary_ext, to_text, to_binary, to_str !! I/O procedures and constants
+    use io_mod, only: nl, str                                                           !! I/O procedures and constants
     use lapack95, only: ppsvx                                 !! Routine for solving linear systems with packed storage
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public
@@ -252,14 +252,13 @@ module nnqs
 
 	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    subroutine stochastic_optimization(self, ising_strengths, energies_file, correlations_file)
+    subroutine stochastic_optimization(self, ising_strengths, energies, correlations)
 		!! Top-level public procedure for evolving variational state to ground state
 		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
         real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
-        character(len=*), optional, intent(in) :: energies_file, correlations_file                 !! File name outputs
+		real(rk), allocatable, dimension(:,:), intent(out) :: energies, correlations       !! Energies and correlations
 
-		real(rk), allocatable, dimension(:,:) :: energies, correlations                    !! Energies and correlations
         integer(ik), allocatable, dimension(:) :: start_sample                          !! Start sample for Monte Carlo
         integer(ik), allocatable, dimension(:,:) :: samples                                     !! Sample storage array
 		real(rk), allocatable, dimension(:) :: e_local, corrs                    !! Local energies, sample correlations
@@ -332,30 +331,8 @@ module nnqs
                                     ' for J = '//str(ising_strengths(1),1)//', B = '//str(ising_strengths(2),1)// &
                            nl//'    Ground state accuracy: '//str(acc,6)//nl
 
-            !! Write data to files:
-            if ( present(energies_file) ) then
-                if ( any(text_ext == ext_of(energies_file)) ) then
-                    call to_text(energies(1:epoch,:), energies_file, header=['Energy', 'Error'])     !! Write text file
-                else if ( any(binary_ext == ext_of(energies_file)) ) then
-                    call to_binary(energies(1:epoch,:), energies_file)                      !! Write unformatted binary
-                else
-                    write(*,'(a)') nl//'Unsupported file extension for file "'//energies_file//'". Skipping...'// &
-                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')//' '// &
-                                   to_str(binary_ext, delim=' ')//nl
-                end if
-            end if
-
-            if ( present(correlations_file) ) then
-                if ( any(text_ext == ext_of(correlations_file)) ) then
-                    call to_text(correlations(:,1:epoch), correlations_file, header=['Epoch'])       !! Write text file
-                else if ( any(binary_ext == ext_of(correlations_file)) ) then
-                    call to_binary(correlations(:,1:epoch), correlations_file)              !! Write unformatted binary
-                else
-                    write(*,'(a)') nl//'Unsupported file extension for file "'//correlations_file//'". Skipping...'// &
-                                   nl//'Try one of the following: '//to_str(text_ext, delim=' ')//' '// &
-                                   to_str(binary_ext, delim=' ')//nl
-                end if
-            end if
+            energies = energies(1:epoch,:)                                                           !! Truncate output
+            correlations = correlations(:,1:epoch)                                                   !! Truncate output
         end if
 	end subroutine stochastic_optimization
 
