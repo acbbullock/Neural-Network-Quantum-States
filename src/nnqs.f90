@@ -306,8 +306,8 @@ module nnqs
 
                 !! Write progress report:
                 tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                              !! Current time
-                write(*,'(a)') '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau,3)//'))] = ' &
-                                    //str(energy,3)//' ± '//str(stderr,3)
+                write(*,'(a)') '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau, fmt='f', decimals=3)//'))] = ' &
+                                    //str(energy, fmt='f', decimals=3)//' ± '//str(stderr, fmt='f', decimals=3)
 
 				if ( ieee_is_nan(energy) ) error stop 'Numerical instability... terminating'       !! Error termination
 				sync images (*)                                                              !! Respond to other images
@@ -326,10 +326,13 @@ module nnqs
 
             acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)             !! Get ground state accuracy
 
-            write(*,'(a)') nl//'    Optimization time: '//str(telapse,3)//' seconds for n = '//str(n)//' spins.'// &
-                           nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy,3)//' ± '//str(stderr,3)// &
-                                    ' for J = '//str(ising_strengths(1),1)//', B = '//str(ising_strengths(2),1)// &
-                           nl//'    Ground state accuracy: '//str(acc,6)//nl
+            write(*,'(a)') nl//'    Optimization time: '//str(telapse, fmt='f', decimals=3)//' seconds for n = '// & 
+                                    str(n)//' spins.'// &
+                           nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
+                                    ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
+                                    str(ising_strengths(1), fmt='f', decimals=1)//' and B = '// &
+                                    str(ising_strengths(2), fmt='f', decimals=1)// &
+                           nl//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//nl
 
             energies = energies(1:epoch,:)                                                           !! Truncate output
             correlations = correlations(:,1:epoch)                                                   !! Truncate output
