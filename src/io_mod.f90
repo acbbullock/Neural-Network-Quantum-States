@@ -19,10 +19,12 @@ module io_mod
 
     character(len=*), dimension(*), parameter :: text_ext = ['csv', 'txt', 'ods', 'odf', 'odm', 'odt', 'xls', 'xlsx', &
                                                              'doc', 'docx', 'md', 'log', 'rtf', 'org', 'embed']
+
     character(len=*), dimension(*), parameter :: binary_ext = ['dat', 'bin']
 
     character(len=*), dimension(*), parameter :: non_separating_chars_us = ['0', '1', '2', '3', '4', '5', '6', '7', &
                                                                             '8', '9', '.', 'e', 'E', '+', '-', '"']
+                                                                            
     character(len=*), dimension(*), parameter :: non_separating_chars_eu = ['0', '1', '2', '3', '4', '5', '6', '7', &
                                                                             '8', '9', ',', 'e', 'E', '+', '-', '"']
 
@@ -903,7 +905,11 @@ module io_mod
             if ( file_name(i:i) == '.' ) exit
         end do
 
-        ext = trim(adjustl(file_name(i+1:l)))
+        if ( i > 0 ) then
+            ext = trim(adjustl(file_name(i+1:l)))
+        else
+            ext = ''
+        end if
     end function ext_of
 
 end module io_mod
