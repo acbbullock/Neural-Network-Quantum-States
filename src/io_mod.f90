@@ -167,34 +167,38 @@ module io_mod
     end interface
 
     interface to_file                                                                              !! Submodule file_io
-        module impure subroutine to_file_1dr64(x, file_name, header, fmt, decimals)
+        module impure subroutine to_file_1dr64(x, file_name, header, dim, delim, fmt, decimals)
             real(real64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
             character(len=1), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_1dr64
-        module impure subroutine to_file_1dr32(x, file_name, header, fmt, decimals)
+        module impure subroutine to_file_1dr32(x, file_name, header, dim, delim, fmt, decimals)
             real(real32), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
             character(len=1), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_1dr32
 
-        module impure subroutine to_file_2dr64(x, file_name, delim, header, fmt, decimals)
+        module impure subroutine to_file_2dr64(x, file_name, header, delim, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
             character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
             character(len=1), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_2dr64
-        module impure subroutine to_file_2dr32(x, file_name, delim, header, fmt, decimals)
+        module impure subroutine to_file_2dr32(x, file_name, header, delim, fmt, decimals)
             real(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
             character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
             character(len=1), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_2dr32
@@ -226,50 +230,58 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_file_5dr32
 
-        module impure subroutine to_file_1di64(x, file_name, header)
+        module impure subroutine to_file_1di64(x, file_name, header, dim, delim)
             integer(int64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_1di64
-        module impure subroutine to_file_1di32(x, file_name, header)
+        module impure subroutine to_file_1di32(x, file_name, header, dim, delim)
             integer(int32), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_1di32
-        module impure subroutine to_file_1di16(x, file_name, header)
+        module impure subroutine to_file_1di16(x, file_name, header, dim, delim)
             integer(int16), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_1di16
-        module impure subroutine to_file_1di8(x, file_name, header)
+        module impure subroutine to_file_1di8(x, file_name, header, dim, delim)
             integer(int8), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_1di8
 
-        module impure subroutine to_file_2di64(x, file_name, delim, header)
+        module impure subroutine to_file_2di64(x, file_name, header, delim)
             integer(int64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
             character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_2di64
-        module impure subroutine to_file_2di32(x, file_name, delim, header)
+        module impure subroutine to_file_2di32(x, file_name, header, delim)
             integer(int32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
             character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_2di32
-        module impure subroutine to_file_2di16(x, file_name, delim, header)
+        module impure subroutine to_file_2di16(x, file_name, header, delim)
             integer(int16), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
             character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_2di16
-        module impure subroutine to_file_2di8(x, file_name, delim, header)
+        module impure subroutine to_file_2di8(x, file_name, header, delim)
             integer(int8), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in), optional :: delim
             character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
         end subroutine to_file_2di8
 
         module impure subroutine to_file_3di64(x, file_name)
@@ -491,82 +503,94 @@ module io_mod
     end interface
 
     interface to_text                                                                              !! Submodule text_io
-        module impure subroutine to_text_1dr64(x, file_name, header, fmt, decimals)
+        module impure subroutine to_text_1dr64(x, file_name, header, dim, delim, fmt, decimals)
             real(real64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
             character(len=1), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_1dr64
-        module impure subroutine to_text_1dr32(x, file_name, header, fmt, decimals)
+        module impure subroutine to_text_1dr32(x, file_name, header, dim, delim, fmt, decimals)
             real(real32), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
             character(len=1), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_1dr32
 
-        module impure subroutine to_text_2dr64(x, file_name, delim, header, fmt, decimals)
+        module impure subroutine to_text_2dr64(x, file_name, header, delim, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in) :: delim
             character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
             character(len=1), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_2dr64
-        module impure subroutine to_text_2dr32(x, file_name, delim, header, fmt, decimals)
+        module impure subroutine to_text_2dr32(x, file_name, header, delim, fmt, decimals)
             real(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in) :: delim
             character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
             character(len=1), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_2dr32
 
-        module impure subroutine to_text_1di64(x, file_name, header)
+        module impure subroutine to_text_1di64(x, file_name, header, dim, delim)
             integer(int64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
         end subroutine to_text_1di64
-        module impure subroutine to_text_1di32(x, file_name, header)
+        module impure subroutine to_text_1di32(x, file_name, header, dim, delim)
             integer(int32), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
         end subroutine to_text_1di32
-        module impure subroutine to_text_1di16(x, file_name, header)
+        module impure subroutine to_text_1di16(x, file_name, header, dim, delim)
             integer(int16), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
         end subroutine to_text_1di16
-        module impure subroutine to_text_1di8(x, file_name, header)
+        module impure subroutine to_text_1di8(x, file_name, header, dim, delim)
             integer(int8), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
         end subroutine to_text_1di8
 
-        module impure subroutine to_text_2di64(x, file_name, delim, header)
+        module impure subroutine to_text_2di64(x, file_name, header, delim)
             integer(int64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in) :: delim
             character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
         end subroutine to_text_2di64
-        module impure subroutine to_text_2di32(x, file_name, delim, header)
+        module impure subroutine to_text_2di32(x, file_name, header, delim)
             integer(int32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in) :: delim
             character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
         end subroutine to_text_2di32
-        module impure subroutine to_text_2di16(x, file_name, delim, header)
+        module impure subroutine to_text_2di16(x, file_name, header, delim)
             integer(int16), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in) :: delim
             character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
         end subroutine to_text_2di16
-        module impure subroutine to_text_2di8(x, file_name, delim, header)
+        module impure subroutine to_text_2di8(x, file_name, header, delim)
             integer(int8), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
-            character(len=*), intent(in) :: delim
             character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
         end subroutine to_text_2di8
     end interface
 
@@ -1719,23 +1743,71 @@ submodule (io_mod) file_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure to_file_1dr64
-        character(len=:), allocatable :: ext
+        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
         character(len=1) :: fmt_
-        integer :: decimals_
+        integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
             if ( .not. present(header) ) then
                 header_ = ['']
+                hstat = 0
             else
-                if ( size(header) /= 1 ) then
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
-                                   nl//'Header for this data must have size (1).'
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
                 else
                     header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
                 end if
             end if
 
@@ -1757,11 +1829,15 @@ submodule (io_mod) file_io
                 decimals_ = decimals
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, fmt=fmt_, decimals=decimals_)
+            call to_text( x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_ )
         else if ( any(binary_ext == ext) ) then
-            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
-            if ( present(fmt) ) write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )      write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
             if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -1771,23 +1847,71 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1dr64
     module procedure to_file_1dr32
-        character(len=:), allocatable :: ext
+        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
         character(len=1) :: fmt_
-        integer :: decimals_
+        integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
             if ( .not. present(header) ) then
                 header_ = ['']
+                hstat = 0
             else
-                if ( size(header) /= 1 ) then
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
-                                   nl//'Header for this data must have size (1).'
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
                 else
                     header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
                 end if
             end if
 
@@ -1809,11 +1933,15 @@ submodule (io_mod) file_io
                 decimals_ = decimals
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, fmt=fmt_, decimals=decimals_)
+            call to_text( x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_ )
         else if ( any(binary_ext == ext) ) then
-            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
-            if ( present(fmt) ) write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )      write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
             if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -1832,23 +1960,23 @@ submodule (io_mod) file_io
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
-            if ( .not. present(delim) ) then
-                delim_ = ','
-            else
-                delim_ = delim
-            end if
-
             if ( .not. present(header) ) then
                 header_ = ['']
             else
                 if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
                                    nl//'Header for this data must have size (1) or '// & 
                                        '('//str(size(x, dim=2))//').'
                 else
                     header_ = header
                 end if
+            end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
             end if
 
             if ( .not. present(fmt) ) then
@@ -1869,12 +1997,13 @@ submodule (io_mod) file_io
                 decimals_ = decimals
             end if
             
-            call to_text(x=x, file_name=file_name, delim=delim_, header=header_, fmt=fmt_, decimals=decimals_)
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_, fmt=fmt_, decimals=decimals_)
         else if ( any(binary_ext == ext) ) then
-            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
-            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
-            if ( present(fmt) ) write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
             if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -1892,23 +2021,23 @@ submodule (io_mod) file_io
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
-            if ( .not. present(delim) ) then
-                delim_ = ','
-            else
-                delim_ = delim
-            end if
-
             if ( .not. present(header) ) then
                 header_ = ['']
             else
                 if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
                                    nl//'Header for this data must have size (1) or '// & 
                                        '('//str(size(x, dim=2))//').'
                 else
                     header_ = header
                 end if
+            end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
             end if
 
             if ( .not. present(fmt) ) then
@@ -1929,12 +2058,13 @@ submodule (io_mod) file_io
                 decimals_ = decimals
             end if
             
-            call to_text(x=x, file_name=file_name, delim=delim_, header=header_, fmt=fmt_, decimals=decimals_)
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_, fmt=fmt_, decimals=decimals_)
         else if ( any(binary_ext == ext) ) then
-            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
-            if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
-            if ( present(fmt) ) write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
             if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -1952,9 +2082,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_3dr64
     module procedure to_file_3dr32
@@ -1965,9 +2101,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_3dr32
 
@@ -1979,9 +2121,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_4dr64
     module procedure to_file_4dr32
@@ -1992,9 +2140,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_4dr32
 
@@ -2006,9 +2160,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_5dr64
     module procedure to_file_5dr32
@@ -2019,34 +2179,92 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_5dr32
 
     module procedure to_file_1di64
-        character(len=:), allocatable :: ext
+        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
+        integer :: hstat, dim_
 
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
             if ( .not. present(header) ) then
                 header_ = ['']
+                hstat = 0
             else
-                if ( size(header) /= 1 ) then
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
-                                   nl//'Header for this data must have size (1).'
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
                 else
                     header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2056,27 +2274,79 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1di64
     module procedure to_file_1di32
-        character(len=:), allocatable :: ext
+        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
+        integer :: hstat, dim_
 
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
             if ( .not. present(header) ) then
                 header_ = ['']
+                hstat = 0
             else
-                if ( size(header) /= 1 ) then
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
-                                   nl//'Header for this data must have size (1).'
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
                 else
                     header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2086,27 +2356,79 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1di32
     module procedure to_file_1di16
-        character(len=:), allocatable :: ext
+        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
+        integer :: hstat, dim_
 
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
             if ( .not. present(header) ) then
                 header_ = ['']
+                hstat = 0
             else
-                if ( size(header) /= 1 ) then
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
-                                   nl//'Header for this data must have size (1).'
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
                 else
                     header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2116,27 +2438,79 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1di16
     module procedure to_file_1di8
-        character(len=:), allocatable :: ext
+        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
+        integer :: hstat, dim_
 
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
             if ( .not. present(header) ) then
                 header_ = ['']
+                hstat = 0
             else
-                if ( size(header) /= 1 ) then
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
-                                   nl//'Header for this data must have size (1).'
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
                 else
                     header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2153,29 +2527,30 @@ submodule (io_mod) file_io
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
-            if ( .not. present(delim) ) then
-                delim_ = ','
-            else
-                delim_ = delim
-            end if
-
             if ( .not. present(header) ) then
                 header_ = ['']
             else
                 if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
                                    nl//'Header for this data must have size (1) or '// & 
                                        '('//str(size(x, dim=2))//').'
                 else
                     header_ = header
                 end if
             end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
             
-            call to_text(x=x, file_name=file_name, delim=delim_, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
-            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2191,29 +2566,30 @@ submodule (io_mod) file_io
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
-            if ( .not. present(delim) ) then
-                delim_ = ','
-            else
-                delim_ = delim
-            end if
-
             if ( .not. present(header) ) then
                 header_ = ['']
             else
                 if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
                                    nl//'Header for this data must have size (1) or '// & 
                                        '('//str(size(x, dim=2))//').'
                 else
                     header_ = header
                 end if
             end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
             
-            call to_text(x=x, file_name=file_name, delim=delim_, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
-            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2229,29 +2605,30 @@ submodule (io_mod) file_io
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
-            if ( .not. present(delim) ) then
-                delim_ = ','
-            else
-                delim_ = delim
-            end if
-
             if ( .not. present(header) ) then
                 header_ = ['']
             else
                 if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
                                    nl//'Header for this data must have size (1) or '// & 
                                        '('//str(size(x, dim=2))//').'
                 else
                     header_ = header
                 end if
             end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
             
-            call to_text(x=x, file_name=file_name, delim=delim_, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
-            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2267,29 +2644,30 @@ submodule (io_mod) file_io
         ext = ext_of(file_name)
 
         if ( any(text_ext == ext) ) then
-            if ( .not. present(delim) ) then
-                delim_ = ','
-            else
-                delim_ = delim
-            end if
-
             if ( .not. present(header) ) then
                 header_ = ['']
             else
                 if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
                     header_ = ['']
-                    write(*,'(a)') nl//'WARNING: Skipping header for file "'//file_name//'".'// &
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
                                    nl//'Header for this data must have size (1) or '// & 
                                        '('//str(size(x, dim=2))//').'
                 else
                     header_ = header
                 end if
             end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
             
-            call to_text(x=x, file_name=file_name, delim=delim_, header=header_)
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
         else if ( any(binary_ext == ext) ) then
-            if ( present(delim) ) write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+
             call to_binary(x=x, file_name=file_name)
         else
             write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
@@ -2307,9 +2685,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_3di64
     module procedure to_file_3di32
@@ -2320,9 +2704,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_3di32
     module procedure to_file_3di16
@@ -2333,9 +2723,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_3di16
     module procedure to_file_3di8
@@ -2346,9 +2742,15 @@ submodule (io_mod) file_io
         if ( any(binary_ext == ext) ) then
             call to_binary(x=x, file_name=file_name)
         else
-            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
-                                'due to unsupported file extension "'//ext//'".'// &
-                            nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
         end if
     end procedure to_file_3di8
 
@@ -3368,6 +3770,7 @@ submodule (io_mod) text_io
     module procedure to_text_1dr64
         logical :: exists
         integer :: file_unit, i
+        character(len=:), allocatable :: label
 
         inquire( file=file_name, exist=exists )
 
@@ -3383,19 +3786,34 @@ submodule (io_mod) text_io
 
         if ( all(header == '') ) then
             continue
-        else
-            write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
         end if
 
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt, decimals=decimals)
-        end do
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt, decimals=decimals)
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim, fmt=fmt, decimals=decimals)
+        end if
 
         close(file_unit)
     end procedure to_text_1dr64
     module procedure to_text_1dr32
         logical :: exists
         integer :: file_unit, i
+        character(len=:), allocatable :: label
 
         inquire( file=file_name, exist=exists )
 
@@ -3411,13 +3829,27 @@ submodule (io_mod) text_io
 
         if ( all(header == '') ) then
             continue
-        else
-            write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
         end if
 
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt, decimals=decimals)
-        end do
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt, decimals=decimals)
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim, fmt=fmt, decimals=decimals)
+        end if
 
         close(file_unit)
     end procedure to_text_1dr32
@@ -3496,6 +3928,7 @@ submodule (io_mod) text_io
     module procedure to_text_1di64
         logical :: exists
         integer :: file_unit, i
+        character(len=:), allocatable :: label
 
         inquire( file=file_name, exist=exists )
 
@@ -3511,19 +3944,34 @@ submodule (io_mod) text_io
 
         if ( all(header == '') ) then
             continue
-        else
-            write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
         end if
 
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i))
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+        end if
 
         close(file_unit)
     end procedure to_text_1di64
     module procedure to_text_1di32
         logical :: exists
         integer :: file_unit, i
+        character(len=:), allocatable :: label
 
         inquire( file=file_name, exist=exists )
 
@@ -3539,19 +3987,34 @@ submodule (io_mod) text_io
 
         if ( all(header == '') ) then
             continue
-        else
-            write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
         end if
 
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i))
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+        end if
 
         close(file_unit)
     end procedure to_text_1di32
     module procedure to_text_1di16
         logical :: exists
         integer :: file_unit, i
+        character(len=:), allocatable :: label
 
         inquire( file=file_name, exist=exists )
 
@@ -3567,19 +4030,34 @@ submodule (io_mod) text_io
 
         if ( all(header == '') ) then
             continue
-        else
-            write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
         end if
 
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i))
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+        end if
 
         close(file_unit)
     end procedure to_text_1di16
     module procedure to_text_1di8
         logical :: exists
         integer :: file_unit, i
+        character(len=:), allocatable :: label
 
         inquire( file=file_name, exist=exists )
 
@@ -3595,13 +4073,27 @@ submodule (io_mod) text_io
 
         if ( all(header == '') ) then
             continue
-        else
-            write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
         end if
 
-        do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') str(x(i))
-        end do
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i))
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+        end if
 
         close(file_unit)
     end procedure to_text_1di8
