@@ -1505,13 +1505,10 @@ end submodule array_printing
 submodule (io_mod) internal_io
     contains
     module procedure str_r64
-        real(real64) :: comparison_number
-        integer :: i, max_decimals, decimals_
+        integer :: i, e, max_decimals, decimals_, l, extra
 
-        character(len=:), allocatable :: decimal
+        character(len=:), allocatable :: decimal, str_tmp
         character(len=1) :: fmt_
-        character(len=11) :: decimals_str
-        character(len=32) :: str_tmp
 
         if ( .not. present(locale) ) then
             decimal = 'POINT'
@@ -1538,31 +1535,48 @@ submodule (io_mod) internal_io
         end if
 
         if ( fmt_ == 'e' ) then
-            if ( .not. present(decimals) ) then
-                decimals_ = 15
-            else
-                if ( decimals < 0 ) then
-                    decimals_ = 0
-                else if ( decimals > 15 ) then
-                    decimals_ = 15
+            associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
+                if ( .not. present(decimals) ) then
+                    decimals_ = max_precision - 1
                 else
-                    decimals_ = decimals
+                    if ( decimals < 0 ) then
+                        decimals_ = 0
+                    else if ( decimals > (max_precision - 1) ) then
+                        decimals_ = max_precision - 1
+                    else
+                        decimals_ = decimals
+                    end if
                 end if
-            end if
+            end associate
 
-            write(unit=decimals_str, fmt='(i11)') decimals_
-            write(unit=str_tmp, fmt='(es32.'//trim(adjustl(decimals_str))//')', decimal=decimal) x
+            l = decimals_ + 15
+
+            allocate( character(len=l) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(es'//str(l)//'.'//str(decimals_)//'e3)', decimal=decimal) x
             x_str = trim(adjustl(str_tmp))
         else if ( fmt_ == 'f' ) then
-            comparison_number = 1.0_real64
+            e = int(log10(abs(x)))
 
-            find_max_decimals: do i = 15, 0, -1
-                if ( abs(x) < comparison_number ) then
-                    max_decimals = i
-                    exit find_max_decimals
+            associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
+                if ( e == 0 ) then
+                    if ( floor(x) == 0 ) then
+                        max_decimals = max_precision
+                    else
+                        max_decimals = max_precision - 1
+                        e = 1 + e
+                    end if
+                else if ( e > 0 ) then
+                    max_decimals = max_precision - (1 + e)
+                    e = 1 + e
+                else
+                    max_decimals = max_precision - e
                 end if
-                comparison_number = 10.0_real64*comparison_number
-            end do find_max_decimals
+
+                extra = e - max_precision
+            end associate
+
+            if ( max_decimals < 0 ) max_decimals = 0
 
             if ( .not. present(decimals) ) then
                 decimals_ = max_decimals
@@ -1576,19 +1590,31 @@ submodule (io_mod) internal_io
                 end if
             end if
 
-            write(unit=decimals_str, fmt='(i11)') decimals_
-            write(unit=str_tmp, fmt='(f32.'//trim(adjustl(decimals_str))//')', decimal=decimal) x
+            if ( e > 0 ) then
+                l = decimals_ + e + 10
+            else
+                l = decimals_ + 10
+            end if
+
+            allocate( character(len=l) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(f'//str(l)//'.'//str(decimals_)//')', decimal=decimal) x
             x_str = trim(adjustl(str_tmp))
+
+            if ( extra > 0 ) then
+                do i = len(x_str)-1, 1, -1
+                    x_str(i:i) = '0'
+                    extra = extra - 1
+                    if ( extra == 0 ) exit
+                end do
+            end if
         end if
     end procedure str_r64
     module procedure str_r32
-        real :: comparison_number
-        integer :: i, max_decimals, decimals_
-        
-        character(len=:), allocatable :: decimal
+        integer :: i, e, max_decimals, decimals_, l, extra
+
+        character(len=:), allocatable :: decimal, str_tmp
         character(len=1) :: fmt_
-        character(len=11) :: decimals_str
-        character(len=32) :: str_tmp
 
         if ( .not. present(locale) ) then
             decimal = 'POINT'
@@ -1615,31 +1641,48 @@ submodule (io_mod) internal_io
         end if
 
         if ( fmt_ == 'e' ) then
-            if ( .not. present(decimals) ) then
-                decimals_ = 7
-            else
-                if ( decimals < 0 ) then
-                    decimals_ = 0
-                else if ( decimals > 7 ) then
-                    decimals_ = 7
+            associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
+                if ( .not. present(decimals) ) then
+                    decimals_ = max_precision - 1
                 else
-                    decimals_ = decimals
+                    if ( decimals < 0 ) then
+                        decimals_ = 0
+                    else if ( decimals > (max_precision - 1) ) then
+                        decimals_ = max_precision - 1
+                    else
+                        decimals_ = decimals
+                    end if
                 end if
-            end if
+            end associate
 
-            write(unit=decimals_str, fmt='(i11)') decimals_
-            write(unit=str_tmp, fmt='(es32.'//trim(adjustl(decimals_str))//')', decimal=decimal) x
+            l = decimals_ + 15
+
+            allocate( character(len=l) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(es'//str(l)//'.'//str(decimals_)//'e2)', decimal=decimal) x
             x_str = trim(adjustl(str_tmp))
         else if ( fmt_ == 'f' ) then
-            comparison_number = 1.0
+            e = int(log10(abs(x)))
 
-            find_max_decimals: do i = 7, 0, -1
-                if ( abs(x) < comparison_number ) then
-                    max_decimals = i
-                    exit find_max_decimals
+            associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
+                if ( e == 0 ) then
+                    if ( floor(x) == 0 ) then
+                        max_decimals = max_precision
+                    else
+                        max_decimals = max_precision - 1
+                        e = 1 + e
+                    end if
+                else if ( e > 0 ) then
+                    max_decimals = max_precision - (1 + e)
+                    e = 1 + e
+                else
+                    max_decimals = max_precision - e
                 end if
-                comparison_number = 10.0*comparison_number
-            end do find_max_decimals
+
+                extra = e - max_precision
+            end associate
+
+            if ( max_decimals < 0 ) max_decimals = 0
 
             if ( .not. present(decimals) ) then
                 decimals_ = max_decimals
@@ -1653,9 +1696,24 @@ submodule (io_mod) internal_io
                 end if
             end if
 
-            write(unit=decimals_str, fmt='(i11)') decimals_
-            write(unit=str_tmp, fmt='(f32.'//trim(adjustl(decimals_str))//')', decimal=decimal) x
+            if ( e > 0 ) then
+                l = decimals_ + e + 10
+            else
+                l = decimals_ + 10
+            end if
+
+            allocate( character(len=l) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(f'//str(l)//'.'//str(decimals_)//')', decimal=decimal) x
             x_str = trim(adjustl(str_tmp))
+
+            if ( extra > 0 ) then
+                do i = len(x_str)-1, 1, -1
+                    x_str(i:i) = '0'
+                    extra = extra - 1
+                    if ( extra == 0 ) exit
+                end do
+            end if
         end if
     end procedure str_r32
 
@@ -1733,7 +1791,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 15
+            decimals_ = 150
         else
             decimals_ = decimals
         end if
@@ -1783,7 +1841,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 7
+            decimals_ = 150
         else
             decimals_ = decimals
         end if
@@ -1963,7 +2021,7 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(decimals) ) then
-                decimals_ = 15
+                decimals_ = 150
             else
                 decimals_ = decimals
             end if
@@ -2085,7 +2143,7 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(decimals) ) then
-                decimals_ = 7
+                decimals_ = 150
             else
                 decimals_ = decimals
             end if
@@ -2167,7 +2225,7 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(decimals) ) then
-                decimals_ = 15
+                decimals_ = 150
             else
                 decimals_ = decimals
             end if
@@ -2247,7 +2305,7 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(decimals) ) then
-                decimals_ = 7
+                decimals_ = 150
             else
                 decimals_ = decimals
             end if
