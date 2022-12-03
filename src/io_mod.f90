@@ -5,7 +5,7 @@
 !!  a specified delimiter.
 !!---------------------------------------------------------------------------------------------------------------------
 module io_mod
-    use, intrinsic :: iso_fortran_env, only: real64, real32, int64, int32, int16, int8, input_unit, output_unit
+    use, intrinsic :: iso_fortran_env, only: real128,real64,real32, int64,int32,int16,int8, input_unit, output_unit
     implicit none (type,external)
     private
 
@@ -35,6 +35,11 @@ module io_mod
                                                             'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z']
 
     interface aprint                                                                        !! Submodule array_printing
+        module impure subroutine aprint_1dr128(x, fmt, decimals)
+            real(real128), dimension(:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+        end subroutine aprint_1dr128
         module impure subroutine aprint_1dr64(x, fmt, decimals)
             real(real64), dimension(:), intent(in) :: x
             character(len=1), intent(in), optional :: fmt
@@ -46,6 +51,11 @@ module io_mod
             integer, intent(in), optional :: decimals
         end subroutine aprint_1dr32
 
+        module impure subroutine aprint_2dr128(x, fmt, decimals)
+            real(real128), dimension(:,:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+        end subroutine aprint_2dr128
         module impure subroutine aprint_2dr64(x, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=1), intent(in), optional :: fmt
@@ -93,6 +103,13 @@ module io_mod
     end interface
 
     interface str                                                                              !! Submodule internal_io
+        module pure function str_r128(x, locale, fmt, decimals) result(x_str)
+            real(real128), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=:), allocatable :: x_str
+        end function str_r128
         module pure function str_r64(x, locale, fmt, decimals) result(x_str)
             real(real64), intent(in) :: x
             character(len=2), intent(in), optional :: locale
@@ -133,6 +150,14 @@ module io_mod
             character(len=:), allocatable :: x_str
         end function to_str_charvec
 
+        module pure function to_str_1dr128(x, locale, delim, fmt, decimals) result(x_str)
+            real(real128), dimension(:), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=:), allocatable :: x_str
+        end function to_str_1dr128
         module pure function to_str_1dr64(x, locale, delim, fmt, decimals) result(x_str)
             real(real64), dimension(:), intent(in) :: x
             character(len=2), intent(in), optional :: locale
@@ -173,6 +198,16 @@ module io_mod
     end interface
 
     interface to_file                                                                              !! Submodule file_io
+        module impure subroutine to_file_1dr128(x, file_name, header, dim, locale, delim, fmt, decimals)
+            real(real128), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+        end subroutine to_file_1dr128
         module impure subroutine to_file_1dr64(x, file_name, header, dim, locale, delim, fmt, decimals)
             real(real64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -194,6 +229,15 @@ module io_mod
             integer, intent(in), optional :: decimals
         end subroutine to_file_1dr32
 
+        module impure subroutine to_file_2dr128(x, file_name, header, locale, delim, fmt, decimals)
+            real(real128), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+        end subroutine to_file_2dr128
         module impure subroutine to_file_2dr64(x, file_name, header, locale, delim, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -213,6 +257,10 @@ module io_mod
             integer, intent(in), optional :: decimals
         end subroutine to_file_2dr32
 
+        module impure subroutine to_file_3dr128(x, file_name)
+            real(real128), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3dr128
         module impure subroutine to_file_3dr64(x, file_name)
             real(real64), dimension(:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -222,6 +270,10 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_file_3dr32
 
+        module impure subroutine to_file_4dr128(x, file_name)
+            real(real128), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_4dr128
         module impure subroutine to_file_4dr64(x, file_name)
             real(real64), dimension(:,:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -231,6 +283,10 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_file_4dr32
 
+        module impure subroutine to_file_5dr128(x, file_name)
+            real(real128), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_5dr128
         module impure subroutine to_file_5dr64(x, file_name)
             real(real64), dimension(:,:,:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -313,6 +369,17 @@ module io_mod
     end interface
 
     interface from_file                                                                            !! Submodule file_io
+        module impure subroutine from_textfile_1dr128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_1dr128
+        module impure subroutine from_binaryfile_1dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_1dr128
         module impure subroutine from_textfile_1dr64(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
@@ -336,6 +403,17 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dr32
 
+        module impure subroutine from_textfile_2dr128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_2dr128
+        module impure subroutine from_binaryfile_2dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_2dr128
         module impure subroutine from_textfile_2dr64(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
@@ -359,6 +437,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2dr32
 
+        module impure subroutine from_file_3dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_3dr128
         module impure subroutine from_file_3dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:), intent(out) :: into
@@ -370,6 +453,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_3dr32
 
+        module impure subroutine from_file_4dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_4dr128
         module impure subroutine from_file_4dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:,:), intent(out) :: into
@@ -381,6 +469,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_4dr32
 
+        module impure subroutine from_file_5dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_5dr128
         module impure subroutine from_file_5dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:,:,:), intent(out) :: into
@@ -513,6 +606,16 @@ module io_mod
     end interface
 
     interface to_text                                                                              !! Submodule text_io
+        module impure subroutine to_text_1dr128(x, file_name, header, dim, locale, delim, fmt, decimals)
+            real(real128), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+        end subroutine to_text_1dr128
         module impure subroutine to_text_1dr64(x, file_name, header, dim, locale, delim, fmt, decimals)
             real(real64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -534,6 +637,15 @@ module io_mod
             integer, intent(in) :: decimals
         end subroutine to_text_1dr32
 
+        module impure subroutine to_text_2dr128(x, file_name, header, locale, delim, fmt, decimals)
+            real(real128), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+        end subroutine to_text_2dr128
         module impure subroutine to_text_2dr64(x, file_name, header, locale, delim, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -609,6 +721,12 @@ module io_mod
     end interface
 
     interface from_text                                                                            !! Submodule text_io
+        module impure subroutine from_text_1dr128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_1dr128
         module impure subroutine from_text_1dr64(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
@@ -622,6 +740,12 @@ module io_mod
             character(len=2), intent(in) :: locale
         end subroutine from_text_1dr32
 
+        module impure subroutine from_text_2dr128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_2dr128
         module impure subroutine from_text_2dr64(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
@@ -687,6 +811,10 @@ module io_mod
     end interface
 
     interface to_binary                                                                          !! Submodule binary_io
+        module impure subroutine to_binary_1dr128(x, file_name)
+            real(real128), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_1dr128
         module impure subroutine to_binary_1dr64(x, file_name)
             real(real64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -696,6 +824,10 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_binary_1dr32
 
+        module impure subroutine to_binary_2dr128(x, file_name)
+            real(real128), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_2dr128
         module impure subroutine to_binary_2dr64(x, file_name)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -705,6 +837,10 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_binary_2dr32
 
+        module impure subroutine to_binary_3dr128(x, file_name)
+            real(real128), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_3dr128
         module impure subroutine to_binary_3dr64(x, file_name)
             real(real64), dimension(:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -714,6 +850,10 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_binary_3dr32
 
+        module impure subroutine to_binary_4dr128(x, file_name)
+            real(real128), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_4dr128
         module impure subroutine to_binary_4dr64(x, file_name)
             real(real64), dimension(:,:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -723,6 +863,10 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_binary_4dr32
 
+        module impure subroutine to_binary_5dr128(x, file_name)
+            real(real128), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_5dr128
         module impure subroutine to_binary_5dr64(x, file_name)
             real(real64), dimension(:,:,:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -785,6 +929,11 @@ module io_mod
     end interface
 
     interface from_binary                                                                        !! Submodule binary_io
+        module impure subroutine from_binary_1dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_1dr128
         module impure subroutine from_binary_1dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
@@ -796,6 +945,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_1dr32
 
+        module impure subroutine from_binary_2dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_2dr128
         module impure subroutine from_binary_2dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
@@ -807,6 +961,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_2dr32
 
+        module impure subroutine from_binary_3dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_3dr128
         module impure subroutine from_binary_3dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:), intent(out) :: into
@@ -818,6 +977,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_3dr32
 
+        module impure subroutine from_binary_4dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_4dr128
         module impure subroutine from_binary_4dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:,:), intent(out) :: into
@@ -829,6 +993,11 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_4dr32
 
+        module impure subroutine from_binary_5dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_5dr128
         module impure subroutine from_binary_5dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:,:,:,:), intent(out) :: into
@@ -928,6 +1097,49 @@ end module io_mod
 
 submodule (io_mod) array_printing
     contains
+    module procedure aprint_1dr128
+        character(len=:), allocatable, dimension(:) :: x_str
+        character(len=1) :: fmt_
+        integer :: i, n_rows, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        n_rows = size(x)
+
+        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_) )
+
+        if ( n_rows > 1 ) then
+            do concurrent (i = 2:n_rows)
+                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+    end procedure aprint_1dr128
     module procedure aprint_1dr64
         character(len=:), allocatable, dimension(:) :: x_str
         character(len=1) :: fmt_
@@ -1015,6 +1227,48 @@ submodule (io_mod) array_printing
         write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
     end procedure aprint_1dr32
 
+    module procedure aprint_2dr128
+        character(len=:), allocatable, dimension(:,:) :: x_str
+        character(len=1) :: fmt_
+        integer :: i, j, n_rows, n_columns, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        n_rows = size(x, dim=1)
+        n_columns = size(x, dim=2)
+
+        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_) )
+
+        do concurrent (j = 1:n_columns, i = 1:n_rows)
+            x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_)
+        end do
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+    end procedure aprint_2dr128
     module procedure aprint_2dr64
         character(len=:), allocatable, dimension(:,:) :: x_str
         character(len=1) :: fmt_
@@ -1504,6 +1758,112 @@ end submodule array_printing
 
 submodule (io_mod) internal_io
     contains
+    module procedure str_r128
+        integer :: i, e, max_decimals, decimals_, l, extra
+
+        character(len=:), allocatable :: decimal, str_tmp
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            decimal = 'POINT'
+        else
+            if ( locale == 'us' ) then
+                decimal = 'POINT'
+            else if ( locale == 'eu' ) then
+                decimal = 'COMMA'
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( fmt_ == 'e' ) then
+            associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
+                if ( .not. present(decimals) ) then
+                    decimals_ = max_precision - 1
+                else
+                    if ( decimals < 0 ) then
+                        decimals_ = 0
+                    else if ( decimals > (max_precision - 1) ) then
+                        decimals_ = max_precision - 1
+                    else
+                        decimals_ = decimals
+                    end if
+                end if
+            end associate
+
+            l = decimals_ + 15
+
+            allocate( character(len=l) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(es'//str(l)//'.'//str(decimals_)//'e4)', decimal=decimal) x
+            x_str = trim(adjustl(str_tmp))
+        else if ( fmt_ == 'f' ) then
+            e = int(log10(abs(x)))
+
+            associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
+                if ( e == 0 ) then
+                    if ( floor(x) == 0 ) then
+                        max_decimals = max_precision
+                    else
+                        max_decimals = max_precision - 1
+                        e = 1 + e
+                    end if
+                else if ( e > 0 ) then
+                    max_decimals = max_precision - (1 + e)
+                    e = 1 + e
+                else
+                    max_decimals = max_precision - e
+                end if
+
+                extra = e - max_precision
+            end associate
+
+            if ( max_decimals < 0 ) max_decimals = 0
+
+            if ( .not. present(decimals) ) then
+                decimals_ = max_decimals
+            else
+                if ( decimals < 0 ) then
+                    decimals_ = 0
+                else if ( decimals > max_decimals ) then
+                    decimals_ = max_decimals
+                else
+                    decimals_ = decimals
+                end if
+            end if
+
+            if ( e > 0 ) then
+                l = decimals_ + e + 10
+            else
+                l = decimals_ + 10
+            end if
+
+            allocate( character(len=l) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(f'//str(l)//'.'//str(decimals_)//')', decimal=decimal) x
+            x_str = trim(adjustl(str_tmp))
+
+            if ( extra > 0 ) then
+                do i = len(x_str)-1, 1, -1
+                    x_str(i:i) = '0'
+                    extra = extra - 1
+                    if ( extra == 0 ) exit
+                end do
+            end if
+        end if
+    end procedure str_r128
     module procedure str_r64
         integer :: i, e, max_decimals, decimals_, l, extra
 
@@ -1752,6 +2112,56 @@ submodule (io_mod) internal_io
         x_str = x_str//trim(adjustl(x(size(x))))
     end procedure to_str_charvec
 
+    module procedure to_str_1dr128
+        integer :: i, decimals_
+        character(len=:), allocatable :: delim_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(delim) ) then
+            if ( locale_ == 'us' ) then
+                delim_ = ','
+            else
+                delim_ = '.'
+            end if
+        else
+            delim_ = delim
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i), locale=locale_, fmt=fmt_, decimals=decimals_)//delim_
+        end do
+        x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_)
+    end procedure to_str_1dr128
     module procedure to_str_1dr64
         integer :: i, decimals_
         character(len=:), allocatable :: delim_
@@ -1922,6 +2332,128 @@ end submodule internal_io
 submodule (io_mod) file_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure to_file_1dr128
+        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_, hstat, dim_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+                hstat = 0
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
+                    header_ = ['']
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
+                else
+                    header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    if ( locale_ == 'us' ) then
+                        delim_ = ','
+                    else
+                        delim_ = '.'
+                    end if
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, dim=dim_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )      write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_1dr128
     module procedure to_file_1dr64
         character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
@@ -2167,6 +2699,86 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1dr32
 
+    module procedure to_file_2dr128
+        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
+                    header_ = ['']
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x, dim=2))//').'
+                else
+                    header_ = header
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( locale_ == 'us' ) then
+                    delim_ = ','
+                else
+                    delim_ = '.'
+                end if
+            else
+                delim_ = delim
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_2dr128
     module procedure to_file_2dr64
         character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
@@ -2328,6 +2940,25 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2dr32
 
+    module procedure to_file_3dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_3dr128
     module procedure to_file_3dr64
         character(len=:), allocatable :: ext
 
@@ -2367,6 +2998,25 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_3dr32
 
+    module procedure to_file_4dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_4dr128
     module procedure to_file_4dr64
         character(len=:), allocatable :: ext
 
@@ -2406,6 +3056,25 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_4dr32
 
+    module procedure to_file_5dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_5dr128
     module procedure to_file_5dr64
         character(len=:), allocatable :: ext
 
@@ -3009,6 +3678,68 @@ submodule (io_mod) file_io
     end procedure to_file_3di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_textfile_1dr128
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_1dr128
+    module procedure from_binaryfile_1dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_1dr128
     module procedure from_textfile_1dr64
         character(len=:), allocatable :: ext
         character(len=2) :: locale_
@@ -3134,6 +3865,68 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1dr32
 
+    module procedure from_textfile_2dr128
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_2dr128
+    module procedure from_binaryfile_2dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_2dr128
     module procedure from_textfile_2dr64
         character(len=:), allocatable :: ext
         character(len=2) :: locale_
@@ -3259,6 +4052,29 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2dr32
 
+    module procedure from_file_3dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_3dr128
     module procedure from_file_3dr64
         character(len=:), allocatable :: ext
 
@@ -3306,6 +4122,29 @@ submodule (io_mod) file_io
         end if
     end procedure from_file_3dr32
 
+    module procedure from_file_4dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_4dr128
     module procedure from_file_4dr64
         character(len=:), allocatable :: ext
 
@@ -3353,6 +4192,29 @@ submodule (io_mod) file_io
         end if
     end procedure from_file_4dr32
 
+    module procedure from_file_5dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_5dr128
     module procedure from_file_5dr64
         character(len=:), allocatable :: ext
 
@@ -4021,6 +4883,49 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure echo_string
 
+    module procedure to_text_1dr128
+        logical :: exists
+        integer :: file_unit, i
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i), locale=locale, fmt=fmt, decimals=decimals)
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, locale=locale, delim=delim, fmt=fmt, decimals=decimals)
+        end if
+
+        close(file_unit)
+    end procedure to_text_1dr128
     module procedure to_text_1dr64
         logical :: exists
         integer :: file_unit, i
@@ -4108,6 +5013,41 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure to_text_1dr32
 
+    module procedure to_text_2dr128
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            label = trim(adjustl(header(1)))
+            do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim
+            end do
+            write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+        else if ( size(header) == size(x, dim=2) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), locale=locale, delim=delim, fmt=fmt, decimals=decimals)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dr128
     module procedure to_text_2dr64
         logical :: exists
         integer :: file_unit, i, j
@@ -4494,6 +5434,136 @@ submodule (io_mod) text_io
     end procedure to_text_2di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_text_1dr128
+        logical :: exists
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, ind, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+        end if
+
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        if ( (n_rows > 1) .and. (n_columns > 1) ) then
+            error stop nl//'Error reading file "'//file_name//'". File data cannot fit into one-dimensional array.'
+            return
+        else if ( n_columns == 1 ) then
+            allocate( into(n_rows) )
+        else if ( n_rows == 1 ) then
+            allocate( into(n_columns) )
+        end if
+    
+        ind = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            if ( any(non_separating_chars == file(i:i)) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_1dr128
     module procedure from_text_1dr64
         logical :: exists
         integer :: file_unit, iostat
@@ -4755,6 +5825,135 @@ submodule (io_mod) text_io
         end do read_into
     end procedure from_text_1dr32
 
+    module procedure from_text_2dr128
+        logical :: exists
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, row, column, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+        end if
+
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        allocate( into(n_rows, n_columns) )
+    
+        row = 1
+        column = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            if ( any(non_separating_chars == file(i:i)) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_2dr128
     module procedure from_text_2dr64
         logical :: exists
         integer :: file_unit, iostat
@@ -6056,6 +7255,26 @@ end submodule text_io
 submodule (io_mod) binary_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure to_binary_1dr128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_1dr128
     module procedure to_binary_1dr64
         logical :: exists
         integer :: file_unit
@@ -6097,6 +7316,26 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_1dr32
 
+    module procedure to_binary_2dr128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_2dr128
     module procedure to_binary_2dr64
         logical :: exists
         integer :: file_unit
@@ -6138,6 +7377,26 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_2dr32
 
+    module procedure to_binary_3dr128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_3dr128
     module procedure to_binary_3dr64
         logical :: exists
         integer :: file_unit
@@ -6179,6 +7438,26 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_3dr32
 
+    module procedure to_binary_4dr128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_4dr128
     module procedure to_binary_4dr64
         logical :: exists
         integer :: file_unit
@@ -6220,6 +7499,26 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure to_binary_4dr32
 
+    module procedure to_binary_5dr128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_5dr128
     module procedure to_binary_5dr64
         logical :: exists
         integer :: file_unit
@@ -6505,6 +7804,32 @@ submodule (io_mod) binary_io
     end procedure to_binary_3di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_binary_1dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_1dr128
     module procedure from_binary_1dr64
         logical :: exists
         integer :: file_unit, iostat
@@ -6558,6 +7883,32 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_1dr32
 
+    module procedure from_binary_2dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_2dr128
     module procedure from_binary_2dr64
         logical :: exists
         integer :: file_unit, iostat
@@ -6611,6 +7962,32 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_2dr32
 
+    module procedure from_binary_3dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_3dr128
     module procedure from_binary_3dr64
         logical :: exists
         integer :: file_unit, iostat
@@ -6664,6 +8041,32 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_3dr32
 
+    module procedure from_binary_4dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_4dr128
     module procedure from_binary_4dr64
         logical :: exists
         integer :: file_unit, iostat
@@ -6717,6 +8120,32 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_4dr32
 
+    module procedure from_binary_5dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_5dr128
     module procedure from_binary_5dr64
         logical :: exists
         integer :: file_unit, iostat
