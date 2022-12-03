@@ -1,8 +1,9 @@
 !!---------------------------------------------------------------------------------------------------------------------
-!!  This module file contains common i/o procedures for arrays of real and integer type. Common operations include
-!!  printing arrays to stdout with a specified format, reading/writing arrays from/to text files and binary files.
-!!  Convenience functions for number -> string conversion are provided as well as vector -> string conversion with
-!!  a specified delimiter.
+!!  This module file contains common i/o procedures for arrays of real, integer, and character type. Common operations
+!!  include printing arrays to stdout with a specified format, reading/writing arrays from/to text files and binary
+!!  files. Convenience functions for number -> string conversion are provided as well as vector -> string conversion
+!!  with a specified delimiter. This module is F2018 compliant, has no external dependencies, and has a max line
+!!  length of 120.
 !!---------------------------------------------------------------------------------------------------------------------
 module io_mod
     use, intrinsic :: iso_fortran_env, only: real128,real64,real32, int64,int32,int16,int8, input_unit, output_unit
@@ -10,8 +11,8 @@ module io_mod
     private
 
     !! Public APIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public :: aprint, to_file, from_file, to_str                                                           !! Array I/O
-    public :: ext_of, echo, str                                                                           !! String I/O
+    public :: aprint, to_str, to_file, from_file                                                           !! Array I/O
+    public :: echo, str, ext_of                                                                           !! String I/O
     public :: nl                                                                                           !! Constants
 
     !! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
