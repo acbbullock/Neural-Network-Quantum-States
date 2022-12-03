@@ -145,12 +145,6 @@ module io_mod
     end interface
 
     interface to_str                                                                           !! Submodule internal_io
-        module pure function to_str_charvec(x, delim) result(x_str)
-            character(len=*), dimension(:), intent(in) :: x
-            character(len=*), intent(in) :: delim
-            character(len=:), allocatable :: x_str
-        end function to_str_charvec
-
         module pure function to_str_1dr128(x, locale, delim, fmt, decimals) result(x_str)
             real(real128), dimension(:), intent(in) :: x
             character(len=2), intent(in), optional :: locale
@@ -196,6 +190,12 @@ module io_mod
             character(len=*), intent(in), optional :: delim
             character(len=:), allocatable :: x_str
         end function to_str_1di8
+
+        module pure function to_str_charvec(x, delim) result(x_str)
+            character(len=*), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: delim
+            character(len=:), allocatable :: x_str
+        end function to_str_charvec
     end interface
 
     interface to_file                                                                              !! Submodule file_io
@@ -2523,16 +2523,6 @@ submodule (io_mod) internal_io
         x_str = trim(adjustl(str_tmp))
     end procedure str_i8
 
-    module procedure to_str_charvec
-        integer :: i
-
-        x_str = ''
-        do i = 1, size(x)-1
-            x_str = x_str//trim(adjustl(x(i)))//delim
-        end do
-        x_str = x_str//trim(adjustl(x(size(x))))
-    end procedure to_str_charvec
-
     module procedure to_str_1dr128
         integer :: i, decimals_
         character(len=:), allocatable :: delim_
@@ -2748,6 +2738,16 @@ submodule (io_mod) internal_io
         end do
         x_str = x_str//str(x(size(x)))
     end procedure to_str_1di8
+
+    module procedure to_str_charvec
+        integer :: i
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//trim(adjustl(x(i)))//delim
+        end do
+        x_str = x_str//trim(adjustl(x(size(x))))
+    end procedure to_str_charvec
 end submodule internal_io
 
 submodule (io_mod) file_io
