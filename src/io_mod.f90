@@ -36,6 +36,44 @@ module io_mod
                                                             'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z']
 
     interface aprint                                                                        !! Submodule array_printing
+        module impure subroutine aprint_1dc128(x, fmt, decimals, im)
+            complex(real128), dimension(:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine aprint_1dc128
+        module impure subroutine aprint_1dc64(x, fmt, decimals, im)
+            complex(real64), dimension(:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine aprint_1dc64
+        module impure subroutine aprint_1dc32(x, fmt, decimals, im)
+            complex(real32), dimension(:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine aprint_1dc32
+
+        module impure subroutine aprint_2dc128(x, fmt, decimals, im)
+            complex(real128), dimension(:,:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine aprint_2dc128
+        module impure subroutine aprint_2dc64(x, fmt, decimals, im)
+            complex(real64), dimension(:,:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine aprint_2dc64
+        module impure subroutine aprint_2dc32(x, fmt, decimals, im)
+            complex(real32), dimension(:,:), intent(in) :: x
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine aprint_2dc32
+
         module impure subroutine aprint_1dr128(x, fmt, decimals)
             real(real128), dimension(:), intent(in) :: x
             character(len=1), intent(in), optional :: fmt
@@ -104,6 +142,31 @@ module io_mod
     end interface
 
     interface str                                                                              !! Submodule internal_io
+        module pure function str_c128(x, locale, fmt, decimals, im) result(x_str)
+            complex(real128), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+            character(len=:), allocatable :: x_str
+        end function str_c128
+        module pure function str_c64(x, locale, fmt, decimals, im) result(x_str)
+            complex(real64), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+            character(len=:), allocatable :: x_str
+        end function str_c64
+        module pure function str_c32(x, locale, fmt, decimals, im) result(x_str)
+            complex(real32), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+            character(len=:), allocatable :: x_str
+        end function str_c32
+
         module pure function str_r128(x, locale, fmt, decimals) result(x_str)
             real(real128), intent(in) :: x
             character(len=2), intent(in), optional :: locale
@@ -145,6 +208,34 @@ module io_mod
     end interface
 
     interface to_str                                                                           !! Submodule internal_io
+        module pure function to_str_1dc128(x, locale, delim, fmt, decimals, im) result(x_str)
+            complex(real128), dimension(:), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+            character(len=:), allocatable :: x_str
+        end function to_str_1dc128
+        module pure function to_str_1dc64(x, locale, delim, fmt, decimals, im) result(x_str)
+            complex(real64), dimension(:), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+            character(len=:), allocatable :: x_str
+        end function to_str_1dc64
+        module pure function to_str_1dc32(x, locale, delim, fmt, decimals, im) result(x_str)
+            complex(real32), dimension(:), intent(in) :: x
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+            character(len=:), allocatable :: x_str
+        end function to_str_1dc32
+
         module pure function to_str_1dr128(x, locale, delim, fmt, decimals) result(x_str)
             real(real128), dimension(:), intent(in) :: x
             character(len=2), intent(in), optional :: locale
@@ -191,14 +282,144 @@ module io_mod
             character(len=:), allocatable :: x_str
         end function to_str_1di8
 
-        module pure function to_str_charvec(x, delim) result(x_str)
+        module pure function to_str_1dchar(x, delim) result(x_str)
             character(len=*), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: delim
             character(len=:), allocatable :: x_str
-        end function to_str_charvec
+        end function to_str_1dchar
     end interface
 
     interface to_file                                                                              !! Submodule file_io
+        module impure subroutine to_file_1dc128(x, file_name, header, dim, locale, delim, fmt, decimals, im)
+            complex(real128), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine to_file_1dc128
+        module impure subroutine to_file_1dc64(x, file_name, header, dim, locale, delim, fmt, decimals, im)
+            complex(real64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine to_file_1dc64
+        module impure subroutine to_file_1dc32(x, file_name, header, dim, locale, delim, fmt, decimals, im)
+            complex(real32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine to_file_1dc32
+
+        module impure subroutine to_file_2dc128(x, file_name, header, locale, delim, fmt, decimals, im)
+            complex(real128), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine to_file_2dc128
+        module impure subroutine to_file_2dc64(x, file_name, header, locale, delim, fmt, decimals, im)
+            complex(real64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine to_file_2dc64
+        module impure subroutine to_file_2dc32(x, file_name, header, locale, delim, fmt, decimals, im)
+            complex(real32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: delim
+            character(len=1), intent(in), optional :: fmt
+            integer, intent(in), optional :: decimals
+            character(len=*), intent(in), optional :: im
+        end subroutine to_file_2dc32
+
+        module impure subroutine to_file_3dc128(x, file_name)
+            complex(real128), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3dc128
+        module impure subroutine to_file_3dc64(x, file_name)
+            complex(real64), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3dc64
+        module impure subroutine to_file_3dc32(x, file_name)
+            complex(real32), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_3dc32
+
+        module impure subroutine to_file_4dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_4dc128
+        module impure subroutine to_file_4dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_4dc64
+        module impure subroutine to_file_4dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_4dc32
+
+        module impure subroutine to_file_5dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_5dc128
+        module impure subroutine to_file_5dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_5dc64
+        module impure subroutine to_file_5dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_5dc32
+
+        module impure subroutine to_file_6dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_6dc128
+        module impure subroutine to_file_6dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_6dc64
+        module impure subroutine to_file_6dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_6dc32
+
+        module impure subroutine to_file_7dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_7dc128
+        module impure subroutine to_file_7dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_7dc64
+        module impure subroutine to_file_7dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_file_7dc32
+
         module impure subroutine to_file_1dr128(x, file_name, header, dim, locale, delim, fmt, decimals)
             real(real128), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -817,6 +1038,71 @@ module io_mod
     end interface
 
     interface to_text                                                                              !! Submodule text_io
+        module impure subroutine to_text_1dc128(x, file_name, header, dim, locale, delim, fmt, decimals, im)
+            complex(real128), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+            character(len=*), intent(in) :: im
+        end subroutine to_text_1dc128
+        module impure subroutine to_text_1dc64(x, file_name, header, dim, locale, delim, fmt, decimals, im)
+            complex(real64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+            character(len=*), intent(in) :: im
+        end subroutine to_text_1dc64
+        module impure subroutine to_text_1dc32(x, file_name, header, dim, locale, delim, fmt, decimals, im)
+            complex(real32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+            character(len=*), intent(in) :: im
+        end subroutine to_text_1dc32
+
+        module impure subroutine to_text_2dc128(x, file_name, header, locale, delim, fmt, decimals, im)
+            complex(real128), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+            character(len=*), intent(in) :: im
+        end subroutine to_text_2dc128
+        module impure subroutine to_text_2dc64(x, file_name, header, locale, delim, fmt, decimals, im)
+            complex(real64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+            character(len=*), intent(in) :: im
+        end subroutine to_text_2dc64
+        module impure subroutine to_text_2dc32(x, file_name, header, locale, delim, fmt, decimals, im)
+            complex(real32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: delim
+            character(len=1), intent(in) :: fmt
+            integer, intent(in) :: decimals
+            character(len=*), intent(in) :: im
+        end subroutine to_text_2dc32
+
         module impure subroutine to_text_1dr128(x, file_name, header, dim, locale, delim, fmt, decimals)
             real(real128), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -1022,6 +1308,97 @@ module io_mod
     end interface
 
     interface to_binary                                                                          !! Submodule binary_io
+        module impure subroutine to_binary_1dc128(x, file_name)
+            complex(real128), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_1dc128
+        module impure subroutine to_binary_1dc64(x, file_name)
+            complex(real64), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_1dc64
+        module impure subroutine to_binary_1dc32(x, file_name)
+            complex(real32), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_1dc32
+
+        module impure subroutine to_binary_2dc128(x, file_name)
+            complex(real128), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_2dc128
+        module impure subroutine to_binary_2dc64(x, file_name)
+            complex(real64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_2dc64
+        module impure subroutine to_binary_2dc32(x, file_name)
+            complex(real32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_2dc32
+
+        module impure subroutine to_binary_3dc128(x, file_name)
+            complex(real128), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_3dc128
+        module impure subroutine to_binary_3dc64(x, file_name)
+            complex(real64), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_3dc64
+        module impure subroutine to_binary_3dc32(x, file_name)
+            complex(real32), dimension(:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_3dc32
+
+        module impure subroutine to_binary_4dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_4dc128
+        module impure subroutine to_binary_4dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_4dc64
+        module impure subroutine to_binary_4dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_4dc32
+
+        module impure subroutine to_binary_5dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_5dc128
+        module impure subroutine to_binary_5dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_5dc64
+        module impure subroutine to_binary_5dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_5dc32
+
+        module impure subroutine to_binary_6dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_6dc128
+        module impure subroutine to_binary_6dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_6dc64
+        module impure subroutine to_binary_6dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_6dc32
+
+        module impure subroutine to_binary_7dc128(x, file_name)
+            complex(real128), dimension(:,:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_7dc128
+        module impure subroutine to_binary_7dc64(x, file_name)
+            complex(real64), dimension(:,:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_7dc64
+        module impure subroutine to_binary_7dc32(x, file_name)
+            complex(real32), dimension(:,:,:,:,:,:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+        end subroutine to_binary_7dc32
+
         module impure subroutine to_binary_1dr128(x, file_name)
             real(real128), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
@@ -1518,6 +1895,305 @@ end module io_mod
 
 submodule (io_mod) array_printing
     contains
+    module procedure aprint_1dc128
+        character(len=:), allocatable, dimension(:) :: x_str
+        character(len=:), allocatable :: im_
+        character(len=1) :: fmt_
+        integer :: i, n_rows, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = 'j'
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        n_rows = size(x)
+
+        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_, im=im_) )
+
+        if ( n_rows > 1 ) then
+            do concurrent (i = 2:n_rows)
+                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+    end procedure aprint_1dc128
+    module procedure aprint_1dc64
+        character(len=:), allocatable, dimension(:) :: x_str
+        character(len=:), allocatable :: im_
+        character(len=1) :: fmt_
+        integer :: i, n_rows, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = 'j'
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        n_rows = size(x)
+
+        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_, im=im_) )
+
+        if ( n_rows > 1 ) then
+            do concurrent (i = 2:n_rows)
+                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+    end procedure aprint_1dc64
+    module procedure aprint_1dc32
+        character(len=:), allocatable, dimension(:) :: x_str
+        character(len=:), allocatable :: im_
+        character(len=1) :: fmt_
+        integer :: i, n_rows, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = 'j'
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        n_rows = size(x)
+
+        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_, im=im_) )
+
+        if ( n_rows > 1 ) then
+            do concurrent (i = 2:n_rows)
+                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+    end procedure aprint_1dc32
+
+    module procedure aprint_2dc128
+        character(len=:), allocatable, dimension(:,:) :: x_str
+        character(len=:), allocatable :: im_
+        character(len=1) :: fmt_
+        integer :: i, j, n_rows, n_columns, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = 'j'
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        n_rows = size(x, dim=1)
+        n_columns = size(x, dim=2)
+
+        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_, im=im_) )
+
+        do concurrent (j = 1:n_columns, i = 1:n_rows)
+            x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_, im=im_)
+        end do
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+    end procedure aprint_2dc128
+    module procedure aprint_2dc64
+        character(len=:), allocatable, dimension(:,:) :: x_str
+        character(len=:), allocatable :: im_
+        character(len=1) :: fmt_
+        integer :: i, j, n_rows, n_columns, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = 'j'
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        n_rows = size(x, dim=1)
+        n_columns = size(x, dim=2)
+
+        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_, im=im_) )
+
+        do concurrent (j = 1:n_columns, i = 1:n_rows)
+            x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_, im=im_)
+        end do
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+    end procedure aprint_2dc64
+    module procedure aprint_2dc32
+        character(len=:), allocatable, dimension(:,:) :: x_str
+        character(len=:), allocatable :: im_
+        character(len=1) :: fmt_
+        integer :: i, j, n_rows, n_columns, decimals_
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 1
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = 'j'
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        n_rows = size(x, dim=1)
+        n_columns = size(x, dim=2)
+
+        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_, im=im_) )
+
+        do concurrent (j = 1:n_columns, i = 1:n_rows)
+            x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_, im=im_)
+        end do
+
+        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
+
+        if ( n_rows == 1 ) return
+
+        if ( n_rows > 2 ) then
+            do i = 2, n_rows - 1
+                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
+            end do
+        end if
+
+        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+    end procedure aprint_2dc32
+
     module procedure aprint_1dr128
         character(len=:), allocatable, dimension(:) :: x_str
         character(len=1) :: fmt_
@@ -2179,6 +2855,166 @@ end submodule array_printing
 
 submodule (io_mod) internal_io
     contains
+    module procedure str_c128
+        integer :: decimals_
+        character(len=:), allocatable :: im_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = ''
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        if ( im_ == '' ) then
+            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//','// &
+                         str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
+        else
+            if ( x%im < 0 ) then
+                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
+                        str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            else
+                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
+                        str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            end if
+        end if
+    end procedure str_c128
+    module procedure str_c64
+        integer :: decimals_
+        character(len=:), allocatable :: im_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = ''
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        if ( im_ == '' ) then
+            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//','// &
+                         str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
+        else
+            if ( x%im < 0 ) then
+                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
+                        str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            else
+                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
+                        str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            end if
+        end if
+    end procedure str_c64
+    module procedure str_c32
+        integer :: decimals_
+        character(len=:), allocatable :: im_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = ''
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        if ( im_ == '' ) then
+            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//','// &
+                         str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
+        else
+            if ( x%im < 0 ) then
+                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
+                        str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            else
+                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
+                        str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            end if
+        end if
+    end procedure str_c32
+
     module procedure str_r128
         integer :: i, e, max_decimals, decimals_, l, extra
 
@@ -2523,6 +3359,175 @@ submodule (io_mod) internal_io
         x_str = trim(adjustl(str_tmp))
     end procedure str_i8
 
+    module procedure to_str_1dc128
+        integer :: i, decimals_
+        character(len=:), allocatable :: delim_, im_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(delim) ) then
+            if ( locale_ == 'us' ) then
+                delim_ = ','
+            else
+                delim_ = '.'
+            end if
+        else
+            delim_ = delim
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = ''
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)//delim_
+        end do
+        x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)
+    end procedure to_str_1dc128
+    module procedure to_str_1dc64
+        integer :: i, decimals_
+        character(len=:), allocatable :: delim_, im_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(delim) ) then
+            if ( locale_ == 'us' ) then
+                delim_ = ','
+            else
+                delim_ = '.'
+            end if
+        else
+            delim_ = delim
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = ''
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)//delim_
+        end do
+        x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)
+    end procedure to_str_1dc64
+    module procedure to_str_1dc32
+        integer :: i, decimals_
+        character(len=:), allocatable :: delim_, im_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+
+        if ( .not. present(locale) ) then
+            locale_ = 'us'
+        else
+            if ( (locale == 'us') .or. (locale == 'eu') ) then
+                locale_ = locale
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(delim) ) then
+            if ( locale_ == 'us' ) then
+                delim_ = ','
+            else
+                delim_ = '.'
+            end if
+        else
+            delim_ = delim
+        end if
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'e'
+        else
+            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( .not. present(decimals) ) then
+            decimals_ = 150
+        else
+            decimals_ = decimals
+        end if
+
+        if ( .not. present(im) ) then
+            im_ = ''
+        else
+            im_ = trim(adjustl(im))
+        end if
+
+        x_str = ''
+        do i = 1, size(x)-1
+            x_str = x_str//str(x(i), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)//delim_
+        end do
+        x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)
+    end procedure to_str_1dc32
+
     module procedure to_str_1dr128
         integer :: i, decimals_
         character(len=:), allocatable :: delim_
@@ -2739,7 +3744,7 @@ submodule (io_mod) internal_io
         x_str = x_str//str(x(size(x)))
     end procedure to_str_1di8
 
-    module procedure to_str_charvec
+    module procedure to_str_1dchar
         integer :: i
 
         x_str = ''
@@ -2747,12 +3752,952 @@ submodule (io_mod) internal_io
             x_str = x_str//trim(adjustl(x(i)))//delim
         end do
         x_str = x_str//trim(adjustl(x(size(x))))
-    end procedure to_str_charvec
+    end procedure to_str_1dchar
 end submodule internal_io
 
 submodule (io_mod) file_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure to_file_1dc128
+        character(len=:), allocatable :: ext, delim_, im_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_, hstat, dim_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+                hstat = 0
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
+                    header_ = ['']
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
+                else
+                    header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    if ( locale_ == 'us' ) then
+                        delim_ = ','
+                    else
+                        delim_ = '.'
+                    end if
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = trim(adjustl(im))
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, dim=dim_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_, im=im_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )      write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            if ( present(im) )       write(*,'(a)') nl//'WARNING: im not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_1dc128
+    module procedure to_file_1dc64
+        character(len=:), allocatable :: ext, delim_, im_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_, hstat, dim_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+                hstat = 0
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
+                    header_ = ['']
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
+                else
+                    header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    if ( locale_ == 'us' ) then
+                        delim_ = ','
+                    else
+                        delim_ = '.'
+                    end if
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = trim(adjustl(im))
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, dim=dim_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_, im=im_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )      write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            if ( present(im) )       write(*,'(a)') nl//'WARNING: im not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_1dc64
+    module procedure to_file_1dc32
+        character(len=:), allocatable :: ext, delim_, im_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_, hstat, dim_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+                hstat = 0
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
+                    header_ = ['']
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
+                else
+                    header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    if ( locale_ == 'us' ) then
+                        delim_ = ','
+                    else
+                        delim_ = '.'
+                    end if
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = trim(adjustl(im))
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, dim=dim_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_, im=im_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(dim) )      write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            if ( present(im) )       write(*,'(a)') nl//'WARNING: im not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_1dc32
+
+    module procedure to_file_2dc128
+        character(len=:), allocatable :: ext, delim_, im_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
+                    header_ = ['']
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x, dim=2))//').'
+                else
+                    header_ = header
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( locale_ == 'us' ) then
+                    delim_ = ','
+                else
+                    delim_ = '.'
+                end if
+            else
+                delim_ = delim
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = trim(adjustl(im))
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_, im=im_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            if ( present(im) )       write(*,'(a)') nl//'WARNING: im not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_2dc128
+    module procedure to_file_2dc64
+        character(len=:), allocatable :: ext, delim_, im_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
+                    header_ = ['']
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x, dim=2))//').'
+                else
+                    header_ = header
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( locale_ == 'us' ) then
+                    delim_ = ','
+                else
+                    delim_ = '.'
+                end if
+            else
+                delim_ = delim
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = trim(adjustl(im))
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_, im=im_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            if ( present(im) )       write(*,'(a)') nl//'WARNING: im not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_2dc64
+    module procedure to_file_2dc32
+        character(len=:), allocatable :: ext, delim_, im_
+        character(len=:), allocatable, dimension(:) :: header_
+        character(len=2) :: locale_
+        character(len=1) :: fmt_
+        integer :: decimals_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
+                    header_ = ['']
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x, dim=2))//').'
+                else
+                    header_ = header
+                end if
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( locale_ == 'us' ) then
+                    delim_ = ','
+                else
+                    delim_ = '.'
+                end if
+            else
+                delim_ = delim
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'e'
+            else
+                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'e'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
+                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                end if
+            end if
+
+            if ( .not. present(decimals) ) then
+                decimals_ = 150
+            else
+                decimals_ = decimals
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = trim(adjustl(im))
+            end if
+            
+            call to_text( x=x, file_name=file_name, header=header_, locale=locale_, delim=delim_, &
+                          fmt=fmt_, decimals=decimals_, im=im_ )
+        else if ( any(binary_ext == ext) ) then
+            if ( present(header) )   write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
+            if ( present(locale) )   write(*,'(a)') nl//'WARNING: locale not supported for file type "'//ext//'".'
+            if ( present(delim) )    write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )      write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
+            if ( present(decimals) ) write(*,'(a)') nl//'WARNING: decimals not supported for file type "'//ext//'".'
+            if ( present(im) )       write(*,'(a)') nl//'WARNING: im not supported for file type "'//ext//'".'
+
+            call to_binary(x=x, file_name=file_name)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                                to_str(binary_ext, delim=' ')
+        end if
+    end procedure to_file_2dc32
+
+    module procedure to_file_3dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_3dc128
+    module procedure to_file_3dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_3dc64
+    module procedure to_file_3dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_3dc32
+
+    module procedure to_file_4dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_4dc128
+    module procedure to_file_4dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_4dc64
+    module procedure to_file_4dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_4dc32
+
+    module procedure to_file_5dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_5dc128
+    module procedure to_file_5dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_5dc64
+    module procedure to_file_5dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_5dc32
+
+    module procedure to_file_6dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_6dc128
+    module procedure to_file_6dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_6dc64
+    module procedure to_file_6dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_6dc32
+
+    module procedure to_file_7dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_7dc128
+    module procedure to_file_7dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_7dc64
+    module procedure to_file_7dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            call to_binary(x=x, file_name=file_name)
+        else
+            if ( any(text_ext == ext) ) then
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'". Cannot write array of '// &
+                                    'dimension ('//str(rank(x))//') to text.'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            else
+                write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                    'due to unsupported file extension "'//ext//'".'// &
+                                nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure to_file_7dc32
+
     module procedure to_file_1dr128
         character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
@@ -6240,6 +8185,245 @@ submodule (io_mod) text_io
         close(file_unit)
     end procedure echo_string
 
+    module procedure to_text_1dc128
+        logical :: exists
+        integer :: file_unit, i
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i), locale=locale, fmt=fmt, decimals=decimals, im=im)
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, locale=locale, delim=delim, fmt=fmt, decimals=decimals, im=im)
+        end if
+
+        close(file_unit)
+    end procedure to_text_1dc128
+    module procedure to_text_1dc64
+        logical :: exists
+        integer :: file_unit, i
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i), locale=locale, fmt=fmt, decimals=decimals, im=im)
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, locale=locale, delim=delim, fmt=fmt, decimals=decimals, im=im)
+        end if
+
+        close(file_unit)
+    end procedure to_text_1dc64
+    module procedure to_text_1dc32
+        logical :: exists
+        integer :: file_unit, i
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') str(x(i), locale=locale, fmt=fmt, decimals=decimals, im=im)
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, locale=locale, delim=delim, fmt=fmt, decimals=decimals, im=im)
+        end if
+
+        close(file_unit)
+    end procedure to_text_1dc32
+
+    module procedure to_text_2dc128
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            label = trim(adjustl(header(1)))
+            do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim
+            end do
+            write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+        else if ( size(header) == size(x, dim=2) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), locale=locale, delim=delim, fmt=fmt, &
+                                                            decimals=decimals, im=im)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dc128
+    module procedure to_text_2dc64
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            label = trim(adjustl(header(1)))
+            do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim
+            end do
+            write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+        else if ( size(header) == size(x, dim=2) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), locale=locale, delim=delim, fmt=fmt, &
+                                                            decimals=decimals, im=im)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dc64
+    module procedure to_text_2dc32
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            label = trim(adjustl(header(1)))
+            do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim
+            end do
+            write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+        else if ( size(header) == size(x, dim=2) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), locale=locale, delim=delim, fmt=fmt, &
+                                                            decimals=decimals, im=im)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dc32
+
     module procedure to_text_1dr128
         logical :: exists
         integer :: file_unit, i
@@ -8612,6 +10796,433 @@ end submodule text_io
 submodule (io_mod) binary_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure to_binary_1dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_1dc128
+    module procedure to_binary_1dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_1dc64
+    module procedure to_binary_1dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_1dc32
+
+    module procedure to_binary_2dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_2dc128
+    module procedure to_binary_2dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_2dc64
+    module procedure to_binary_2dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_2dc32
+
+    module procedure to_binary_3dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_3dc128
+    module procedure to_binary_3dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_3dc64
+    module procedure to_binary_3dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_3dc32
+
+    module procedure to_binary_4dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_4dc128
+    module procedure to_binary_4dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_4dc64
+    module procedure to_binary_4dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_4dc32
+
+    module procedure to_binary_5dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_5dc128
+    module procedure to_binary_5dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_5dc64
+    module procedure to_binary_5dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_5dc32
+
+    module procedure to_binary_6dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_6dc128
+    module procedure to_binary_6dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_6dc64
+    module procedure to_binary_6dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_6dc32
+
+    module procedure to_binary_7dc128
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_7dc128
+    module procedure to_binary_7dc64
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+
+        close(file_unit)
+    end procedure to_binary_7dc64
+    module procedure to_binary_7dc32
+        logical :: exists
+        integer :: file_unit
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='unformatted', &
+                  action='write', access='stream' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='unformatted', &
+                  action='write', access='stream' )
+        end if
+
+        write(unit=file_unit) x
+        
+        close(file_unit)
+    end procedure to_binary_7dc32
+
     module procedure to_binary_1dr128
         logical :: exists
         integer :: file_unit
