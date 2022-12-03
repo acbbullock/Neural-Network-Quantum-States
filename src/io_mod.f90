@@ -2857,7 +2857,7 @@ submodule (io_mod) internal_io
     contains
     module procedure str_c128
         integer :: decimals_
-        character(len=:), allocatable :: im_
+        character(len=:), allocatable :: im_, sep
         character(len=2) :: locale_
         character(len=1) :: fmt_
 
@@ -2896,7 +2896,12 @@ submodule (io_mod) internal_io
         end if
 
         if ( im_ == '' ) then
-            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//','// &
+            if ( locale_ == 'us' ) then
+                sep = ','
+            else
+                sep = ';'
+            end if
+            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//sep// &
                          str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
         else
             if ( x%im < 0 ) then
@@ -2910,7 +2915,7 @@ submodule (io_mod) internal_io
     end procedure str_c128
     module procedure str_c64
         integer :: decimals_
-        character(len=:), allocatable :: im_
+        character(len=:), allocatable :: im_, sep
         character(len=2) :: locale_
         character(len=1) :: fmt_
 
@@ -2949,7 +2954,12 @@ submodule (io_mod) internal_io
         end if
 
         if ( im_ == '' ) then
-            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//','// &
+            if ( locale_ == 'us' ) then
+                sep = ','
+            else
+                sep = ';'
+            end if
+            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//sep// &
                          str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
         else
             if ( x%im < 0 ) then
@@ -2963,7 +2973,7 @@ submodule (io_mod) internal_io
     end procedure str_c64
     module procedure str_c32
         integer :: decimals_
-        character(len=:), allocatable :: im_
+        character(len=:), allocatable :: im_, sep
         character(len=2) :: locale_
         character(len=1) :: fmt_
 
@@ -3002,7 +3012,12 @@ submodule (io_mod) internal_io
         end if
 
         if ( im_ == '' ) then
-            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//','// &
+            if ( locale_ == 'us' ) then
+                sep = ','
+            else
+                sep = ';'
+            end if
+            x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//sep// &
                          str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
         else
             if ( x%im < 0 ) then
@@ -3380,7 +3395,7 @@ submodule (io_mod) internal_io
             if ( locale_ == 'us' ) then
                 delim_ = ','
             else
-                delim_ = '.'
+                delim_ = ';'
             end if
         else
             delim_ = delim
@@ -3436,7 +3451,7 @@ submodule (io_mod) internal_io
             if ( locale_ == 'us' ) then
                 delim_ = ','
             else
-                delim_ = '.'
+                delim_ = ';'
             end if
         else
             delim_ = delim
@@ -3492,7 +3507,7 @@ submodule (io_mod) internal_io
             if ( locale_ == 'us' ) then
                 delim_ = ','
             else
-                delim_ = '.'
+                delim_ = ';'
             end if
         else
             delim_ = delim
@@ -3549,7 +3564,7 @@ submodule (io_mod) internal_io
             if ( locale_ == 'us' ) then
                 delim_ = ','
             else
-                delim_ = '.'
+                delim_ = ';'
             end if
         else
             delim_ = delim
@@ -3599,7 +3614,7 @@ submodule (io_mod) internal_io
             if ( locale_ == 'us' ) then
                 delim_ = ','
             else
-                delim_ = '.'
+                delim_ = ';'
             end if
         else
             delim_ = delim
@@ -3649,7 +3664,7 @@ submodule (io_mod) internal_io
             if ( locale_ == 'us' ) then
                 delim_ = ','
             else
-                delim_ = '.'
+                delim_ = ';'
             end if
         else
             delim_ = delim
@@ -3833,7 +3848,7 @@ submodule (io_mod) file_io
                     if ( locale_ == 'us' ) then
                         delim_ = ','
                     else
-                        delim_ = '.'
+                        delim_ = ';'
                     end if
                 end if
             else
@@ -3962,7 +3977,7 @@ submodule (io_mod) file_io
                     if ( locale_ == 'us' ) then
                         delim_ = ','
                     else
-                        delim_ = '.'
+                        delim_ = ';'
                     end if
                 end if
             else
@@ -4091,7 +4106,7 @@ submodule (io_mod) file_io
                     if ( locale_ == 'us' ) then
                         delim_ = ','
                     else
-                        delim_ = '.'
+                        delim_ = ';'
                     end if
                 end if
             else
@@ -4185,7 +4200,7 @@ submodule (io_mod) file_io
                 if ( locale_ == 'us' ) then
                     delim_ = ','
                 else
-                    delim_ = '.'
+                    delim_ = ';'
                 end if
             else
                 delim_ = delim
@@ -4272,7 +4287,7 @@ submodule (io_mod) file_io
                 if ( locale_ == 'us' ) then
                     delim_ = ','
                 else
-                    delim_ = '.'
+                    delim_ = ';'
                 end if
             else
                 delim_ = delim
@@ -4359,7 +4374,7 @@ submodule (io_mod) file_io
                 if ( locale_ == 'us' ) then
                     delim_ = ','
                 else
-                    delim_ = '.'
+                    delim_ = ';'
                 end if
             else
                 delim_ = delim
@@ -4773,7 +4788,7 @@ submodule (io_mod) file_io
                     if ( locale_ == 'us' ) then
                         delim_ = ','
                     else
-                        delim_ = '.'
+                        delim_ = ';'
                     end if
                 end if
             else
@@ -4895,7 +4910,7 @@ submodule (io_mod) file_io
                     if ( locale_ == 'us' ) then
                         delim_ = ','
                     else
-                        delim_ = '.'
+                        delim_ = ';'
                     end if
                 end if
             else
@@ -5017,7 +5032,7 @@ submodule (io_mod) file_io
                     if ( locale_ == 'us' ) then
                         delim_ = ','
                     else
-                        delim_ = '.'
+                        delim_ = ';'
                     end if
                 end if
             else
@@ -5104,7 +5119,7 @@ submodule (io_mod) file_io
                 if ( locale_ == 'us' ) then
                     delim_ = ','
                 else
-                    delim_ = '.'
+                    delim_ = ';'
                 end if
             else
                 delim_ = delim
@@ -5184,7 +5199,7 @@ submodule (io_mod) file_io
                 if ( locale_ == 'us' ) then
                     delim_ = ','
                 else
-                    delim_ = '.'
+                    delim_ = ';'
                 end if
             else
                 delim_ = delim
@@ -5264,7 +5279,7 @@ submodule (io_mod) file_io
                 if ( locale_ == 'us' ) then
                     delim_ = ','
                 else
-                    delim_ = '.'
+                    delim_ = ';'
                 end if
             else
                 delim_ = delim
