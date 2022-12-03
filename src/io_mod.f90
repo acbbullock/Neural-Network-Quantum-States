@@ -1,9 +1,9 @@
 !!---------------------------------------------------------------------------------------------------------------------
-!!  This module file contains common i/o procedures for arrays of real, integer, and character type. Common operations
-!!  include printing arrays to stdout with a specified format, reading/writing arrays from/to text files and binary
-!!  files. Convenience functions for number -> string conversion are provided as well as vector -> string conversion
-!!  with a specified delimiter. This module is F2018 compliant, has no external dependencies, and has a max line
-!!  length of 120.
+!!  This module file contains common i/o procedures for arrays of complex, real, integer, and character type. Common
+!!  operations include printing array slices to stdout, reading/writing multidimensional arrays from/to text files
+!!  and binary files. Convenience functions for number -> string conversion are provided as well as vector -> string
+!!  conversion with a specified delimiter. This module is F2018 compliant, has no external dependencies, and has a max
+!!  line length of 120.
 !!---------------------------------------------------------------------------------------------------------------------
 module io_mod
     use, intrinsic :: iso_fortran_env, only: real128,real64,real32, int64,int32,int16,int8, input_unit, output_unit
@@ -18,22 +18,26 @@ module io_mod
     !! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     character(len=1), parameter :: nl = new_line('a')                                             !! New line character
 
-    character(len=*), dimension(*), parameter :: text_ext = ['csv', 'txt', 'ods', 'odf', 'odm', 'odt', 'xls', 'xlsx', &
-                                                             'doc', 'docx', 'md', 'log', 'rtf', 'org', 'embed']
+    character(len=*), dimension(*), parameter :: text_ext = [ 'csv', 'txt', 'ods', 'odf', 'odm', 'odt',  &
+                                                              'xls', 'xlsx', 'doc', 'docx', 'md', 'log', &
+                                                              'rtf', 'org', 'embed' ]
 
-    character(len=*), dimension(*), parameter :: binary_ext = ['dat', 'bin']
+    character(len=*), dimension(*), parameter :: binary_ext = [ 'dat', 'bin' ]
 
-    character(len=*), dimension(*), parameter :: non_separating_chars_us = ['0', '1', '2', '3', '4', '5', '6', '7', &
-                                                                            '8', '9', '.', 'e', 'E', '+', '-', '"']
+    character(len=*), dimension(*), parameter :: non_separating_chars_us = [ '0', '1', '2', '3', '4', '5', '6', '7', &
+                                                                             '8', '9', '.', 'e', 'E', '+', '-', '"', &
+                                                                             '(', ')' ]
                                                                             
-    character(len=*), dimension(*), parameter :: non_separating_chars_eu = ['0', '1', '2', '3', '4', '5', '6', '7', &
-                                                                            '8', '9', ',', 'e', 'E', '+', '-', '"']
+    character(len=*), dimension(*), parameter :: non_separating_chars_eu = [ '0', '1', '2', '3', '4', '5', '6', '7', &
+                                                                             '8', '9', ',', 'e', 'E', '+', '-', '"', &
+                                                                             '(', ')' ]
 
-    character(len=*), dimension(*), parameter :: letters = ['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', &
-                                                            'f', 'F', 'g', 'G', 'h', 'H', 'i', 'I', 'j', 'J', &
-                                                            'k', 'K', 'l', 'L', 'm', 'M', 'n', 'N', 'o', 'O', &
-                                                            'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', &
-                                                            'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z']
+    character(len=*), dimension(*), parameter :: letters = [ 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', &
+                                                             'f', 'F', 'g', 'G', 'h', 'H', 'i', 'I', 'j', 'J', &
+                                                             'k', 'K', 'l', 'L', 'm', 'M', 'n', 'N', 'o', 'O', &
+                                                             'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', &
+                                                             'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', &
+                                                             'z', 'Z' ]
 
     interface aprint                                                                        !! Submodule array_printing
         module impure subroutine aprint_1dc128(x, fmt, decimals, im)
@@ -685,6 +689,154 @@ module io_mod
     end interface
 
     interface from_file                                                                            !! Submodule file_io
+        module impure subroutine from_textfile_1dc128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_1dc128
+        module impure subroutine from_binaryfile_1dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_1dc128
+        module impure subroutine from_textfile_1dc64(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_1dc64
+        module impure subroutine from_binaryfile_1dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_1dc64
+        module impure subroutine from_textfile_1dc32(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_1dc32
+        module impure subroutine from_binaryfile_1dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_1dc32
+
+        module impure subroutine from_textfile_2dc128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_2dc128
+        module impure subroutine from_binaryfile_2dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_2dc128
+        module impure subroutine from_textfile_2dc64(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_2dc64
+        module impure subroutine from_binaryfile_2dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_2dc64
+        module impure subroutine from_textfile_2dc32(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in), optional :: header
+            character(len=2), intent(in), optional :: locale
+        end subroutine from_textfile_2dc32
+        module impure subroutine from_binaryfile_2dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binaryfile_2dc32
+
+        module impure subroutine from_file_3dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_3dc128
+        module impure subroutine from_file_3dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_3dc64
+        module impure subroutine from_file_3dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_3dc32
+
+        module impure subroutine from_file_4dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_4dc128
+        module impure subroutine from_file_4dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_4dc64
+        module impure subroutine from_file_4dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_4dc32
+
+        module impure subroutine from_file_5dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_5dc128
+        module impure subroutine from_file_5dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_5dc64
+        module impure subroutine from_file_5dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_5dc32
+
+        module impure subroutine from_file_6dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_6dc128
+        module impure subroutine from_file_6dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_6dc64
+        module impure subroutine from_file_6dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_6dc32
+
+        module impure subroutine from_file_7dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_7dc128
+        module impure subroutine from_file_7dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_7dc64
+        module impure subroutine from_file_7dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_7dc32
+
         module impure subroutine from_textfile_1dr128(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
@@ -1218,6 +1370,44 @@ module io_mod
     end interface
 
     interface from_text                                                                            !! Submodule text_io
+        module impure subroutine from_text_1dc128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_1dc128
+        module impure subroutine from_text_1dc64(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_1dc64
+        module impure subroutine from_text_1dc32(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_1dc32
+
+        module impure subroutine from_text_2dc128(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_2dc128
+        module impure subroutine from_text_2dc64(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_2dc64
+        module impure subroutine from_text_2dc32(file_name, into, header, locale)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:), intent(out) :: into
+            logical, intent(in) :: header
+            character(len=2), intent(in) :: locale
+        end subroutine from_text_2dc32
+
         module impure subroutine from_text_1dr128(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
@@ -1611,6 +1801,118 @@ module io_mod
     end interface
 
     interface from_binary                                                                        !! Submodule binary_io
+        module impure subroutine from_binary_1dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_1dc128
+        module impure subroutine from_binary_1dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_1dc64
+        module impure subroutine from_binary_1dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_1dc32
+
+        module impure subroutine from_binary_2dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_2dc128
+        module impure subroutine from_binary_2dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_2dc64
+        module impure subroutine from_binary_2dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_2dc32
+
+        module impure subroutine from_binary_3dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_3dc128
+        module impure subroutine from_binary_3dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_3dc64
+        module impure subroutine from_binary_3dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_3dc32
+
+        module impure subroutine from_binary_4dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_4dc128
+        module impure subroutine from_binary_4dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_4dc64
+        module impure subroutine from_binary_4dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_4dc32
+
+        module impure subroutine from_binary_5dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_5dc128
+        module impure subroutine from_binary_5dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_5dc64
+        module impure subroutine from_binary_5dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_5dc32
+
+        module impure subroutine from_binary_6dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_6dc128
+        module impure subroutine from_binary_6dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_6dc64
+        module impure subroutine from_binary_6dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_6dc32
+
+        module impure subroutine from_binary_7dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_7dc128
+        module impure subroutine from_binary_7dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_7dc64
+        module impure subroutine from_binary_7dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_7dc32
+
         module impure subroutine from_binary_1dr128(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
@@ -6483,6 +6785,730 @@ submodule (io_mod) file_io
     end procedure to_file_7di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_textfile_1dc128
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_1dc128
+    module procedure from_binaryfile_1dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_1dc128
+    module procedure from_textfile_1dc64
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_1dc64
+    module procedure from_binaryfile_1dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_1dc64
+    module procedure from_textfile_1dc32
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_1dc32
+    module procedure from_binaryfile_1dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_1dc32
+
+    module procedure from_textfile_2dc128
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_2dc128
+    module procedure from_binaryfile_2dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_2dc128
+    module procedure from_textfile_2dc64
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_2dc64
+    module procedure from_binaryfile_2dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_2dc64
+    module procedure from_textfile_2dc32
+        character(len=:), allocatable :: ext
+        character(len=2) :: locale_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(locale) ) then
+                locale_ = 'us'
+            else
+                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                    locale_ = locale
+                else
+                    locale_ = 'us'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
+                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                end if
+            end if
+            
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
+                               'for binary data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_2dc32
+    module procedure from_binaryfile_2dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must not be specified '// &
+                               'for textual data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')//' '// &
+                           to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_binaryfile_2dc32
+
+    module procedure from_file_3dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_3dc128
+    module procedure from_file_3dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_3dc64
+    module procedure from_file_3dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_3dc32
+
+    module procedure from_file_4dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_4dc128
+    module procedure from_file_4dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_4dc64
+    module procedure from_file_4dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_4dc32
+
+    module procedure from_file_5dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_5dc128
+    module procedure from_file_5dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_5dc64
+    module procedure from_file_5dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_5dc32
+
+    module procedure from_file_6dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_6dc128
+    module procedure from_file_6dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_6dc64
+    module procedure from_file_6dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_6dc32
+
+    module procedure from_file_7dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_7dc128
+    module procedure from_file_7dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_7dc64
+    module procedure from_file_7dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_7dc32
+
     module procedure from_textfile_1dr128
         character(len=:), allocatable :: ext
         character(len=2) :: locale_
@@ -8990,6 +10016,1070 @@ submodule (io_mod) text_io
     end procedure to_text_2di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_text_1dc128
+        logical :: exists, ignore_sep
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, j, ind, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal, sep, number
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+            sep = ','
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+            sep = ';'
+        end if
+
+        ignore_sep = .false.
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    prev_char = current_char
+                    cycle
+                end if
+
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        if ( (n_rows > 1) .and. (n_columns > 1) ) then
+            error stop nl//'Error reading file "'//file_name//'". File data cannot fit into one-dimensional array.'
+            return
+        else if ( n_columns == 1 ) then
+            allocate( into(n_rows) )
+        else if ( n_rows == 1 ) then
+            allocate( into(n_columns) )
+        end if
+    
+        ignore_sep = .false.
+        ind = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    l2 = i + 1
+                    cycle read_into
+                end if
+
+                if ( any(letters == current_char) ) then
+                    number = file(l1:i)
+                    reformat: do j = 1, len(number)
+                        if ( number(j:j) == '+' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
+                        else if  ( number(j:j) == '-' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
+                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
+                            number = '('//number(:j-1)//')'
+                            exit reformat
+                        end if
+                    end do reformat
+                    read(unit=number, fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_1dc128
+    module procedure from_text_1dc64
+        logical :: exists, ignore_sep
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, j, ind, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal, sep, number
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+            sep = ','
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+            sep = ';'
+        end if
+
+        ignore_sep = .false.
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    prev_char = current_char
+                    cycle
+                end if
+
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        if ( (n_rows > 1) .and. (n_columns > 1) ) then
+            error stop nl//'Error reading file "'//file_name//'". File data cannot fit into one-dimensional array.'
+            return
+        else if ( n_columns == 1 ) then
+            allocate( into(n_rows) )
+        else if ( n_rows == 1 ) then
+            allocate( into(n_columns) )
+        end if
+    
+        ignore_sep = .false.
+        ind = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    l2 = i + 1
+                    cycle read_into
+                end if
+
+                if ( any(letters == current_char) ) then
+                    number = file(l1:i)
+                    reformat: do j = 1, len(number)
+                        if ( number(j:j) == '+' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
+                        else if  ( number(j:j) == '-' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
+                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
+                            number = '('//number(:j-1)//')'
+                            exit reformat
+                        end if
+                    end do reformat
+                    read(unit=number, fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_1dc64
+    module procedure from_text_1dc32
+        logical :: exists, ignore_sep
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, j, ind, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal, sep, number
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+            sep = ','
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+            sep = ';'
+        end if
+
+        ignore_sep = .false.
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    prev_char = current_char
+                    cycle
+                end if
+
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        if ( (n_rows > 1) .and. (n_columns > 1) ) then
+            error stop nl//'Error reading file "'//file_name//'". File data cannot fit into one-dimensional array.'
+            return
+        else if ( n_columns == 1 ) then
+            allocate( into(n_rows) )
+        else if ( n_rows == 1 ) then
+            allocate( into(n_columns) )
+        end if
+    
+        ignore_sep = .false.
+        ind = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    l2 = i + 1
+                    cycle read_into
+                end if
+
+                if ( any(letters == current_char) ) then
+                    number = file(l1:i)
+                    reformat: do j = 1, len(number)
+                        if ( number(j:j) == '+' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
+                        else if  ( number(j:j) == '-' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
+                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
+                            number = '('//number(:j-1)//')'
+                            exit reformat
+                        end if
+                    end do reformat
+                    read(unit=number, fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_1dc32
+
+    module procedure from_text_2dc128
+        logical :: exists, ignore_sep
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, j, row, column, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal, sep, number
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+            sep = ','
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+            sep = ';'
+        end if
+
+        ignore_sep = .false.
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    prev_char = current_char
+                    cycle
+                end if
+
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        allocate( into(n_rows, n_columns) )
+    
+        ignore_sep = .false.
+        row = 1
+        column = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    l2 = i + 1
+                    cycle read_into
+                end if
+
+                if ( any(letters == current_char) ) then
+                    number = file(l1:i)
+                    reformat: do j = 1, len(number)
+                        if ( number(j:j) == '+' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
+                        else if  ( number(j:j) == '-' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
+                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
+                            number = '('//number(:j-1)//')'
+                            exit reformat
+                        end if
+                    end do reformat
+                    read(unit=number, fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_2dc128
+    module procedure from_text_2dc64
+        logical :: exists, ignore_sep
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, j, row, column, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal, sep, number
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+            sep = ','
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+            sep = ';'
+        end if
+
+        ignore_sep = .false.
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    prev_char = current_char
+                    cycle
+                end if
+
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        allocate( into(n_rows, n_columns) )
+    
+        ignore_sep = .false.
+        row = 1
+        column = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    l2 = i + 1
+                    cycle read_into
+                end if
+
+                if ( any(letters == current_char) ) then
+                    number = file(l1:i)
+                    reformat: do j = 1, len(number)
+                        if ( number(j:j) == '+' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
+                        else if  ( number(j:j) == '-' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
+                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
+                            number = '('//number(:j-1)//')'
+                            exit reformat
+                        end if
+                    end do reformat
+                    read(unit=number, fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_2dc64
+    module procedure from_text_2dc32
+        logical :: exists, ignore_sep
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, j, row, column, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        character(len=:), allocatable :: file, decimal, sep, number
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( locale == 'us' ) then
+            non_separating_chars = non_separating_chars_us
+            decimal = 'POINT'
+            sep = ','
+        else
+            non_separating_chars = non_separating_chars_eu
+            decimal = 'COMMA'
+            sep = ';'
+        end if
+
+        ignore_sep = .false.
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+                prev_char = current_char
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    prev_char = current_char
+                    cycle
+                end if
+
+                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                else
+                    prev_char = current_char
+                end if
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        allocate( into(n_rows, n_columns) )
+    
+        ignore_sep = .false.
+        row = 1
+        column = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+            if ( current_char == '(' ) then
+                ignore_sep = .true.
+            else if ( current_char == ')' ) then
+                ignore_sep = .false.
+            end if
+
+            if ( any(non_separating_chars == current_char) ) then
+                if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            else
+                if ( (current_char == sep) .and. ignore_sep ) then
+                    l2 = i + 1
+                    cycle read_into
+                end if
+
+                if ( any(letters == current_char) ) then
+                    number = file(l1:i)
+                    reformat: do j = 1, len(number)
+                        if ( number(j:j) == '+' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
+                        else if  ( number(j:j) == '-' ) then
+                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
+                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
+                            number = '('//number(:j-1)//')'
+                            exit reformat
+                        end if
+                    end do reformat
+                    read(unit=number, fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            end if
+        end do read_into
+    end procedure from_text_2dc32
+
     module procedure from_text_1dr128
         logical :: exists
         integer :: file_unit, iostat
@@ -12233,6 +14323,562 @@ submodule (io_mod) binary_io
     end procedure to_binary_7di8
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    module procedure from_binary_1dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_1dc128
+    module procedure from_binary_1dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_1dc64
+    module procedure from_binary_1dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_1dc32
+
+    module procedure from_binary_2dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_2dc128
+    module procedure from_binary_2dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_2dc64
+    module procedure from_binary_2dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_2dc32
+
+    module procedure from_binary_3dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_3dc128
+    module procedure from_binary_3dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_3dc64
+    module procedure from_binary_3dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_3dc32
+
+    module procedure from_binary_4dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_4dc128
+    module procedure from_binary_4dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_4dc64
+    module procedure from_binary_4dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_4dc32
+
+    module procedure from_binary_5dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_5dc128
+    module procedure from_binary_5dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_5dc64
+    module procedure from_binary_5dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_5dc32
+
+    module procedure from_binary_6dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_6dc128
+    module procedure from_binary_6dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_6dc64
+    module procedure from_binary_6dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_6dc32
+
+    module procedure from_binary_7dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_7dc128
+    module procedure from_binary_7dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_7dc64
+    module procedure from_binary_7dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_7dc32
+
     module procedure from_binary_1dr128
         logical :: exists
         integer :: file_unit, iostat
