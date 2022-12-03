@@ -1181,6 +1181,134 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_7dc32
 
+        module impure subroutine from_file_8dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8dc128
+        module impure subroutine from_file_8dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8dc64
+        module impure subroutine from_file_8dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8dc32
+
+        module impure subroutine from_file_9dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9dc128
+        module impure subroutine from_file_9dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9dc64
+        module impure subroutine from_file_9dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9dc32
+
+        module impure subroutine from_file_10dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10dc128
+        module impure subroutine from_file_10dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10dc64
+        module impure subroutine from_file_10dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10dc32
+
+        module impure subroutine from_file_11dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11dc128
+        module impure subroutine from_file_11dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11dc64
+        module impure subroutine from_file_11dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11dc32
+
+        module impure subroutine from_file_12dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12dc128
+        module impure subroutine from_file_12dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12dc64
+        module impure subroutine from_file_12dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12dc32
+
+        module impure subroutine from_file_13dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13dc128
+        module impure subroutine from_file_13dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13dc64
+        module impure subroutine from_file_13dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13dc32
+
+        module impure subroutine from_file_14dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14dc128
+        module impure subroutine from_file_14dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14dc64
+        module impure subroutine from_file_14dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14dc32
+
+        module impure subroutine from_file_15dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15dc128
+        module impure subroutine from_file_15dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15dc64
+        module impure subroutine from_file_15dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15dc32
+
         module impure subroutine from_textfile_1dr128(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
@@ -1328,6 +1456,134 @@ module io_mod
             real(real32), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_7dr32
+
+        module impure subroutine from_file_8dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8dr128
+        module impure subroutine from_file_8dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8dr64
+        module impure subroutine from_file_8dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8dr32
+
+        module impure subroutine from_file_9dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9dr128
+        module impure subroutine from_file_9dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9dr64
+        module impure subroutine from_file_9dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9dr32
+
+        module impure subroutine from_file_10dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10dr128
+        module impure subroutine from_file_10dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10dr64
+        module impure subroutine from_file_10dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10dr32
+
+        module impure subroutine from_file_11dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11dr128
+        module impure subroutine from_file_11dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11dr64
+        module impure subroutine from_file_11dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11dr32
+
+        module impure subroutine from_file_12dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12dr128
+        module impure subroutine from_file_12dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12dr64
+        module impure subroutine from_file_12dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12dr32
+
+        module impure subroutine from_file_13dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13dr128
+        module impure subroutine from_file_13dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13dr64
+        module impure subroutine from_file_13dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13dr32
+
+        module impure subroutine from_file_14dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14dr128
+        module impure subroutine from_file_14dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14dr64
+        module impure subroutine from_file_14dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14dr32
+
+        module impure subroutine from_file_15dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15dr128
+        module impure subroutine from_file_15dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15dr64
+        module impure subroutine from_file_15dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15dr32
 
         module impure subroutine from_textfile_1di64(file_name, into, header, locale)
             character(len=*), intent(in) :: file_name
@@ -1523,6 +1779,174 @@ module io_mod
             integer(int8), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_7di8
+
+        module impure subroutine from_file_8di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8di64
+        module impure subroutine from_file_8di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8di32
+        module impure subroutine from_file_8di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8di16
+        module impure subroutine from_file_8di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_8di8
+
+        module impure subroutine from_file_9di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9di64
+        module impure subroutine from_file_9di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9di32
+        module impure subroutine from_file_9di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9di16
+        module impure subroutine from_file_9di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_9di8
+
+        module impure subroutine from_file_10di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10di64
+        module impure subroutine from_file_10di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10di32
+        module impure subroutine from_file_10di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10di16
+        module impure subroutine from_file_10di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_10di8
+
+        module impure subroutine from_file_11di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11di64
+        module impure subroutine from_file_11di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11di32
+        module impure subroutine from_file_11di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11di16
+        module impure subroutine from_file_11di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_11di8
+
+        module impure subroutine from_file_12di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12di64
+        module impure subroutine from_file_12di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12di32
+        module impure subroutine from_file_12di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12di16
+        module impure subroutine from_file_12di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_12di8
+
+        module impure subroutine from_file_13di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13di64
+        module impure subroutine from_file_13di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13di32
+        module impure subroutine from_file_13di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13di16
+        module impure subroutine from_file_13di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_13di8
+
+        module impure subroutine from_file_14di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14di64
+        module impure subroutine from_file_14di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14di32
+        module impure subroutine from_file_14di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14di16
+        module impure subroutine from_file_14di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_14di8
+
+        module impure subroutine from_file_15di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15di64
+        module impure subroutine from_file_15di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15di32
+        module impure subroutine from_file_15di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15di16
+        module impure subroutine from_file_15di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_file_15di8
     end interface
 
     interface echo                                                                                 !! Submodule text_io
@@ -2601,6 +3025,134 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_7dc32
 
+        module impure subroutine from_binary_8dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8dc128
+        module impure subroutine from_binary_8dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8dc64
+        module impure subroutine from_binary_8dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8dc32
+
+        module impure subroutine from_binary_9dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9dc128
+        module impure subroutine from_binary_9dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9dc64
+        module impure subroutine from_binary_9dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9dc32
+
+        module impure subroutine from_binary_10dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10dc128
+        module impure subroutine from_binary_10dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10dc64
+        module impure subroutine from_binary_10dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10dc32
+
+        module impure subroutine from_binary_11dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11dc128
+        module impure subroutine from_binary_11dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11dc64
+        module impure subroutine from_binary_11dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11dc32
+
+        module impure subroutine from_binary_12dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12dc128
+        module impure subroutine from_binary_12dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12dc64
+        module impure subroutine from_binary_12dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12dc32
+
+        module impure subroutine from_binary_13dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13dc128
+        module impure subroutine from_binary_13dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13dc64
+        module impure subroutine from_binary_13dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13dc32
+
+        module impure subroutine from_binary_14dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14dc128
+        module impure subroutine from_binary_14dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14dc64
+        module impure subroutine from_binary_14dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14dc32
+
+        module impure subroutine from_binary_15dc128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15dc128
+        module impure subroutine from_binary_15dc64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15dc64
+        module impure subroutine from_binary_15dc32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            complex(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15dc32
+
         module impure subroutine from_binary_1dr128(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
@@ -2712,6 +3264,134 @@ module io_mod
             real(real32), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_7dr32
+
+        module impure subroutine from_binary_8dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8dr128
+        module impure subroutine from_binary_8dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8dr64
+        module impure subroutine from_binary_8dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8dr32
+
+        module impure subroutine from_binary_9dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9dr128
+        module impure subroutine from_binary_9dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9dr64
+        module impure subroutine from_binary_9dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9dr32
+
+        module impure subroutine from_binary_10dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10dr128
+        module impure subroutine from_binary_10dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10dr64
+        module impure subroutine from_binary_10dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10dr32
+
+        module impure subroutine from_binary_11dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11dr128
+        module impure subroutine from_binary_11dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11dr64
+        module impure subroutine from_binary_11dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11dr32
+
+        module impure subroutine from_binary_12dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12dr128
+        module impure subroutine from_binary_12dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12dr64
+        module impure subroutine from_binary_12dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12dr32
+
+        module impure subroutine from_binary_13dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13dr128
+        module impure subroutine from_binary_13dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13dr64
+        module impure subroutine from_binary_13dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13dr32
+
+        module impure subroutine from_binary_14dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14dr128
+        module impure subroutine from_binary_14dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14dr64
+        module impure subroutine from_binary_14dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14dr32
+
+        module impure subroutine from_binary_15dr128(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real128), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15dr128
+        module impure subroutine from_binary_15dr64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15dr64
+        module impure subroutine from_binary_15dr32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            real(real32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15dr32
 
         module impure subroutine from_binary_1di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -2859,6 +3539,174 @@ module io_mod
             integer(int8), allocatable, dimension(:,:,:,:,:,:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_7di8
+
+        module impure subroutine from_binary_8di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8di64
+        module impure subroutine from_binary_8di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8di32
+        module impure subroutine from_binary_8di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8di16
+        module impure subroutine from_binary_8di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_8di8
+
+        module impure subroutine from_binary_9di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9di64
+        module impure subroutine from_binary_9di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9di32
+        module impure subroutine from_binary_9di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9di16
+        module impure subroutine from_binary_9di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_9di8
+
+        module impure subroutine from_binary_10di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10di64
+        module impure subroutine from_binary_10di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10di32
+        module impure subroutine from_binary_10di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10di16
+        module impure subroutine from_binary_10di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_10di8
+
+        module impure subroutine from_binary_11di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11di64
+        module impure subroutine from_binary_11di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11di32
+        module impure subroutine from_binary_11di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11di16
+        module impure subroutine from_binary_11di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_11di8
+
+        module impure subroutine from_binary_12di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12di64
+        module impure subroutine from_binary_12di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12di32
+        module impure subroutine from_binary_12di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12di16
+        module impure subroutine from_binary_12di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_12di8
+
+        module impure subroutine from_binary_13di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13di64
+        module impure subroutine from_binary_13di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13di32
+        module impure subroutine from_binary_13di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13di16
+        module impure subroutine from_binary_13di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_13di8
+
+        module impure subroutine from_binary_14di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14di64
+        module impure subroutine from_binary_14di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14di32
+        module impure subroutine from_binary_14di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14di16
+        module impure subroutine from_binary_14di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_14di8
+
+        module impure subroutine from_binary_15di64(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int64), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15di64
+        module impure subroutine from_binary_15di32(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int32), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15di32
+        module impure subroutine from_binary_15di16(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int16), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15di16
+        module impure subroutine from_binary_15di8(file_name, into, data_shape)
+            character(len=*), intent(in) :: file_name
+            integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
+            integer, dimension(:), intent(in) :: data_shape
+        end subroutine from_binary_15di8
     end interface
 
     contains
@@ -9741,6 +10589,566 @@ submodule (io_mod) file_io
         end if
     end procedure from_file_7dc32
 
+    module procedure from_file_8dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8dc128
+    module procedure from_file_8dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8dc64
+    module procedure from_file_8dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8dc32
+
+    module procedure from_file_9dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9dc128
+    module procedure from_file_9dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9dc64
+    module procedure from_file_9dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9dc32
+
+    module procedure from_file_10dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10dc128
+    module procedure from_file_10dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10dc64
+    module procedure from_file_10dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10dc32
+
+    module procedure from_file_11dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11dc128
+    module procedure from_file_11dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11dc64
+    module procedure from_file_11dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11dc32
+
+    module procedure from_file_12dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12dc128
+    module procedure from_file_12dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12dc64
+    module procedure from_file_12dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12dc32
+
+    module procedure from_file_13dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13dc128
+    module procedure from_file_13dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13dc64
+    module procedure from_file_13dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13dc32
+
+    module procedure from_file_14dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14dc128
+    module procedure from_file_14dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14dc64
+    module procedure from_file_14dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14dc32
+
+    module procedure from_file_15dc128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15dc128
+    module procedure from_file_15dc64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15dc64
+    module procedure from_file_15dc32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15dc32
+
     module procedure from_textfile_1dr128
         character(len=:), allocatable :: ext
         character(len=2) :: locale_
@@ -10464,6 +11872,566 @@ submodule (io_mod) file_io
             end if
         end if
     end procedure from_file_7dr32
+
+    module procedure from_file_8dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8dr128
+    module procedure from_file_8dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8dr64
+    module procedure from_file_8dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8dr32
+
+    module procedure from_file_9dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9dr128
+    module procedure from_file_9dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9dr64
+    module procedure from_file_9dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9dr32
+
+    module procedure from_file_10dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10dr128
+    module procedure from_file_10dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10dr64
+    module procedure from_file_10dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10dr32
+
+    module procedure from_file_11dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11dr128
+    module procedure from_file_11dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11dr64
+    module procedure from_file_11dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11dr32
+
+    module procedure from_file_12dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12dr128
+    module procedure from_file_12dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12dr64
+    module procedure from_file_12dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12dr32
+
+    module procedure from_file_13dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13dr128
+    module procedure from_file_13dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13dr64
+    module procedure from_file_13dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13dr32
+
+    module procedure from_file_14dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14dr128
+    module procedure from_file_14dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14dr64
+    module procedure from_file_14dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14dr32
+
+    module procedure from_file_15dr128
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15dr128
+    module procedure from_file_15dr64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15dr64
+    module procedure from_file_15dr32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15dr32
 
     module procedure from_textfile_1di64
         character(len=:), allocatable :: ext
@@ -11427,6 +13395,750 @@ submodule (io_mod) file_io
             end if
         end if
     end procedure from_file_7di8
+
+    module procedure from_file_8di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8di64
+    module procedure from_file_8di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8di32
+    module procedure from_file_8di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8di16
+    module procedure from_file_8di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_8di8
+
+    module procedure from_file_9di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9di64
+    module procedure from_file_9di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9di32
+    module procedure from_file_9di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9di16
+    module procedure from_file_9di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_9di8
+
+    module procedure from_file_10di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10di64
+    module procedure from_file_10di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10di32
+    module procedure from_file_10di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10di16
+    module procedure from_file_10di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_10di8
+
+    module procedure from_file_11di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11di64
+    module procedure from_file_11di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11di32
+    module procedure from_file_11di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11di16
+    module procedure from_file_11di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_11di8
+
+    module procedure from_file_12di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12di64
+    module procedure from_file_12di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12di32
+    module procedure from_file_12di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12di16
+    module procedure from_file_12di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_12di8
+
+    module procedure from_file_13di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13di64
+    module procedure from_file_13di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13di32
+    module procedure from_file_13di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13di16
+    module procedure from_file_13di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_13di8
+
+    module procedure from_file_14di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14di64
+    module procedure from_file_14di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14di32
+    module procedure from_file_14di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14di16
+    module procedure from_file_14di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_14di8
+
+    module procedure from_file_15di64
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15di64
+    module procedure from_file_15di32
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15di32
+    module procedure from_file_15di16
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15di16
+    module procedure from_file_15di8
+        character(len=:), allocatable :: ext
+
+        ext = ext_of(file_name)
+
+        if ( any(binary_ext == ext) ) then
+            if ( size(data_shape) /= rank(into) ) then
+                error stop nl//'FATAL: Shape mismatch in read of file "'//file_name//'".'// &
+                           nl//'Output array has dimension ('//str(rank(into))//') while data_shape has size (' &
+                             //str(size(data_shape))//'). These must match.'
+            end if
+
+            call from_binary(file_name=file_name, into=into, data_shape=data_shape)
+        else
+            if ( any(text_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Textual data cannot be read into '// &
+                               'arrays of dimension greater than (2).'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(binary_ext, delim=' ')
+            end if
+        end if
+    end procedure from_file_15di8
 end submodule file_io
 
 submodule (io_mod) text_io
@@ -18735,6 +21447,671 @@ submodule (io_mod) binary_io
         close(file_unit)
     end procedure from_binary_7dc32
 
+    module procedure from_binary_8dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8dc128
+    module procedure from_binary_8dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8dc64
+    module procedure from_binary_8dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8dc32
+
+    module procedure from_binary_9dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9dc128
+    module procedure from_binary_9dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9dc64
+    module procedure from_binary_9dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9dc32
+
+    module procedure from_binary_10dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10dc128
+    module procedure from_binary_10dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10dc64
+    module procedure from_binary_10dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10dc32
+
+    module procedure from_binary_11dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11dc128
+    module procedure from_binary_11dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11dc64
+    module procedure from_binary_11dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11dc32
+
+    module procedure from_binary_12dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12dc128
+    module procedure from_binary_12dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12dc64
+    module procedure from_binary_12dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12dc32
+
+    module procedure from_binary_13dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13dc128
+    module procedure from_binary_13dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13dc64
+    module procedure from_binary_13dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13dc32
+
+    module procedure from_binary_14dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14dc128
+    module procedure from_binary_14dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14dc64
+    module procedure from_binary_14dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14dc32
+
+    module procedure from_binary_15dc128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15dc128
+    module procedure from_binary_15dc64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15dc64
+    module procedure from_binary_15dc32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15dc32
+
     module procedure from_binary_1dr128
         logical :: exists
         integer :: file_unit, iostat
@@ -19290,6 +22667,671 @@ submodule (io_mod) binary_io
 
         close(file_unit)
     end procedure from_binary_7dr32
+
+    module procedure from_binary_8dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8dr128
+    module procedure from_binary_8dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8dr64
+    module procedure from_binary_8dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8dr32
+
+    module procedure from_binary_9dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9dr128
+    module procedure from_binary_9dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9dr64
+    module procedure from_binary_9dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9dr32
+
+    module procedure from_binary_10dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10dr128
+    module procedure from_binary_10dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10dr64
+    module procedure from_binary_10dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10dr32
+
+    module procedure from_binary_11dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11dr128
+    module procedure from_binary_11dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11dr64
+    module procedure from_binary_11dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11dr32
+
+    module procedure from_binary_12dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12dr128
+    module procedure from_binary_12dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12dr64
+    module procedure from_binary_12dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12dr32
+
+    module procedure from_binary_13dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13dr128
+    module procedure from_binary_13dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13dr64
+    module procedure from_binary_13dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13dr32
+
+    module procedure from_binary_14dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14dr128
+    module procedure from_binary_14dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14dr64
+    module procedure from_binary_14dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14dr32
+
+    module procedure from_binary_15dr128
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15dr128
+    module procedure from_binary_15dr64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15dr64
+    module procedure from_binary_15dr32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15dr32
 
     module procedure from_binary_1di64
         logical :: exists
@@ -20029,4 +24071,888 @@ submodule (io_mod) binary_io
 
         close(file_unit)
     end procedure from_binary_7di8
+
+    module procedure from_binary_8di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8di64
+    module procedure from_binary_8di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8di32
+    module procedure from_binary_8di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8di16
+    module procedure from_binary_8di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_8di8
+
+    module procedure from_binary_9di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9di64
+    module procedure from_binary_9di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9di32
+    module procedure from_binary_9di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9di16
+    module procedure from_binary_9di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_9di8
+
+    module procedure from_binary_10di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10di64
+    module procedure from_binary_10di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10di32
+    module procedure from_binary_10di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10di16
+    module procedure from_binary_10di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_10di8
+
+    module procedure from_binary_11di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11di64
+    module procedure from_binary_11di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11di32
+    module procedure from_binary_11di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11di16
+    module procedure from_binary_11di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_11di8
+
+    module procedure from_binary_12di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12di64
+    module procedure from_binary_12di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12di32
+    module procedure from_binary_12di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12di16
+    module procedure from_binary_12di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_12di8
+
+    module procedure from_binary_13di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13di64
+    module procedure from_binary_13di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13di32
+    module procedure from_binary_13di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13di16
+    module procedure from_binary_13di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_13di8
+
+    module procedure from_binary_14di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14di64
+    module procedure from_binary_14di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14di32
+    module procedure from_binary_14di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14di16
+    module procedure from_binary_14di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_14di8
+
+    module procedure from_binary_15di64
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15di64
+    module procedure from_binary_15di32
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15di32
+    module procedure from_binary_15di16
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15di16
+    module procedure from_binary_15di8
+        logical :: exists
+        integer :: file_unit, iostat
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        allocate( into(data_shape(1), data_shape(2), data_shape(3), data_shape(4), data_shape(5), data_shape(6), &
+                       data_shape(7), data_shape(8), data_shape(9), data_shape(10), data_shape(11), data_shape(12), &
+                       data_shape(13), data_shape(14), data_shape(15)) )
+        read(unit=file_unit, iostat=iostat) into
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        close(file_unit)
+    end procedure from_binary_15di8
 end submodule binary_io
