@@ -293,9 +293,10 @@ module io_fortran_lib
             character(len=:), allocatable :: x_str
         end function to_str_1di8
 
-        module pure function to_str_1dchar(x, delim) result(x_str)
+        module pure function to_str_1dchar(x, delim, trimstring) result(x_str)
             character(len=*), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: delim
+            logical, intent(in), optional :: trimstring
             character(len=:), allocatable :: x_str
         end function to_str_1dchar
     end interface
@@ -1045,6 +1046,21 @@ module io_fortran_lib
             integer(int8), dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
         end subroutine to_file_15di8
+
+        module impure subroutine to_file_1dchar(x, file_name, header, dim, delim)
+            character(len=*), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            integer, intent(in), optional :: dim
+            character(len=*), intent(in), optional :: delim
+        end subroutine to_file_1dchar
+
+        module impure subroutine to_file_2dchar(x, file_name, header, delim)
+            character(len=*), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
+        end subroutine to_file_2dchar
     end interface
 
     interface from_file                                                                            !! Submodule file_io
@@ -1980,6 +1996,22 @@ module io_fortran_lib
             integer(int8), allocatable, dimension(:,:,:,:,:,:,:,:,:,:,:,:,:,:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_15di8
+
+        module impure subroutine from_textfile_1dchar(file_name, into, word_length, header, delim)
+            character(len=*), intent(in) :: file_name
+            character(len=:), allocatable, dimension(:), intent(out) :: into
+            integer, intent(in) :: word_length
+            logical, intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
+        end subroutine from_textfile_1dchar
+
+        module impure subroutine from_textfile_2dchar(file_name, into, word_length, header, delim)
+            character(len=*), intent(in) :: file_name
+            character(len=:), allocatable, dimension(:,:), intent(out) :: into
+            integer, intent(in) :: word_length
+            logical, intent(in), optional :: header
+            character(len=*), intent(in), optional :: delim
+        end subroutine from_textfile_2dchar
     end interface
 
     interface echo                                                                                 !! Submodule text_io
@@ -2176,6 +2208,21 @@ module io_fortran_lib
             character(len=*), intent(in) :: delim
             character(len=*), intent(in) :: fmt
         end subroutine to_text_2di8
+
+        module impure subroutine to_text_1dchar(x, file_name, header, dim, delim)
+            character(len=*), dimension(:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            integer, intent(in) :: dim
+            character(len=*), intent(in) :: delim
+        end subroutine to_text_1dchar
+
+        module impure subroutine to_text_2dchar(x, file_name, header, delim)
+            character(len=*), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in) :: file_name
+            character(len=*), dimension(:), intent(in) :: header
+            character(len=*), intent(in) :: delim
+        end subroutine to_text_2dchar
     end interface
 
     interface from_text                                                                            !! Submodule text_io
@@ -2322,6 +2369,22 @@ module io_fortran_lib
             logical, intent(in) :: header
             character(len=*), intent(in) :: fmt
         end subroutine from_text_2di8
+
+        module impure subroutine from_text_1dchar(file_name, into, word_length, header, delim)
+            character(len=*), intent(in) :: file_name
+            character(len=:), allocatable, dimension(:), intent(out) :: into
+            integer, intent(in) :: word_length
+            logical, intent(in) :: header
+            character(len=*), intent(in) :: delim
+        end subroutine from_text_1dchar
+
+        module impure subroutine from_text_2dchar(file_name, into, word_length, header, delim)
+            character(len=*), intent(in) :: file_name
+            character(len=:), allocatable, dimension(:,:), intent(out) :: into
+            integer, intent(in) :: word_length
+            logical, intent(in) :: header
+            character(len=*), intent(in) :: delim
+        end subroutine from_text_2dchar
     end interface
 
     interface to_binary                                                                          !! Submodule binary_io
@@ -3455,22 +3518,22 @@ module io_fortran_lib
         module impure subroutine from_binary_1di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:), intent(out) :: into
-            integer, intent(in) :: data_shape(1)
+            integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_1di64
         module impure subroutine from_binary_1di32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:), intent(out) :: into
-            integer, intent(in) :: data_shape(1)
+            integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_1di32
         module impure subroutine from_binary_1di16(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:), intent(out) :: into
-            integer, intent(in) :: data_shape(1)
+            integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_1di16
         module impure subroutine from_binary_1di8(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:), intent(out) :: into
-            integer, intent(in) :: data_shape(1)
+            integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binary_1di8
 
         module impure subroutine from_binary_2di64(file_name, into, data_shape)
@@ -4733,40 +4796,21 @@ submodule (io_fortran_lib) array_printing
         
         write(unit=*, fmt='(a)') '   ┣ '//adjustr(x(ubound(x, dim=1)))//' ┫'//nl
     end procedure aprint_1dchar
-
+    
     module procedure aprint_2dchar
-        character(len=:), allocatable :: str_tmp
-        integer :: i, j
+        integer :: i
 
-        str_tmp = ''
-        do j = lbound(x, dim=2), ubound(x, dim=2) - 1
-            str_tmp = str_tmp//adjustr(x(lbound(x, dim=1), j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x(lbound(x, dim=1), ubound(x, dim=2)))
-
-        write(unit=*, fmt='(a)') nl//'   ┣ '//str_tmp//' ┫'
+        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x(lbound(x, dim=1),:), delim=' ', trimstring=.false.)//' ┫'
 
         if ( size(x, dim=1) == 1 ) return
 
         if ( size(x, dim=1) > 2 ) then
             do i = lbound(x, dim=1) + 1, ubound(x, dim=1) - 1
-                str_tmp = ''
-                do j = lbound(x, dim=2), ubound(x, dim=2) - 1
-                    str_tmp = str_tmp//adjustr(x(i, j))//' '
-                end do
-                str_tmp = str_tmp//adjustr(x(i, ubound(x, dim=2)))
-
-                write(unit=*, fmt='(a)') '   ┃ '//str_tmp//' ┃'
+                write(unit=*, fmt='(a)') '   ┃ '//to_str(x(i,:), delim=' ', trimstring=.false.)//' ┃'
             end do
         end if
-
-        str_tmp = ''
-        do j = lbound(x, dim=2), ubound(x, dim=2) - 1
-            str_tmp = str_tmp//adjustr(x(ubound(x, dim=1), j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x(ubound(x, dim=1), ubound(x, dim=2)))
         
-        write(unit=*, fmt='(a)') '   ┣ '//str_tmp//' ┫'//nl
+        write(unit=*, fmt='(a)') '   ┣ '//to_str(x(ubound(x, dim=1),:), delim=' ', trimstring=.false.)//' ┫'//nl
     end procedure aprint_2dchar
 end submodule array_printing
 
@@ -5795,13 +5839,28 @@ submodule (io_fortran_lib) internal_io
     end procedure to_str_1di8
 
     module procedure to_str_1dchar
+        logical :: trimstring_
         integer :: i
 
-        x_str = ''
-        do i = 1, size(x)-1
-            x_str = x_str//trim(adjustl(x(i)))//delim
-        end do
-        x_str = x_str//trim(adjustl(x(size(x))))
+        if ( .not. present(trimstring) ) then
+            trimstring_ = .true.
+        else
+            trimstring_ = trimstring
+        end if
+
+        if ( trimstring_ ) then
+            x_str = ''
+            do i = 1, size(x)-1
+                x_str = x_str//trim(adjustl(x(i)))//delim
+            end do
+            x_str = x_str//trim(adjustl(x(size(x))))
+        else
+            x_str = ''
+            do i = 1, size(x)-1
+                x_str = x_str//adjustr(x(i))//delim
+            end do
+            x_str = x_str//adjustr(x(size(x)))
+        end if
     end procedure to_str_1dchar
 end submodule internal_io
 
@@ -10172,6 +10231,116 @@ submodule (io_fortran_lib) file_io
             end if
         end if
     end procedure to_file_15di8
+
+    module procedure to_file_1dchar
+        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable, dimension(:) :: header_
+        integer :: hstat, dim_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+                hstat = 0
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x)) ) then
+                    header_ = ['']
+                    hstat = -1
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x))//').'
+                else
+                    header_ = header
+                    if ( size(header) == 1 ) then
+                        hstat = 1
+                    else
+                        hstat = 2
+                    end if
+                end if
+            end if
+
+            if ( .not. present(dim) ) then
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                else
+                    dim_ = 1
+                end if
+            else
+                if ( hstat == 2 ) then
+                    dim_ = 2
+                    if ( dim /= 2 ) then
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (2).'
+                    end if
+                else
+                    if ( dim == 1 ) then
+                        dim_ = 1
+                    else if ( dim == 2 ) then
+                        dim_ = 2
+                    else
+                        dim_ = 1
+                        write(*,'(a)') nl//'WARNING: Invalid dim ('//str(dim)//') in write to file "'// &
+                                       file_name//'" for given header... defaulting to (1).'
+                    end if
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = ','
+                end if
+            else
+                if ( dim_ == 1 ) then
+                    delim_ = ''
+                else
+                    delim_ = delim
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')
+        end if
+    end procedure to_file_1dchar
+
+    module procedure to_file_2dchar
+        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable, dimension(:) :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = ['']
+            else
+                if ( (size(header) /= 1) .and. (size(header) /= size(x, dim=2)) ) then
+                    header_ = ['']
+                    write(*,'(a)') nl//'WARNING: Invalid header for file "'//file_name//'".'// &
+                                   nl//'Header for this data must have size (1) or '// & 
+                                       '('//str(size(x, dim=2))//').'
+                else
+                    header_ = header
+                end if
+            end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
+        else
+            write(*,'(a)')  nl//'WARNING: Skipping write to "'//file_name//'" '// &
+                                'due to unsupported file extension "'//ext//'".'// &
+                            nl//'Supported file extensions: '//to_str(text_ext, delim=' ')
+        end if
+    end procedure to_file_2dchar
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure from_textfile_1dc128
@@ -14596,6 +14765,76 @@ submodule (io_fortran_lib) file_io
             end if
         end if
     end procedure from_file_15di8
+
+    module procedure from_textfile_1dchar
+        character(len=:), allocatable :: ext, delim_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
+
+            if ( word_length < 0 ) then
+                error stop nl//'FATAL: word_length may not be negative in read of file "'//file_name//'".'
+            end if
+            
+            call from_text(file_name=file_name, into=into, word_length=word_length, header=header_, delim=delim_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Binary read not supported for '// &
+                               'character data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_1dchar
+
+    module procedure from_textfile_2dchar
+        character(len=:), allocatable :: ext, delim_
+        logical :: header_
+
+        ext = ext_of(file_name)
+
+        if ( any(text_ext == ext) ) then
+            if ( .not. present(header) ) then
+                header_ = .false.
+            else
+                header_ = header
+            end if
+
+            if ( .not. present(delim) ) then
+                delim_ = ','
+            else
+                delim_ = delim
+            end if
+
+            if ( word_length < 0 ) then
+                error stop nl//'FATAL: word_length may not be negative in read of file "'//file_name//'".'
+            end if
+            
+            call from_text(file_name=file_name, into=into, word_length=word_length, header=header_, delim=delim_)
+        else
+            if ( any(binary_ext == ext) ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". Binary read not supported for '// &
+                               'character data.'
+            else
+                error stop nl//'FATAL: Unsupported file extension "'//ext//'" for file "'//file_name//'".'// &
+                           nl//'Supported file extensions: '//to_str(text_ext, delim=' ')
+            end if
+        end if
+    end procedure from_textfile_2dchar
 end submodule file_io
 
 submodule (io_fortran_lib) text_io
@@ -15416,6 +15655,86 @@ submodule (io_fortran_lib) text_io
         close(file_unit)
     end procedure to_text_2di8
 
+    module procedure to_text_1dchar
+        logical :: exists
+        integer :: file_unit, i
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            if ( dim == 1 ) then
+                write(unit=file_unit, fmt='(a)') trim(adjustl(header(1)))
+            else if ( dim == 2 ) then
+                label = trim(adjustl(header(1)))
+                do i = lbound(x, dim=1), ubound(x, dim=1) - 1
+                    write(unit=file_unit, fmt='(a)', advance='no') label//str(i)//delim
+                end do
+                write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=1))
+            end if
+        else if ( size(header) == size(x) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        if ( dim == 1 ) then
+            do i = lbound(x, dim=1), ubound(x, dim=1)
+                write(unit=file_unit, fmt='(a)') trim(adjustl(x(i)))
+            end do
+        else if ( dim == 2 ) then
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+        end if
+
+        close(file_unit)
+    end procedure to_text_1dchar
+
+    module procedure to_text_2dchar
+        logical :: exists
+        integer :: file_unit, i, j
+        character(len=:), allocatable :: label
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = output_unit
+
+        if ( .not. exists ) then
+            open( newunit=file_unit, file=file_name, status='new', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        else
+            open( newunit=file_unit, file=file_name, status='replace', form='formatted', &
+                  action='write', access='sequential', position='rewind' )
+        end if
+
+        if ( all(header == '') ) then
+            continue
+        else if ( size(header) == 1 ) then
+            label = trim(adjustl(header(1)))
+            do j = lbound(x, dim=2), ubound(x, dim=2) - 1
+                write(unit=file_unit, fmt='(a)', advance='no') label//str(j)//delim
+            end do
+            write(unit=file_unit, fmt='(a)') label//str(ubound(x, dim=2))
+        else if ( size(header) == size(x, dim=2) ) then
+            write(unit=file_unit, fmt='(a)') to_str(header, delim=delim)
+        end if
+
+        do i = lbound(x, dim=1), ubound(x, dim=1)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim)
+        end do
+
+        close(file_unit)
+    end procedure to_text_2dchar
+
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure from_text_1dc128
         logical :: exists, ignore_sep
@@ -15594,8 +15913,8 @@ submodule (io_fortran_lib) text_io
                     read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                     read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                 else
-                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                    read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt=*, decimal=decimal) c%im
                 end if
                 into(ind) = c
                 if ( ind /= size(into) ) then
@@ -15613,7 +15932,7 @@ submodule (io_fortran_lib) text_io
                     cycle read_into
                 end if
 
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     number = file(l1+1:l2-1)
                     do j = 1, len(number)
                         if ( number(j:j) == sep ) then
@@ -15625,8 +15944,8 @@ submodule (io_fortran_lib) text_io
                         read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                         read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
+                        read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt=*, decimal=decimal) c%im
                     end if
                     into(ind) = c
                     if ( ind /= size(into) ) then
@@ -15819,8 +16138,8 @@ submodule (io_fortran_lib) text_io
                     read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                     read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                 else
-                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                    read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt=*, decimal=decimal) c%im
                 end if
                 into(ind) = c
                 if ( ind /= size(into) ) then
@@ -15838,7 +16157,7 @@ submodule (io_fortran_lib) text_io
                     cycle read_into
                 end if
 
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     number = file(l1+1:l2-1)
                     do j = 1, len(number)
                         if ( number(j:j) == sep ) then
@@ -15850,8 +16169,8 @@ submodule (io_fortran_lib) text_io
                         read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                         read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
+                        read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt=*, decimal=decimal) c%im
                     end if
                     into(ind) = c
                     if ( ind /= size(into) ) then
@@ -16044,8 +16363,8 @@ submodule (io_fortran_lib) text_io
                     read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                     read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                 else
-                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                    read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt=*, decimal=decimal) c%im
                 end if
                 into(ind) = c
                 if ( ind /= size(into) ) then
@@ -16063,7 +16382,7 @@ submodule (io_fortran_lib) text_io
                     cycle read_into
                 end if
 
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     number = file(l1+1:l2-1)
                     do j = 1, len(number)
                         if ( number(j:j) == sep ) then
@@ -16075,8 +16394,8 @@ submodule (io_fortran_lib) text_io
                         read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                         read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
+                        read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt=*, decimal=decimal) c%im
                     end if
                     into(ind) = c
                     if ( ind /= size(into) ) then
@@ -16264,8 +16583,8 @@ submodule (io_fortran_lib) text_io
                     read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                     read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                 else
-                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                    read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt=*, decimal=decimal) c%im
                 end if
                 into(row, column) = c
                 if ( column /= n_columns ) then
@@ -16288,7 +16607,7 @@ submodule (io_fortran_lib) text_io
                     cycle read_into
                 end if
 
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     number = file(l1+1:l2-1)
                     do j = 1, len(number)
                         if ( number(j:j) == sep ) then
@@ -16300,8 +16619,8 @@ submodule (io_fortran_lib) text_io
                         read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                         read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
+                        read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt=*, decimal=decimal) c%im
                     end if
                     into(row, column) = c
                     if ( column /= n_columns ) then
@@ -16493,8 +16812,8 @@ submodule (io_fortran_lib) text_io
                     read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                     read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                 else
-                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                    read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt=*, decimal=decimal) c%im
                 end if
                 into(row, column) = c
                 if ( column /= n_columns ) then
@@ -16517,7 +16836,7 @@ submodule (io_fortran_lib) text_io
                     cycle read_into
                 end if
 
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     number = file(l1+1:l2-1)
                     do j = 1, len(number)
                         if ( number(j:j) == sep ) then
@@ -16529,8 +16848,8 @@ submodule (io_fortran_lib) text_io
                         read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                         read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
+                        read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt=*, decimal=decimal) c%im
                     end if
                     into(row, column) = c
                     if ( column /= n_columns ) then
@@ -16722,8 +17041,8 @@ submodule (io_fortran_lib) text_io
                     read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                     read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                 else
-                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                    read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt=*, decimal=decimal) c%im
                 end if
                 into(row, column) = c
                 if ( column /= n_columns ) then
@@ -16746,7 +17065,7 @@ submodule (io_fortran_lib) text_io
                     cycle read_into
                 end if
 
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     number = file(l1+1:l2-1)
                     do j = 1, len(number)
                         if ( number(j:j) == sep ) then
@@ -16758,8 +17077,8 @@ submodule (io_fortran_lib) text_io
                         read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
                         read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
-                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
+                        read(unit=number(:sep_pos-1), fmt=*, decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt=*, decimal=decimal) c%im
                     end if
                     into(row, column) = c
                     if ( column /= n_columns ) then
@@ -16902,7 +17221,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     if ( fmt == 'z' ) then
                         read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     else
@@ -17041,7 +17360,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     if ( fmt == 'z' ) then
                         read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     else
@@ -17180,7 +17499,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     if ( fmt == 'z' ) then
                         read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     else
@@ -17314,7 +17633,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     if ( fmt == 'z' ) then
                         read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     else
@@ -17452,7 +17771,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     if ( fmt == 'z' ) then
                         read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     else
@@ -17590,7 +17909,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     if ( fmt == 'z' ) then
                         read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     else
@@ -17729,7 +18048,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
@@ -17858,7 +18177,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
@@ -17987,7 +18306,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
@@ -18116,7 +18435,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
@@ -18240,7 +18559,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
@@ -18368,7 +18687,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
@@ -18496,7 +18815,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
@@ -18624,7 +18943,7 @@ submodule (io_fortran_lib) text_io
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
             else
-                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                if ( any(non_separating_chars == file(l2:l2)) ) then
                     read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
@@ -18643,6 +18962,275 @@ submodule (io_fortran_lib) text_io
             end if
         end do read_into
     end procedure from_text_2di8
+
+    module procedure from_text_1dchar
+        logical :: exists
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, ind, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: separating_chars
+        character(len=:), allocatable :: file
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( len(delim) > 0 ) then
+            allocate( character(len=1) :: separating_chars(len(delim)+1) )
+            do i = 1, len(delim)
+                separating_chars(i) = delim(i:i)
+            end do
+            separating_chars(len(delim)+1) = nl
+        else
+            separating_chars = [nl]
+        end if
+
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+
+            if ( any(separating_chars == current_char) ) then
+                if ( any(separating_chars == prev_char) ) then
+                    prev_char = current_char
+                else
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                end if
+            else
+                prev_char = current_char
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        if ( (n_rows > 1) .and. (n_columns > 1) ) then
+            error stop nl//'Error reading file "'//file_name//'". File data cannot fit into one-dimensional array.'
+            return
+        else if ( n_columns == 1 ) then
+            allocate( character(len=word_length) :: into(n_rows) )
+        else if ( n_rows == 1 ) then
+            allocate( character(len=word_length) :: into(n_columns) )
+        end if
+    
+        ind = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+
+            if ( any(separating_chars == current_char) ) then
+                if ( .not. any(separating_chars == file(l2:l2)) ) then
+                    read(unit=file(l1:l2), fmt='(a)') into(ind)
+                    if ( ind /= size(into) ) then
+                        ind = ind + 1
+                    else
+                        exit read_into
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            else
+                if ( any(separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            end if
+        end do read_into
+    end procedure from_text_1dchar
+
+    module procedure from_text_2dchar
+        logical :: exists
+        integer :: file_unit, iostat
+        integer :: n_rows, n_columns, file_length
+        integer :: i, row, column, l1, l2
+
+        character(len=:), allocatable, dimension(:) :: separating_chars
+        character(len=:), allocatable :: file
+        character(len=1) :: prev_char, current_char
+
+        inquire( file=file_name, exist=exists )
+
+        file_unit = input_unit
+
+        if ( exists ) then
+            open( newunit=file_unit, file=file_name, status='old', form='unformatted', &
+                  action='read', access='stream', position='rewind' )
+        else
+            error stop nl//'FATAL: Error reading file "'//file_name//'". No such file exists.'
+            return
+        end if
+
+        inquire( file=file_name, size=file_length )
+
+        if ( file_length == 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty.'
+            return
+        end if
+
+        allocate( character(len=file_length) :: file )
+        read(unit=file_unit, iostat=iostat) file
+        close(file_unit)
+
+        if ( iostat > 0 ) then
+            error stop nl//'FATAL: Error reading file "'//file_name//'".'
+            return
+        end if
+
+        if ( header ) then
+            do i = 1, file_length
+                if ( file(i:i) == nl ) then
+                    file = file(i+1:)
+                    file_length = len(file)
+                    exit
+                else if ( i == file_length ) then
+                    file = file//nl
+                    file_length = file_length + 1
+                    write(*,'(a)') 'WARNING: Ignoring erroneous value of (T) for header in read of file "'// &
+                                    file_name//'". File has one line.'
+                end if
+            end do
+
+            if ( file_length == 0 ) then
+                error stop nl//'FATAL: Error reading file "'//file_name//'". File is empty after header.'
+                return
+            end if
+        end if
+
+        n_rows = 0
+
+        do i = 1, file_length
+            if ( file(i:i) == nl ) then
+                n_rows = n_rows + 1
+            else if ( i == file_length ) then
+                file = file//nl
+                file_length = file_length + 1
+                n_rows = n_rows + 1
+            end if
+        end do
+
+        if ( len(delim) > 0 ) then
+            allocate( character(len=1) :: separating_chars(len(delim)+1) )
+            do i = 1, len(delim)
+                separating_chars(i) = delim(i:i)
+            end do
+            separating_chars(len(delim)+1) = nl
+        else
+            separating_chars = [nl]
+        end if
+
+        prev_char = '0'
+        n_columns = 0
+
+        do i = 1, file_length
+            current_char = file(i:i)
+
+            if ( any(separating_chars == current_char) ) then
+                if ( any(separating_chars == prev_char) ) then
+                    prev_char = current_char
+                else
+                    prev_char = current_char
+                    n_columns = n_columns + 1
+                end if
+            else
+                prev_char = current_char
+            end if
+
+            if ( current_char == nl ) exit
+        end do
+
+        allocate( character(len=word_length) :: into(n_rows, n_columns) )
+    
+        row = 1
+        column = 1
+        l1 = 1
+        l2 = 1
+
+        read_into: do i = 1, file_length
+            current_char = file(i:i)
+
+            if ( any(separating_chars == current_char) ) then
+                if ( .not. any(separating_chars == file(l2:l2)) ) then
+                    read(unit=file(l1:l2), fmt='(a)') into(row, column)
+                    if ( column /= n_columns ) then
+                        column = column + 1
+                    else
+                        if ( row /= n_rows ) then
+                            row = row + 1
+                            column = 1
+                        else
+                            exit read_into
+                        end if
+                    end if
+                    l2 = i
+                else
+                    l2 = i
+                end if
+            else
+                if ( any(separating_chars == file(l2:l2)) ) l1 = i
+                l2 = i
+            end if
+        end do read_into
+    end procedure from_text_2dchar
 end submodule text_io
 
 submodule (io_fortran_lib) binary_io
