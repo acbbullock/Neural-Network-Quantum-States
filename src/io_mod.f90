@@ -12,7 +12,7 @@ module io_mod
 
     !! Public APIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     public :: aprint, to_str, to_file, from_file                                                           !! Array I/O
-    public :: echo, str, ext_of                                                                           !! String I/O
+    public :: str, echo                                                                                   !! String I/O
     public :: nl                                                                                           !! Constants
 
     !! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,116 +24,115 @@ module io_mod
 
     character(len=*), dimension(*), parameter :: binary_ext = [ 'dat', 'bin' ]
 
-    character(len=*), dimension(*), parameter :: non_separating_chars_us = [ '0', '1', '2', '3', '4', '5', '6', '7', &
-                                                                             '8', '9', '.', 'e', 'E', '+', '-', '"', &
-                                                                             '(', ')' ]
-                                                                            
-    character(len=*), dimension(*), parameter :: non_separating_chars_eu = [ '0', '1', '2', '3', '4', '5', '6', '7', &
-                                                                             '8', '9', ',', 'e', 'E', '+', '-', '"', &
-                                                                             '(', ')' ]
+    character(len=*), dimension(*), parameter :: real_fmts = [ 'es', 'f', 'z' ]
 
-    character(len=*), dimension(*), parameter :: letters = [ 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', &
-                                                             'f', 'F', 'g', 'G', 'h', 'H', 'i', 'I', 'j', 'J', &
-                                                             'k', 'K', 'l', 'L', 'm', 'M', 'n', 'N', 'o', 'O', &
-                                                             'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', &
-                                                             'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', &
-                                                             'z', 'Z' ]
+    character(len=*), dimension(*), parameter :: int_fmts = [ 'i', 'z' ]
+
+    character(len=*), dimension(*), parameter :: locales = [ 'US', 'EU' ]
 
     interface aprint                                                                        !! Submodule array_printing
         module impure subroutine aprint_1dc128(x, fmt, decimals, im)
             complex(real128), dimension(:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine aprint_1dc128
         module impure subroutine aprint_1dc64(x, fmt, decimals, im)
             complex(real64), dimension(:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine aprint_1dc64
         module impure subroutine aprint_1dc32(x, fmt, decimals, im)
             complex(real32), dimension(:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine aprint_1dc32
 
         module impure subroutine aprint_2dc128(x, fmt, decimals, im)
             complex(real128), dimension(:,:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine aprint_2dc128
         module impure subroutine aprint_2dc64(x, fmt, decimals, im)
             complex(real64), dimension(:,:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine aprint_2dc64
         module impure subroutine aprint_2dc32(x, fmt, decimals, im)
             complex(real32), dimension(:,:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine aprint_2dc32
 
         module impure subroutine aprint_1dr128(x, fmt, decimals)
             real(real128), dimension(:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine aprint_1dr128
         module impure subroutine aprint_1dr64(x, fmt, decimals)
             real(real64), dimension(:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine aprint_1dr64
         module impure subroutine aprint_1dr32(x, fmt, decimals)
             real(real32), dimension(:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine aprint_1dr32
 
         module impure subroutine aprint_2dr128(x, fmt, decimals)
             real(real128), dimension(:,:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine aprint_2dr128
         module impure subroutine aprint_2dr64(x, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine aprint_2dr64
         module impure subroutine aprint_2dr32(x, fmt, decimals)
             real(real32), dimension(:,:), intent(in) :: x
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine aprint_2dr32
 
-        module impure subroutine aprint_1di64(x)
+        module impure subroutine aprint_1di64(x, fmt)
             integer(int64), dimension(:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_1di64
-        module impure subroutine aprint_1di32(x)
+        module impure subroutine aprint_1di32(x, fmt)
             integer(int32), dimension(:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_1di32
-        module impure subroutine aprint_1di16(x)
+        module impure subroutine aprint_1di16(x, fmt)
             integer(int16), dimension(:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_1di16
-        module impure subroutine aprint_1di8(x)
+        module impure subroutine aprint_1di8(x, fmt)
             integer(int8), dimension(:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_1di8
 
-        module impure subroutine aprint_2di64(x)
+        module impure subroutine aprint_2di64(x, fmt)
             integer(int64), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_2di64
-        module impure subroutine aprint_2di32(x)
+        module impure subroutine aprint_2di32(x, fmt)
             integer(int32), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_2di32
-        module impure subroutine aprint_2di16(x)
+        module impure subroutine aprint_2di16(x, fmt)
             integer(int16), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_2di16
-        module impure subroutine aprint_2di8(x)
+        module impure subroutine aprint_2di8(x, fmt)
             integer(int8), dimension(:,:), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
         end subroutine aprint_2di8
 
         module impure subroutine aprint_1dchar(x)
@@ -148,24 +147,24 @@ module io_mod
     interface str                                                                              !! Submodule internal_io
         module pure function str_c128(x, locale, fmt, decimals, im) result(x_str)
             complex(real128), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
             character(len=:), allocatable :: x_str
         end function str_c128
         module pure function str_c64(x, locale, fmt, decimals, im) result(x_str)
             complex(real64), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
             character(len=:), allocatable :: x_str
         end function str_c64
         module pure function str_c32(x, locale, fmt, decimals, im) result(x_str)
             complex(real32), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
             character(len=:), allocatable :: x_str
@@ -173,40 +172,44 @@ module io_mod
 
         module pure function str_r128(x, locale, fmt, decimals) result(x_str)
             real(real128), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=:), allocatable :: x_str
         end function str_r128
         module pure function str_r64(x, locale, fmt, decimals) result(x_str)
             real(real64), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=:), allocatable :: x_str
         end function str_r64
         module pure function str_r32(x, locale, fmt, decimals) result(x_str)
             real(real32), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=:), allocatable :: x_str
         end function str_r32
 
-        module pure function str_i64(x) result(x_str)
+        module pure function str_i64(x, fmt) result(x_str)
             integer(int64), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function str_i64
-        module pure function str_i32(x) result(x_str)
+        module pure function str_i32(x, fmt) result(x_str)
             integer(int32), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function str_i32
-        module pure function str_i16(x) result(x_str)
+        module pure function str_i16(x, fmt) result(x_str)
             integer(int16), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function str_i16
-        module pure function str_i8(x) result(x_str)
+        module pure function str_i8(x, fmt) result(x_str)
             integer(int8), intent(in) :: x
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function str_i8
     end interface
@@ -214,27 +217,27 @@ module io_mod
     interface to_str                                                                           !! Submodule internal_io
         module pure function to_str_1dc128(x, locale, delim, fmt, decimals, im) result(x_str)
             complex(real128), dimension(:), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
             character(len=:), allocatable :: x_str
         end function to_str_1dc128
         module pure function to_str_1dc64(x, locale, delim, fmt, decimals, im) result(x_str)
             complex(real64), dimension(:), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
             character(len=:), allocatable :: x_str
         end function to_str_1dc64
         module pure function to_str_1dc32(x, locale, delim, fmt, decimals, im) result(x_str)
             complex(real32), dimension(:), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
             character(len=:), allocatable :: x_str
@@ -242,47 +245,51 @@ module io_mod
 
         module pure function to_str_1dr128(x, locale, delim, fmt, decimals) result(x_str)
             real(real128), dimension(:), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=:), allocatable :: x_str
         end function to_str_1dr128
         module pure function to_str_1dr64(x, locale, delim, fmt, decimals) result(x_str)
             real(real64), dimension(:), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=:), allocatable :: x_str
         end function to_str_1dr64
         module pure function to_str_1dr32(x, locale, delim, fmt, decimals) result(x_str)
             real(real32), dimension(:), intent(in) :: x
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=:), allocatable :: x_str
         end function to_str_1dr32
 
-        module pure function to_str_1di64(x, delim) result(x_str)
+        module pure function to_str_1di64(x, delim, fmt) result(x_str)
             integer(int64), dimension(:), intent(in) :: x
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function to_str_1di64
-        module pure function to_str_1di32(x, delim) result(x_str)
+        module pure function to_str_1di32(x, delim, fmt) result(x_str)
             integer(int32), dimension(:), intent(in) :: x
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function to_str_1di32
-        module pure function to_str_1di16(x, delim) result(x_str)
+        module pure function to_str_1di16(x, delim, fmt) result(x_str)
             integer(int16), dimension(:), intent(in) :: x
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function to_str_1di16
-        module pure function to_str_1di8(x, delim) result(x_str)
+        module pure function to_str_1di8(x, delim, fmt) result(x_str)
             integer(int8), dimension(:), intent(in) :: x
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
             character(len=:), allocatable :: x_str
         end function to_str_1di8
 
@@ -299,9 +306,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine to_file_1dc128
@@ -310,9 +317,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine to_file_1dc64
@@ -321,9 +328,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine to_file_1dc32
@@ -332,9 +339,9 @@ module io_mod
             complex(real128), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine to_file_2dc128
@@ -342,9 +349,9 @@ module io_mod
             complex(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine to_file_2dc64
@@ -352,9 +359,9 @@ module io_mod
             complex(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
             character(len=*), intent(in), optional :: im
         end subroutine to_file_2dc32
@@ -533,9 +540,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_1dr128
         module impure subroutine to_file_1dr64(x, file_name, header, dim, locale, delim, fmt, decimals)
@@ -543,9 +550,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_1dr64
         module impure subroutine to_file_1dr32(x, file_name, header, dim, locale, delim, fmt, decimals)
@@ -553,9 +560,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_1dr32
 
@@ -563,27 +570,27 @@ module io_mod
             real(real128), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_2dr128
         module impure subroutine to_file_2dr64(x, file_name, header, locale, delim, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_2dr64
         module impure subroutine to_file_2dr32(x, file_name, header, locale, delim, fmt, decimals)
             real(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
             character(len=*), intent(in), optional :: delim
-            character(len=1), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: fmt
             integer, intent(in), optional :: decimals
         end subroutine to_file_2dr32
 
@@ -756,58 +763,66 @@ module io_mod
             character(len=*), intent(in) :: file_name
         end subroutine to_file_15dr32
 
-        module impure subroutine to_file_1di64(x, file_name, header, dim, delim)
+        module impure subroutine to_file_1di64(x, file_name, header, dim, delim, fmt)
             integer(int64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_1di64
-        module impure subroutine to_file_1di32(x, file_name, header, dim, delim)
+        module impure subroutine to_file_1di32(x, file_name, header, dim, delim, fmt)
             integer(int32), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_1di32
-        module impure subroutine to_file_1di16(x, file_name, header, dim, delim)
+        module impure subroutine to_file_1di16(x, file_name, header, dim, delim, fmt)
             integer(int16), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_1di16
-        module impure subroutine to_file_1di8(x, file_name, header, dim, delim)
+        module impure subroutine to_file_1di8(x, file_name, header, dim, delim, fmt)
             integer(int8), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             integer, intent(in), optional :: dim
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_1di8
 
-        module impure subroutine to_file_2di64(x, file_name, header, delim)
+        module impure subroutine to_file_2di64(x, file_name, header, delim, fmt)
             integer(int64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_2di64
-        module impure subroutine to_file_2di32(x, file_name, header, delim)
+        module impure subroutine to_file_2di32(x, file_name, header, delim, fmt)
             integer(int32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_2di32
-        module impure subroutine to_file_2di16(x, file_name, header, delim)
+        module impure subroutine to_file_2di16(x, file_name, header, delim, fmt)
             integer(int16), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_2di16
-        module impure subroutine to_file_2di8(x, file_name, header, delim)
+        module impure subroutine to_file_2di8(x, file_name, header, delim, fmt)
             integer(int8), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in), optional :: header
             character(len=*), intent(in), optional :: delim
+            character(len=*), intent(in), optional :: fmt
         end subroutine to_file_2di8
 
         module impure subroutine to_file_3di64(x, file_name)
@@ -1033,33 +1048,39 @@ module io_mod
     end interface
 
     interface from_file                                                                            !! Submodule file_io
-        module impure subroutine from_textfile_1dc128(file_name, into, header, locale)
+        module impure subroutine from_textfile_1dc128(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real128), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: im
         end subroutine from_textfile_1dc128
         module impure subroutine from_binaryfile_1dc128(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             complex(real128), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dc128
-        module impure subroutine from_textfile_1dc64(file_name, into, header, locale)
+        module impure subroutine from_textfile_1dc64(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real64), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: im
         end subroutine from_textfile_1dc64
         module impure subroutine from_binaryfile_1dc64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             complex(real64), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dc64
-        module impure subroutine from_textfile_1dc32(file_name, into, header, locale)
+        module impure subroutine from_textfile_1dc32(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real32), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: im
         end subroutine from_textfile_1dc32
         module impure subroutine from_binaryfile_1dc32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -1067,33 +1088,39 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dc32
 
-        module impure subroutine from_textfile_2dc128(file_name, into, header, locale)
+        module impure subroutine from_textfile_2dc128(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real128), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: im
         end subroutine from_textfile_2dc128
         module impure subroutine from_binaryfile_2dc128(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             complex(real128), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2dc128
-        module impure subroutine from_textfile_2dc64(file_name, into, header, locale)
+        module impure subroutine from_textfile_2dc64(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real64), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: im
         end subroutine from_textfile_2dc64
         module impure subroutine from_binaryfile_2dc64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             complex(real64), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2dc64
-        module impure subroutine from_textfile_2dc32(file_name, into, header, locale)
+        module impure subroutine from_textfile_2dc32(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real32), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
+            character(len=*), intent(in), optional :: im
         end subroutine from_textfile_2dc32
         module impure subroutine from_binaryfile_2dc32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -1309,33 +1336,36 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_15dc32
 
-        module impure subroutine from_textfile_1dr128(file_name, into, header, locale)
+        module impure subroutine from_textfile_1dr128(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1dr128
         module impure subroutine from_binaryfile_1dr128(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dr128
-        module impure subroutine from_textfile_1dr64(file_name, into, header, locale)
+        module impure subroutine from_textfile_1dr64(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1dr64
         module impure subroutine from_binaryfile_1dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dr64
-        module impure subroutine from_textfile_1dr32(file_name, into, header, locale)
+        module impure subroutine from_textfile_1dr32(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1dr32
         module impure subroutine from_binaryfile_1dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -1343,33 +1373,36 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1dr32
 
-        module impure subroutine from_textfile_2dr128(file_name, into, header, locale)
+        module impure subroutine from_textfile_2dr128(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2dr128
         module impure subroutine from_binaryfile_2dr128(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2dr128
-        module impure subroutine from_textfile_2dr64(file_name, into, header, locale)
+        module impure subroutine from_textfile_2dr64(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2dr64
         module impure subroutine from_binaryfile_2dr64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2dr64
-        module impure subroutine from_textfile_2dr32(file_name, into, header, locale)
+        module impure subroutine from_textfile_2dr32(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2dr32
         module impure subroutine from_binaryfile_2dr32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -1585,44 +1618,44 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_file_15dr32
 
-        module impure subroutine from_textfile_1di64(file_name, into, header, locale)
+        module impure subroutine from_textfile_1di64(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1di64
         module impure subroutine from_binaryfile_1di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1di64
-        module impure subroutine from_textfile_1di32(file_name, into, header, locale)
+        module impure subroutine from_textfile_1di32(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1di32
         module impure subroutine from_binaryfile_1di32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1di32
-        module impure subroutine from_textfile_1di16(file_name, into, header, locale)
+        module impure subroutine from_textfile_1di16(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1di16
         module impure subroutine from_binaryfile_1di16(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1di16
-        module impure subroutine from_textfile_1di8(file_name, into, header, locale)
+        module impure subroutine from_textfile_1di8(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_1di8
         module impure subroutine from_binaryfile_1di8(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -1630,44 +1663,44 @@ module io_mod
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_1di8
 
-        module impure subroutine from_textfile_2di64(file_name, into, header, locale)
+        module impure subroutine from_textfile_2di64(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2di64
         module impure subroutine from_binaryfile_2di64(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2di64
-        module impure subroutine from_textfile_2di32(file_name, into, header, locale)
+        module impure subroutine from_textfile_2di32(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2di32
         module impure subroutine from_binaryfile_2di32(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2di32
-        module impure subroutine from_textfile_2di16(file_name, into, header, locale)
+        module impure subroutine from_textfile_2di16(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2di16
         module impure subroutine from_binaryfile_2di16(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:,:), intent(out) :: into
             integer, dimension(:), intent(in) :: data_shape
         end subroutine from_binaryfile_2di16
-        module impure subroutine from_textfile_2di8(file_name, into, header, locale)
+        module impure subroutine from_textfile_2di8(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in), optional :: header
-            character(len=2), intent(in), optional :: locale
+            character(len=*), intent(in), optional :: fmt
         end subroutine from_textfile_2di8
         module impure subroutine from_binaryfile_2di8(file_name, into, data_shape)
             character(len=*), intent(in) :: file_name
@@ -1963,9 +1996,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
             character(len=*), intent(in) :: im
         end subroutine to_text_1dc128
@@ -1974,9 +2007,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
             character(len=*), intent(in) :: im
         end subroutine to_text_1dc64
@@ -1985,9 +2018,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
             character(len=*), intent(in) :: im
         end subroutine to_text_1dc32
@@ -1996,9 +2029,9 @@ module io_mod
             complex(real128), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
             character(len=*), intent(in) :: im
         end subroutine to_text_2dc128
@@ -2006,9 +2039,9 @@ module io_mod
             complex(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
             character(len=*), intent(in) :: im
         end subroutine to_text_2dc64
@@ -2016,9 +2049,9 @@ module io_mod
             complex(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
             character(len=*), intent(in) :: im
         end subroutine to_text_2dc32
@@ -2028,9 +2061,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_1dr128
         module impure subroutine to_text_1dr64(x, file_name, header, dim, locale, delim, fmt, decimals)
@@ -2038,9 +2071,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_1dr64
         module impure subroutine to_text_1dr32(x, file_name, header, dim, locale, delim, fmt, decimals)
@@ -2048,9 +2081,9 @@ module io_mod
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_1dr32
 
@@ -2058,210 +2091,236 @@ module io_mod
             real(real128), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_2dr128
         module impure subroutine to_text_2dr64(x, file_name, header, locale, delim, fmt, decimals)
             real(real64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_2dr64
         module impure subroutine to_text_2dr32(x, file_name, header, locale, delim, fmt, decimals)
             real(real32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
             character(len=*), intent(in) :: delim
-            character(len=1), intent(in) :: fmt
+            character(len=*), intent(in) :: fmt
             integer, intent(in) :: decimals
         end subroutine to_text_2dr32
 
-        module impure subroutine to_text_1di64(x, file_name, header, dim, delim)
+        module impure subroutine to_text_1di64(x, file_name, header, dim, delim, fmt)
             integer(int64), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_1di64
-        module impure subroutine to_text_1di32(x, file_name, header, dim, delim)
+        module impure subroutine to_text_1di32(x, file_name, header, dim, delim, fmt)
             integer(int32), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_1di32
-        module impure subroutine to_text_1di16(x, file_name, header, dim, delim)
+        module impure subroutine to_text_1di16(x, file_name, header, dim, delim, fmt)
             integer(int16), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_1di16
-        module impure subroutine to_text_1di8(x, file_name, header, dim, delim)
+        module impure subroutine to_text_1di8(x, file_name, header, dim, delim, fmt)
             integer(int8), dimension(:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             integer, intent(in) :: dim
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_1di8
 
-        module impure subroutine to_text_2di64(x, file_name, header, delim)
+        module impure subroutine to_text_2di64(x, file_name, header, delim, fmt)
             integer(int64), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_2di64
-        module impure subroutine to_text_2di32(x, file_name, header, delim)
+        module impure subroutine to_text_2di32(x, file_name, header, delim, fmt)
             integer(int32), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_2di32
-        module impure subroutine to_text_2di16(x, file_name, header, delim)
+        module impure subroutine to_text_2di16(x, file_name, header, delim, fmt)
             integer(int16), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_2di16
-        module impure subroutine to_text_2di8(x, file_name, header, delim)
+        module impure subroutine to_text_2di8(x, file_name, header, delim, fmt)
             integer(int8), dimension(:,:), intent(in) :: x
             character(len=*), intent(in) :: file_name
             character(len=*), dimension(:), intent(in) :: header
             character(len=*), intent(in) :: delim
+            character(len=*), intent(in) :: fmt
         end subroutine to_text_2di8
     end interface
 
     interface from_text                                                                            !! Submodule text_io
-        module impure subroutine from_text_1dc128(file_name, into, header, locale)
+        module impure subroutine from_text_1dc128(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real128), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
+            character(len=*), intent(in) :: im
         end subroutine from_text_1dc128
-        module impure subroutine from_text_1dc64(file_name, into, header, locale)
+        module impure subroutine from_text_1dc64(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real64), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
+            character(len=*), intent(in) :: im
         end subroutine from_text_1dc64
-        module impure subroutine from_text_1dc32(file_name, into, header, locale)
+        module impure subroutine from_text_1dc32(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real32), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
+            character(len=*), intent(in) :: im
         end subroutine from_text_1dc32
 
-        module impure subroutine from_text_2dc128(file_name, into, header, locale)
+        module impure subroutine from_text_2dc128(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real128), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
+            character(len=*), intent(in) :: im
         end subroutine from_text_2dc128
-        module impure subroutine from_text_2dc64(file_name, into, header, locale)
+        module impure subroutine from_text_2dc64(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real64), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
+            character(len=*), intent(in) :: im
         end subroutine from_text_2dc64
-        module impure subroutine from_text_2dc32(file_name, into, header, locale)
+        module impure subroutine from_text_2dc32(file_name, into, header, locale, fmt, im)
             character(len=*), intent(in) :: file_name
             complex(real32), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
+            character(len=*), intent(in) :: im
         end subroutine from_text_2dc32
 
-        module impure subroutine from_text_1dr128(file_name, into, header, locale)
+        module impure subroutine from_text_1dr128(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1dr128
-        module impure subroutine from_text_1dr64(file_name, into, header, locale)
+        module impure subroutine from_text_1dr64(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1dr64
-        module impure subroutine from_text_1dr32(file_name, into, header, locale)
+        module impure subroutine from_text_1dr32(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1dr32
 
-        module impure subroutine from_text_2dr128(file_name, into, header, locale)
+        module impure subroutine from_text_2dr128(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real128), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2dr128
-        module impure subroutine from_text_2dr64(file_name, into, header, locale)
+        module impure subroutine from_text_2dr64(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real64), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2dr64
-        module impure subroutine from_text_2dr32(file_name, into, header, locale)
+        module impure subroutine from_text_2dr32(file_name, into, header, locale, fmt)
             character(len=*), intent(in) :: file_name
             real(real32), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2dr32
 
-        module impure subroutine from_text_1di64(file_name, into, header, locale)
+        module impure subroutine from_text_1di64(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1di64
-        module impure subroutine from_text_1di32(file_name, into, header, locale)
+        module impure subroutine from_text_1di32(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1di32
-        module impure subroutine from_text_1di16(file_name, into, header, locale)
+        module impure subroutine from_text_1di16(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1di16
-        module impure subroutine from_text_1di8(file_name, into, header, locale)
+        module impure subroutine from_text_1di8(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_1di8
 
-        module impure subroutine from_text_2di64(file_name, into, header, locale)
+        module impure subroutine from_text_2di64(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int64), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2di64
-        module impure subroutine from_text_2di32(file_name, into, header, locale)
+        module impure subroutine from_text_2di32(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int32), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2di32
-        module impure subroutine from_text_2di16(file_name, into, header, locale)
+        module impure subroutine from_text_2di16(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int16), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2di16
-        module impure subroutine from_text_2di8(file_name, into, header, locale)
+        module impure subroutine from_text_2di8(file_name, into, header, fmt)
             character(len=*), intent(in) :: file_name
             integer(int8), allocatable, dimension(:,:), intent(out) :: into
             logical, intent(in) :: header
-            character(len=2), intent(in) :: locale
+            character(len=*), intent(in) :: fmt
         end subroutine from_text_2di8
     end interface
 
@@ -3735,22 +3794,22 @@ submodule (io_mod) array_printing
     contains
     module procedure aprint_1dc128
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: im_
-        character(len=1) :: fmt_
-        integer :: i, n_rows, decimals_
+        character(len=:), allocatable :: fmt_, im_, xre_max_str, xre_min_str, xim_max_str, xim_min_str
+        integer :: i, n_rows, decimals_, l
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -3763,44 +3822,55 @@ submodule (io_mod) array_printing
 
         n_rows = size(x)
 
-        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_, im=im_) )
-
-        if ( n_rows > 1 ) then
-            do concurrent (i = 2:n_rows)
-                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
-            end do
+        if ( len(im_) > 0 ) then
+            l = len(im_)
+        else
+            l = 3
         end if
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+        xre_max_str = str(maxval(x%re), fmt=fmt_, decimals=decimals_)
+        xre_min_str = str(minval(x%re), fmt=fmt_, decimals=decimals_)
+        xim_max_str = str(maxval(x%im), fmt=fmt_, decimals=decimals_)
+        xim_min_str = str(minval(x%im), fmt=fmt_, decimals=decimals_)
 
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
-            end do
+        if ( len(xre_max_str) > len(xre_min_str) ) then
+            l = l + len(xre_max_str)
+        else
+            l = l + len(xre_min_str)
         end if
 
-        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+        if ( len(xim_max_str) > len(xim_min_str) ) then
+            l = l + len(xim_max_str)
+        else
+            l = l + len(xim_min_str)
+        end if
+
+        allocate( character(len=l) :: x_str(n_rows) )
+
+        do concurrent (i = 1:n_rows)
+            x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
+        end do
+
+        call aprint(x_str)
     end procedure aprint_1dc128
     module procedure aprint_1dc64
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: im_
-        character(len=1) :: fmt_
-        integer :: i, n_rows, decimals_
+        character(len=:), allocatable :: fmt_, im_, xre_max_str, xre_min_str, xim_max_str, xim_min_str
+        integer :: i, n_rows, decimals_, l
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -3813,44 +3883,55 @@ submodule (io_mod) array_printing
 
         n_rows = size(x)
 
-        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_, im=im_) )
-
-        if ( n_rows > 1 ) then
-            do concurrent (i = 2:n_rows)
-                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
-            end do
+        if ( len(im_) > 0 ) then
+            l = len(im_)
+        else
+            l = 3
         end if
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+        xre_max_str = str(maxval(x%re), fmt=fmt_, decimals=decimals_)
+        xre_min_str = str(minval(x%re), fmt=fmt_, decimals=decimals_)
+        xim_max_str = str(maxval(x%im), fmt=fmt_, decimals=decimals_)
+        xim_min_str = str(minval(x%im), fmt=fmt_, decimals=decimals_)
 
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
-            end do
+        if ( len(xre_max_str) > len(xre_min_str) ) then
+            l = l + len(xre_max_str)
+        else
+            l = l + len(xre_min_str)
         end if
 
-        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+        if ( len(xim_max_str) > len(xim_min_str) ) then
+            l = l + len(xim_max_str)
+        else
+            l = l + len(xim_min_str)
+        end if
+
+        allocate( character(len=l) :: x_str(n_rows) )
+
+        do concurrent (i = 1:n_rows)
+            x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
+        end do
+
+        call aprint(x_str)
     end procedure aprint_1dc64
     module procedure aprint_1dc32
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: im_
-        character(len=1) :: fmt_
-        integer :: i, n_rows, decimals_
+        character(len=:), allocatable :: fmt_, im_, xre_max_str, xre_min_str, xim_max_str, xim_min_str
+        integer :: i, n_rows, decimals_, l
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -3863,45 +3944,56 @@ submodule (io_mod) array_printing
 
         n_rows = size(x)
 
-        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_, im=im_) )
-
-        if ( n_rows > 1 ) then
-            do concurrent (i = 2:n_rows)
-                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
-            end do
+        if ( len(im_) > 0 ) then
+            l = len(im_)
+        else
+            l = 3
         end if
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+        xre_max_str = str(maxval(x%re), fmt=fmt_, decimals=decimals_)
+        xre_min_str = str(minval(x%re), fmt=fmt_, decimals=decimals_)
+        xim_max_str = str(maxval(x%im), fmt=fmt_, decimals=decimals_)
+        xim_min_str = str(minval(x%im), fmt=fmt_, decimals=decimals_)
 
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
-            end do
+        if ( len(xre_max_str) > len(xre_min_str) ) then
+            l = l + len(xre_max_str)
+        else
+            l = l + len(xre_min_str)
         end if
 
-        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+        if ( len(xim_max_str) > len(xim_min_str) ) then
+            l = l + len(xim_max_str)
+        else
+            l = l + len(xim_min_str)
+        end if
+
+        allocate( character(len=l) :: x_str(n_rows) )
+
+        do concurrent (i = 1:n_rows)
+            x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_, im=im_)
+        end do
+
+        call aprint(x_str)
     end procedure aprint_1dc32
 
     module procedure aprint_2dc128
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: im_
-        character(len=1) :: fmt_
-        integer :: i, j, n_rows, n_columns, decimals_
+        character(len=:), allocatable :: fmt_, im_, xre_max_str, xre_min_str, xim_max_str, xim_min_str
+        integer :: i, j, n_rows, n_columns, decimals_, l
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -3915,42 +4007,55 @@ submodule (io_mod) array_printing
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_, im=im_) )
+        if ( len(im_) > 0 ) then
+            l = len(im_)
+        else
+            l = 3
+        end if
+
+        xre_max_str = str(maxval(x%re), fmt=fmt_, decimals=decimals_)
+        xre_min_str = str(minval(x%re), fmt=fmt_, decimals=decimals_)
+        xim_max_str = str(maxval(x%im), fmt=fmt_, decimals=decimals_)
+        xim_min_str = str(minval(x%im), fmt=fmt_, decimals=decimals_)
+
+        if ( len(xre_max_str) > len(xre_min_str) ) then
+            l = l + len(xre_max_str)
+        else
+            l = l + len(xre_min_str)
+        end if
+
+        if ( len(xim_max_str) > len(xim_min_str) ) then
+            l = l + len(xim_max_str)
+        else
+            l = l + len(xim_min_str)
+        end if
+
+        allocate( character(len=l) :: x_str(n_rows, n_columns) )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
             x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_, im=im_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2dc128
     module procedure aprint_2dc64
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: im_
-        character(len=1) :: fmt_
-        integer :: i, j, n_rows, n_columns, decimals_
+        character(len=:), allocatable :: fmt_, im_, xre_max_str, xre_min_str, xim_max_str, xim_min_str
+        integer :: i, j, n_rows, n_columns, decimals_, l
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -3964,42 +4069,55 @@ submodule (io_mod) array_printing
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_, im=im_) )
+        if ( len(im_) > 0 ) then
+            l = len(im_)
+        else
+            l = 3
+        end if
+
+        xre_max_str = str(maxval(x%re), fmt=fmt_, decimals=decimals_)
+        xre_min_str = str(minval(x%re), fmt=fmt_, decimals=decimals_)
+        xim_max_str = str(maxval(x%im), fmt=fmt_, decimals=decimals_)
+        xim_min_str = str(minval(x%im), fmt=fmt_, decimals=decimals_)
+
+        if ( len(xre_max_str) > len(xre_min_str) ) then
+            l = l + len(xre_max_str)
+        else
+            l = l + len(xre_min_str)
+        end if
+
+        if ( len(xim_max_str) > len(xim_min_str) ) then
+            l = l + len(xim_max_str)
+        else
+            l = l + len(xim_min_str)
+        end if
+
+        allocate( character(len=l) :: x_str(n_rows, n_columns) )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
             x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_, im=im_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2dc64
     module procedure aprint_2dc32
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: im_
-        character(len=1) :: fmt_
-        integer :: i, j, n_rows, n_columns, decimals_
+        character(len=:), allocatable :: fmt_, im_, xre_max_str, xre_min_str, xim_max_str, xim_min_str
+        integer :: i, j, n_rows, n_columns, decimals_, l
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -4013,172 +4131,189 @@ submodule (io_mod) array_printing
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_, im=im_) )
+        if ( len(im_) > 0 ) then
+            l = len(im_)
+        else
+            l = 3
+        end if
+
+        xre_max_str = str(maxval(x%re), fmt=fmt_, decimals=decimals_)
+        xre_min_str = str(minval(x%re), fmt=fmt_, decimals=decimals_)
+        xim_max_str = str(maxval(x%im), fmt=fmt_, decimals=decimals_)
+        xim_min_str = str(minval(x%im), fmt=fmt_, decimals=decimals_)
+
+        if ( len(xre_max_str) > len(xre_min_str) ) then
+            l = l + len(xre_max_str)
+        else
+            l = l + len(xre_min_str)
+        end if
+
+        if ( len(xim_max_str) > len(xim_min_str) ) then
+            l = l + len(xim_max_str)
+        else
+            l = l + len(xim_min_str)
+        end if
+
+        allocate( character(len=l) :: x_str(n_rows, n_columns) )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
             x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_, im=im_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2dc32
 
     module procedure aprint_1dr128
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, x_abs_min_str, source
         integer :: i, n_rows, decimals_
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
 
         n_rows = size(x)
 
-        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_) )
+        x_max_str = str(maxval(x), fmt=fmt_, decimals=decimals_)
+        x_min_str = str(minval(x), fmt=fmt_, decimals=decimals_)
+        x_abs_min_str = str(minval(abs(x)), fmt=fmt_, decimals=decimals_)
 
-        if ( n_rows > 1 ) then
-            do concurrent (i = 2:n_rows)
-                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
-            end do
+        if ( len(x_max_str) > len(x_min_str) ) then
+            source = x_max_str
+        else
+            source = x_min_str
         end if
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+        if ( len(x_abs_min_str) > len(source) ) source = x_abs_min_str
 
-        if ( n_rows == 1 ) return
+        allocate( x_str(n_rows), source=source )
 
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
-            end do
-        end if
+        do concurrent (i = 1:n_rows)
+            x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
+        end do
 
-        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1dr128
     module procedure aprint_1dr64
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, x_abs_min_str, source
         integer :: i, n_rows, decimals_
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
 
         n_rows = size(x)
 
-        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_) )
+        x_max_str = str(maxval(x), fmt=fmt_, decimals=decimals_)
+        x_min_str = str(minval(x), fmt=fmt_, decimals=decimals_)
+        x_abs_min_str = str(minval(abs(x)), fmt=fmt_, decimals=decimals_)
 
-        if ( n_rows > 1 ) then
-            do concurrent (i = 2:n_rows)
-                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
-            end do
+        if ( len(x_max_str) > len(x_min_str) ) then
+            source = x_max_str
+        else
+            source = x_min_str
         end if
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+        if ( len(x_abs_min_str) > len(source) ) source = x_abs_min_str
 
-        if ( n_rows == 1 ) return
+        allocate( x_str(n_rows), source=source )
 
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
-            end do
-        end if
+        do concurrent (i = 1:n_rows)
+            x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
+        end do
 
-        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1dr64
     module procedure aprint_1dr32
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, x_abs_min_str, source
         integer :: i, n_rows, decimals_
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
 
         n_rows = size(x)
 
-        allocate( x_str(n_rows), source=str(x(1), fmt=fmt_, decimals=decimals_) )
+        x_max_str = str(maxval(x), fmt=fmt_, decimals=decimals_)
+        x_min_str = str(minval(x), fmt=fmt_, decimals=decimals_)
+        x_abs_min_str = str(minval(abs(x)), fmt=fmt_, decimals=decimals_)
 
-        if ( n_rows > 1 ) then
-            do concurrent (i = 2:n_rows)
-                x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
-            end do
+        if ( len(x_max_str) > len(x_min_str) ) then
+            source = x_max_str
+        else
+            source = x_min_str
         end if
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//x_str(1)//' ┫'
+        if ( len(x_abs_min_str) > len(source) ) source = x_abs_min_str
 
-        if ( n_rows == 1 ) return
+        allocate( x_str(n_rows), source=source )
 
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//x_str(i)//' ┃'
-            end do
-        end if
+        do concurrent (i = 1:n_rows)
+            x_str(i) = str(x(i), fmt=fmt_, decimals=decimals_)
+        end do
 
-        write(unit=*, fmt='(a)') '   ┣ '//x_str(n_rows)//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1dr32
 
     module procedure aprint_2dr128
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, x_abs_min_str, source
         integer :: i, j, n_rows, n_columns, decimals_
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -4186,41 +4321,44 @@ submodule (io_mod) array_printing
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_) )
+        x_max_str = str(maxval(x), fmt=fmt_, decimals=decimals_)
+        x_min_str = str(minval(x), fmt=fmt_, decimals=decimals_)
+        x_abs_min_str = str(minval(abs(x)), fmt=fmt_, decimals=decimals_)
+
+        if ( len(x_max_str) > len(x_min_str) ) then
+            source = x_max_str
+        else
+            source = x_min_str
+        end if
+
+        if ( len(x_abs_min_str) > len(source) ) source = x_abs_min_str
+
+        allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
             x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2dr128
     module procedure aprint_2dr64
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, x_abs_min_str, source
         integer :: i, j, n_rows, n_columns, decimals_
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -4228,41 +4366,44 @@ submodule (io_mod) array_printing
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_) )
+        x_max_str = str(maxval(x), fmt=fmt_, decimals=decimals_)
+        x_min_str = str(minval(x), fmt=fmt_, decimals=decimals_)
+        x_abs_min_str = str(minval(abs(x)), fmt=fmt_, decimals=decimals_)
+
+        if ( len(x_max_str) > len(x_min_str) ) then
+            source = x_max_str
+        else
+            source = x_min_str
+        end if
+
+        if ( len(x_abs_min_str) > len(source) ) source = x_abs_min_str
+
+        allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
             x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2dr64
     module procedure aprint_2dr32
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, x_abs_min_str, source
         integer :: i, j, n_rows, n_columns, decimals_
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'f'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing real array. Aborting...'
                 return
             end if
         end if
 
         if ( .not. present(decimals) ) then
-            decimals_ = 1
+            decimals_ = 2
         else
             decimals_ = decimals
         end if
@@ -4270,34 +4411,47 @@ submodule (io_mod) array_printing
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        allocate( x_str(n_rows, n_columns), source=str(x(1,1), fmt=fmt_, decimals=decimals_) )
+        x_max_str = str(maxval(x), fmt=fmt_, decimals=decimals_)
+        x_min_str = str(minval(x), fmt=fmt_, decimals=decimals_)
+        x_abs_min_str = str(minval(abs(x)), fmt=fmt_, decimals=decimals_)
+
+        if ( len(x_max_str) > len(x_min_str) ) then
+            source = x_max_str
+        else
+            source = x_min_str
+        end if
+
+        if ( len(x_abs_min_str) > len(source) ) source = x_abs_min_str
+
+        allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
             x_str(i,j) = str(x(i,j), fmt=fmt_, decimals=decimals_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//to_str(x_str(1,:), delim=' ')//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//to_str(x_str(i,:), delim=' ')//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//to_str(x_str(n_rows,:), delim=' ')//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2dr32
 
     module procedure aprint_1di64
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source
         integer :: i, n_rows
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4308,30 +4462,31 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows), source=source )
 
         do concurrent (i = 1:n_rows)
-            x_str(i) = str(x(i))
+            x_str(i) = str(x(i), fmt=fmt_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//adjustr(x_str(1))//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//adjustr(x_str(i))//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//adjustr(x_str(n_rows))//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1di64
     module procedure aprint_1di32
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source
         integer :: i, n_rows
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4342,30 +4497,31 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows), source=source )
 
         do concurrent (i = 1:n_rows)
-            x_str(i) = str(x(i))
+            x_str(i) = str(x(i), fmt=fmt_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//adjustr(x_str(1))//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//adjustr(x_str(i))//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//adjustr(x_str(n_rows))//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1di32
     module procedure aprint_1di16
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source
         integer :: i, n_rows
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4376,30 +4532,31 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows), source=source )
 
         do concurrent (i = 1:n_rows)
-            x_str(i) = str(x(i))
+            x_str(i) = str(x(i), fmt=fmt_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//adjustr(x_str(1))//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//adjustr(x_str(i))//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//adjustr(x_str(n_rows))//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1di16
     module procedure aprint_1di8
         character(len=:), allocatable, dimension(:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source
         integer :: i, n_rows
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4410,32 +4567,33 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows), source=source )
 
         do concurrent (i = 1:n_rows)
-            x_str(i) = str(x(i))
+            x_str(i) = str(x(i), fmt=fmt_)
         end do
 
-        write(unit=*, fmt='(a)') nl//'   ┣ '//adjustr(x_str(1))//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                write(unit=*, fmt='(a)') '   ┃ '//adjustr(x_str(i))//' ┃'
-            end do
-        end if
-
-        write(unit=*, fmt='(a)') '   ┣ '//adjustr(x_str(n_rows))//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_1di8
 
     module procedure aprint_2di64
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source, str_tmp
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source, str_tmp
         integer :: i, j, n_rows, n_columns
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4446,49 +4604,32 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
-            x_str(i,j) = str(x(i,j))
+            x_str(i,j) = str(x(i,j), fmt=fmt_)
         end do
 
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(1,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(1,n_columns))
-
-        write(unit=*, fmt='(a)') nl//'   ┣ '//str_tmp//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                str_tmp = ''
-                do j = 1, n_columns - 1
-                    str_tmp = str_tmp//adjustr(x_str(i,j))//' '
-                end do
-                str_tmp = str_tmp//adjustr(x_str(i,n_columns))
-
-                write(unit=*, fmt='(a)') '   ┃ '//str_tmp//' ┃'
-            end do
-        end if
-
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(n_rows,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(n_rows,n_columns))
-
-        write(unit=*, fmt='(a)') '   ┣ '//str_tmp//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2di64
     module procedure aprint_2di32
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source, str_tmp
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source, str_tmp
         integer :: i, j, n_rows, n_columns
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4499,49 +4640,32 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
-            x_str(i,j) = str(x(i,j))
+            x_str(i,j) = str(x(i,j), fmt=fmt_)
         end do
 
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(1,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(1,n_columns))
-
-        write(unit=*, fmt='(a)') nl//'   ┣ '//str_tmp//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                str_tmp = ''
-                do j = 1, n_columns - 1
-                    str_tmp = str_tmp//adjustr(x_str(i,j))//' '
-                end do
-                str_tmp = str_tmp//adjustr(x_str(i,n_columns))
-
-                write(unit=*, fmt='(a)') '   ┃ '//str_tmp//' ┃'
-            end do
-        end if
-
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(n_rows,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(n_rows,n_columns))
-
-        write(unit=*, fmt='(a)') '   ┣ '//str_tmp//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2di32
     module procedure aprint_2di16
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source, str_tmp
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source, str_tmp
         integer :: i, j, n_rows, n_columns
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4552,49 +4676,32 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
-            x_str(i,j) = str(x(i,j))
+            x_str(i,j) = str(x(i,j), fmt=fmt_)
         end do
 
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(1,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(1,n_columns))
-
-        write(unit=*, fmt='(a)') nl//'   ┣ '//str_tmp//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                str_tmp = ''
-                do j = 1, n_columns - 1
-                    str_tmp = str_tmp//adjustr(x_str(i,j))//' '
-                end do
-                str_tmp = str_tmp//adjustr(x_str(i,n_columns))
-
-                write(unit=*, fmt='(a)') '   ┃ '//str_tmp//' ┃'
-            end do
-        end if
-
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(n_rows,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(n_rows,n_columns))
-
-        write(unit=*, fmt='(a)') '   ┣ '//str_tmp//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2di16
     module procedure aprint_2di8
         character(len=:), allocatable, dimension(:,:) :: x_str
-        character(len=:), allocatable :: x_max_str, x_min_str, source, str_tmp
+        character(len=:), allocatable :: fmt_, x_max_str, x_min_str, source, str_tmp
         integer :: i, j, n_rows, n_columns
+
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                write(*,'(a)') nl//'WARNING: Unknown format "'//fmt//'" for printing integer array. Aborting...'
+                return
+            end if
+        end if
 
         n_rows = size(x, dim=1)
         n_columns = size(x, dim=2)
 
-        x_max_str = str(maxval(x))
-        x_min_str = str(minval(x))
+        x_max_str = str(maxval(x), fmt=fmt_)
+        x_min_str = str(minval(x), fmt=fmt_)
 
         if ( len(x_max_str) > len(x_min_str) ) then
             source = x_max_str
@@ -4605,38 +4712,10 @@ submodule (io_mod) array_printing
         allocate( x_str(n_rows, n_columns), source=source )
 
         do concurrent (j = 1:n_columns, i = 1:n_rows)
-            x_str(i,j) = str(x(i,j))
+            x_str(i,j) = str(x(i,j), fmt=fmt_)
         end do
 
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(1,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(1,n_columns))
-
-        write(unit=*, fmt='(a)') nl//'   ┣ '//str_tmp//' ┫'
-
-        if ( n_rows == 1 ) return
-
-        if ( n_rows > 2 ) then
-            do i = 2, n_rows - 1
-                str_tmp = ''
-                do j = 1, n_columns - 1
-                    str_tmp = str_tmp//adjustr(x_str(i,j))//' '
-                end do
-                str_tmp = str_tmp//adjustr(x_str(i,n_columns))
-
-                write(unit=*, fmt='(a)') '   ┃ '//str_tmp//' ┃'
-            end do
-        end if
-
-        str_tmp = ''
-        do j = 1, n_columns - 1
-            str_tmp = str_tmp//adjustr(x_str(n_rows,j))//' '
-        end do
-        str_tmp = str_tmp//adjustr(x_str(n_rows,n_columns))
-
-        write(unit=*, fmt='(a)') '   ┣ '//str_tmp//' ┫'//nl
+        call aprint(x_str)
     end procedure aprint_2di8
 
     module procedure aprint_1dchar
@@ -4694,15 +4773,13 @@ end submodule array_printing
 submodule (io_mod) internal_io
     contains
     module procedure str_c128
+        character(len=:), allocatable :: locale_, fmt_, im_, sep
         integer :: decimals_
-        character(len=:), allocatable :: im_, sep
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -4711,9 +4788,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -4734,7 +4811,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( im_ == '' ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 sep = ','
             else
                 sep = ';'
@@ -4742,25 +4819,28 @@ submodule (io_mod) internal_io
             x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//sep// &
                          str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
         else
-            if ( x%im < 0 ) then
-                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
-                        str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
-            else
+            if ( fmt_ == 'z' ) then
                 x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
                         str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            else
+                if ( x%im < 0 ) then
+                    x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
+                            str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+                else
+                    x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
+                            str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+                end if
             end if
         end if
     end procedure str_c128
     module procedure str_c64
+        character(len=:), allocatable :: locale_, fmt_, im_, sep
         integer :: decimals_
-        character(len=:), allocatable :: im_, sep
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -4769,9 +4849,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -4792,7 +4872,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( im_ == '' ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 sep = ','
             else
                 sep = ';'
@@ -4800,25 +4880,28 @@ submodule (io_mod) internal_io
             x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//sep// &
                          str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
         else
-            if ( x%im < 0 ) then
-                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
-                        str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
-            else
+            if ( fmt_ == 'z' ) then
                 x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
                         str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            else
+                if ( x%im < 0 ) then
+                    x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
+                            str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+                else
+                    x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
+                            str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+                end if
             end if
         end if
     end procedure str_c64
     module procedure str_c32
+        character(len=:), allocatable :: locale_, fmt_, im_, sep
         integer :: decimals_
-        character(len=:), allocatable :: im_, sep
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -4827,9 +4910,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -4850,7 +4933,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( im_ == '' ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 sep = ','
             else
                 sep = ';'
@@ -4858,28 +4941,31 @@ submodule (io_mod) internal_io
             x_str = '('//str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//sep// &
                          str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//')'
         else
-            if ( x%im < 0 ) then
-                x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
-                        str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
-            else
+            if ( fmt_ == 'z' ) then
                 x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
                         str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+            else
+                if ( x%im < 0 ) then
+                    x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'-'// &
+                            str(abs(x%im), locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+                else
+                    x_str = str(x%re, locale=locale_, fmt=fmt_, decimals=decimals_)//'+'// &
+                            str(x%im, locale=locale_, fmt=fmt_, decimals=decimals_)//im_
+                end if
             end if
         end if
     end procedure str_c32
 
     module procedure str_r128
+        character(len=:), allocatable :: decimal, fmt_, str_tmp
         integer :: i, e, max_decimals, decimals_, l, extra
-
-        character(len=:), allocatable :: decimal, str_tmp
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
             decimal = 'POINT'
         else
-            if ( locale == 'us' ) then
+            if ( locale == 'US' ) then
                 decimal = 'POINT'
-            else if ( locale == 'eu' ) then
+            else if ( locale == 'EU' ) then
                 decimal = 'COMMA'
             else
                 x_str = ''
@@ -4888,9 +4974,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -4898,7 +4984,7 @@ submodule (io_mod) internal_io
             end if
         end if
 
-        if ( fmt_ == 'e' ) then
+        if ( fmt_ == 'es' ) then
             associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
                 if ( .not. present(decimals) ) then
                     decimals_ = max_precision - 1
@@ -4972,20 +5058,23 @@ submodule (io_mod) internal_io
                     if ( extra == 0 ) exit
                 end do
             end if
+        else if ( fmt_ == 'z' ) then
+            allocate( character(len=70) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(z)') x
+            x_str = trim(adjustl(str_tmp))
         end if
     end procedure str_r128
     module procedure str_r64
+        character(len=:), allocatable :: decimal, fmt_, str_tmp
         integer :: i, e, max_decimals, decimals_, l, extra
-
-        character(len=:), allocatable :: decimal, str_tmp
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
             decimal = 'POINT'
         else
-            if ( locale == 'us' ) then
+            if ( locale == 'US' ) then
                 decimal = 'POINT'
-            else if ( locale == 'eu' ) then
+            else if ( locale == 'EU' ) then
                 decimal = 'COMMA'
             else
                 x_str = ''
@@ -4994,9 +5083,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5004,7 +5093,7 @@ submodule (io_mod) internal_io
             end if
         end if
 
-        if ( fmt_ == 'e' ) then
+        if ( fmt_ == 'es' ) then
             associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
                 if ( .not. present(decimals) ) then
                     decimals_ = max_precision - 1
@@ -5078,20 +5167,23 @@ submodule (io_mod) internal_io
                     if ( extra == 0 ) exit
                 end do
             end if
+        else if ( fmt_ == 'z' ) then
+            allocate( character(len=40) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(z)') x
+            x_str = trim(adjustl(str_tmp))
         end if
     end procedure str_r64
     module procedure str_r32
+        character(len=:), allocatable :: decimal, fmt_, str_tmp
         integer :: i, e, max_decimals, decimals_, l, extra
-
-        character(len=:), allocatable :: decimal, str_tmp
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
             decimal = 'POINT'
         else
-            if ( locale == 'us' ) then
+            if ( locale == 'US' ) then
                 decimal = 'POINT'
-            else if ( locale == 'eu' ) then
+            else if ( locale == 'EU' ) then
                 decimal = 'COMMA'
             else
                 x_str = ''
@@ -5100,9 +5192,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5110,7 +5202,7 @@ submodule (io_mod) internal_io
             end if
         end if
 
-        if ( fmt_ == 'e' ) then
+        if ( fmt_ == 'es' ) then
             associate ( max_precision => ceiling( 1.0 + log10(real(radix(x)))*digits(x) ) )
                 if ( .not. present(decimals) ) then
                     decimals_ = max_precision - 1
@@ -5184,44 +5276,115 @@ submodule (io_mod) internal_io
                     if ( extra == 0 ) exit
                 end do
             end if
+        else if ( fmt_ == 'z' ) then
+            allocate( character(len=25) :: str_tmp )
+
+            write(unit=str_tmp, fmt='(z)') x
+            x_str = trim(adjustl(str_tmp))
         end if
     end procedure str_r32
 
     module procedure str_i64
-        character(len=21) :: str_tmp
+        character(len=:), allocatable :: fmt_
+        character(len=40) :: str_tmp
 
-        write(unit=str_tmp, fmt='(i21)') x
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( fmt_ == 'i' ) then
+            write(unit=str_tmp, fmt='(i)') x
+        else if ( fmt_ == 'z' ) then
+            write(unit=str_tmp, fmt='(z)') x
+        end if
+        
         x_str = trim(adjustl(str_tmp))
     end procedure str_i64
     module procedure str_i32
-        character(len=11) :: str_tmp
+        character(len=:), allocatable :: fmt_
+        character(len=25) :: str_tmp
 
-        write(unit=str_tmp, fmt='(i11)') x
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( fmt_ == 'i' ) then
+            write(unit=str_tmp, fmt='(i)') x
+        else if ( fmt_ == 'z' ) then
+            write(unit=str_tmp, fmt='(z)') x
+        end if
+        
         x_str = trim(adjustl(str_tmp))
     end procedure str_i32
     module procedure str_i16
-        character(len=6) :: str_tmp
+        character(len=:), allocatable :: fmt_
+        character(len=15) :: str_tmp
 
-        write(unit=str_tmp, fmt='(i6)') x
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( fmt_ == 'i' ) then
+            write(unit=str_tmp, fmt='(i)') x
+        else if ( fmt_ == 'z' ) then
+            write(unit=str_tmp, fmt='(z)') x
+        end if
+        
         x_str = trim(adjustl(str_tmp))
     end procedure str_i16
     module procedure str_i8
-        character(len=4) :: str_tmp
+        character(len=:), allocatable :: fmt_
+        character(len=10) :: str_tmp
 
-        write(unit=str_tmp, fmt='(i4)') x
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
+        if ( fmt_ == 'i' ) then
+            write(unit=str_tmp, fmt='(i)') x
+        else if ( fmt_ == 'z' ) then
+            write(unit=str_tmp, fmt='(z)') x
+        end if
+        
         x_str = trim(adjustl(str_tmp))
     end procedure str_i8
 
     module procedure to_str_1dc128
+        character(len=:), allocatable :: locale_, delim_, fmt_, im_
         integer :: i, decimals_
-        character(len=:), allocatable :: delim_, im_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -5230,7 +5393,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(delim) ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 delim_ = ','
             else
                 delim_ = ';'
@@ -5240,9 +5403,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5269,15 +5432,13 @@ submodule (io_mod) internal_io
         x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)
     end procedure to_str_1dc128
     module procedure to_str_1dc64
+        character(len=:), allocatable :: locale_, delim_, fmt_, im_
         integer :: i, decimals_
-        character(len=:), allocatable :: delim_, im_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -5286,7 +5447,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(delim) ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 delim_ = ','
             else
                 delim_ = ';'
@@ -5296,9 +5457,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5325,15 +5486,13 @@ submodule (io_mod) internal_io
         x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_, im=im_)
     end procedure to_str_1dc64
     module procedure to_str_1dc32
+        character(len=:), allocatable :: locale_, delim_, fmt_, im_
         integer :: i, decimals_
-        character(len=:), allocatable :: delim_, im_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -5342,7 +5501,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(delim) ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 delim_ = ','
             else
                 delim_ = ';'
@@ -5352,9 +5511,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5382,15 +5541,13 @@ submodule (io_mod) internal_io
     end procedure to_str_1dc32
 
     module procedure to_str_1dr128
+        character(len=:), allocatable :: locale_, delim_, fmt_
         integer :: i, decimals_
-        character(len=:), allocatable :: delim_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -5399,7 +5556,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(delim) ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 delim_ = ','
             else
                 delim_ = ';'
@@ -5409,9 +5566,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5432,15 +5589,13 @@ submodule (io_mod) internal_io
         x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_)
     end procedure to_str_1dr128
     module procedure to_str_1dr64
+        character(len=:), allocatable :: locale_, delim_, fmt_
         integer :: i, decimals_
-        character(len=:), allocatable :: delim_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -5449,7 +5604,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(delim) ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 delim_ = ','
             else
                 delim_ = ';'
@@ -5459,9 +5614,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5482,15 +5637,13 @@ submodule (io_mod) internal_io
         x_str = x_str//str(x(size(x)), locale=locale_, fmt=fmt_, decimals=decimals_)
     end procedure to_str_1dr64
     module procedure to_str_1dr32
+        character(len=:), allocatable :: locale_, delim_, fmt_
         integer :: i, decimals_
-        character(len=:), allocatable :: delim_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
 
         if ( .not. present(locale) ) then
-            locale_ = 'us'
+            locale_ = 'US'
         else
-            if ( (locale == 'us') .or. (locale == 'eu') ) then
+            if ( any(locales == locale) ) then
                 locale_ = locale
             else
                 x_str = ''
@@ -5499,7 +5652,7 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(delim) ) then
-            if ( locale_ == 'us' ) then
+            if ( locale_ == 'US' ) then
                 delim_ = ','
             else
                 delim_ = ';'
@@ -5509,9 +5662,9 @@ submodule (io_mod) internal_io
         end if
 
         if ( .not. present(fmt) ) then
-            fmt_ = 'e'
+            fmt_ = 'es'
         else
-            if ( (fmt == 'f') .or. (fmt == 'e') ) then
+            if ( any(real_fmts == fmt) ) then
                 fmt_ = fmt
             else
                 x_str = ''
@@ -5533,8 +5686,8 @@ submodule (io_mod) internal_io
     end procedure to_str_1dr32
 
     module procedure to_str_1di64
+        character(len=:), allocatable :: delim_, fmt_
         integer :: i
-        character(len=:), allocatable :: delim_
 
         if ( .not. present(delim) ) then
             delim_ = ','
@@ -5542,15 +5695,26 @@ submodule (io_mod) internal_io
             delim_ = delim
         end if
 
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
         x_str = ''
         do i = 1, size(x)-1
-            x_str = x_str//str(x(i))//delim_
+            x_str = x_str//str(x(i), fmt=fmt_)//delim_
         end do
-        x_str = x_str//str(x(size(x)))
+        x_str = x_str//str(x(size(x)), fmt=fmt_)
     end procedure to_str_1di64
     module procedure to_str_1di32
+        character(len=:), allocatable :: delim_, fmt_
         integer :: i
-        character(len=:), allocatable :: delim_
 
         if ( .not. present(delim) ) then
             delim_ = ','
@@ -5558,15 +5722,26 @@ submodule (io_mod) internal_io
             delim_ = delim
         end if
 
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
         x_str = ''
         do i = 1, size(x)-1
-            x_str = x_str//str(x(i))//delim_
+            x_str = x_str//str(x(i), fmt=fmt_)//delim_
         end do
-        x_str = x_str//str(x(size(x)))
+        x_str = x_str//str(x(size(x)), fmt=fmt_)
     end procedure to_str_1di32
     module procedure to_str_1di16
+        character(len=:), allocatable :: delim_, fmt_
         integer :: i
-        character(len=:), allocatable :: delim_
 
         if ( .not. present(delim) ) then
             delim_ = ','
@@ -5574,15 +5749,26 @@ submodule (io_mod) internal_io
             delim_ = delim
         end if
 
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
         x_str = ''
         do i = 1, size(x)-1
-            x_str = x_str//str(x(i))//delim_
+            x_str = x_str//str(x(i), fmt=fmt_)//delim_
         end do
-        x_str = x_str//str(x(size(x)))
+        x_str = x_str//str(x(size(x)), fmt=fmt_)
     end procedure to_str_1di16
     module procedure to_str_1di8
+        character(len=:), allocatable :: delim_, fmt_
         integer :: i
-        character(len=:), allocatable :: delim_
 
         if ( .not. present(delim) ) then
             delim_ = ','
@@ -5590,11 +5776,22 @@ submodule (io_mod) internal_io
             delim_ = delim
         end if
 
+        if ( .not. present(fmt) ) then
+            fmt_ = 'i'
+        else
+            if ( any(int_fmts == fmt) ) then
+                fmt_ = fmt
+            else
+                x_str = ''
+                return
+            end if
+        end if
+
         x_str = ''
         do i = 1, size(x)-1
-            x_str = x_str//str(x(i))//delim_
+            x_str = x_str//str(x(i), fmt=fmt_)//delim_
         end do
-        x_str = x_str//str(x(size(x)))
+        x_str = x_str//str(x(size(x)), fmt=fmt_)
     end procedure to_str_1di8
 
     module procedure to_str_1dchar
@@ -5612,10 +5809,8 @@ submodule (io_mod) file_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure to_file_1dc128
-        character(len=:), allocatable :: ext, delim_, im_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_, im_
         integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
@@ -5668,14 +5863,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
@@ -5683,7 +5879,7 @@ submodule (io_mod) file_io
                 if ( dim_ == 1 ) then
                     delim_ = ''
                 else
-                    if ( locale_ == 'us' ) then
+                    if ( locale_ == 'US' ) then
                         delim_ = ','
                     else
                         delim_ = ';'
@@ -5698,14 +5894,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -5741,10 +5938,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1dc128
     module procedure to_file_1dc64
-        character(len=:), allocatable :: ext, delim_, im_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_, im_
         integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
@@ -5797,14 +5992,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
@@ -5812,7 +6008,7 @@ submodule (io_mod) file_io
                 if ( dim_ == 1 ) then
                     delim_ = ''
                 else
-                    if ( locale_ == 'us' ) then
+                    if ( locale_ == 'US' ) then
                         delim_ = ','
                     else
                         delim_ = ';'
@@ -5827,14 +6023,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -5870,10 +6067,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1dc64
     module procedure to_file_1dc32
-        character(len=:), allocatable :: ext, delim_, im_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_, im_
         integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
@@ -5926,14 +6121,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
@@ -5941,7 +6137,7 @@ submodule (io_mod) file_io
                 if ( dim_ == 1 ) then
                     delim_ = ''
                 else
-                    if ( locale_ == 'us' ) then
+                    if ( locale_ == 'US' ) then
                         delim_ = ','
                     else
                         delim_ = ';'
@@ -5956,14 +6152,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -6000,10 +6197,8 @@ submodule (io_mod) file_io
     end procedure to_file_1dc32
 
     module procedure to_file_2dc128
-        character(len=:), allocatable :: ext, delim_, im_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_, im_
         integer :: decimals_
 
         ext = ext_of(file_name)
@@ -6023,19 +6218,20 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
             if ( .not. present(delim) ) then
-                if ( locale_ == 'us' ) then
+                if ( locale_ == 'US' ) then
                     delim_ = ','
                 else
                     delim_ = ';'
@@ -6045,14 +6241,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -6087,10 +6284,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2dc128
     module procedure to_file_2dc64
-        character(len=:), allocatable :: ext, delim_, im_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_, im_
         integer :: decimals_
 
         ext = ext_of(file_name)
@@ -6110,19 +6305,20 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
             if ( .not. present(delim) ) then
-                if ( locale_ == 'us' ) then
+                if ( locale_ == 'US' ) then
                     delim_ = ','
                 else
                     delim_ = ';'
@@ -6132,14 +6328,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -6174,10 +6371,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2dc64
     module procedure to_file_2dc32
-        character(len=:), allocatable :: ext, delim_, im_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_, im_
         integer :: decimals_
 
         ext = ext_of(file_name)
@@ -6197,19 +6392,20 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
             if ( .not. present(delim) ) then
-                if ( locale_ == 'us' ) then
+                if ( locale_ == 'US' ) then
                     delim_ = ','
                 else
                     delim_ = ';'
@@ -6219,14 +6415,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -7016,10 +7213,8 @@ submodule (io_mod) file_io
     end procedure to_file_15dc32
 
     module procedure to_file_1dr128
-        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_
         integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
@@ -7072,14 +7267,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
@@ -7087,7 +7283,7 @@ submodule (io_mod) file_io
                 if ( dim_ == 1 ) then
                     delim_ = ''
                 else
-                    if ( locale_ == 'us' ) then
+                    if ( locale_ == 'US' ) then
                         delim_ = ','
                     else
                         delim_ = ';'
@@ -7102,14 +7298,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -7138,10 +7335,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1dr128
     module procedure to_file_1dr64
-        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_
         integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
@@ -7194,14 +7389,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
@@ -7209,7 +7405,7 @@ submodule (io_mod) file_io
                 if ( dim_ == 1 ) then
                     delim_ = ''
                 else
-                    if ( locale_ == 'us' ) then
+                    if ( locale_ == 'US' ) then
                         delim_ = ','
                     else
                         delim_ = ';'
@@ -7224,14 +7420,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -7260,10 +7457,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1dr64
     module procedure to_file_1dr32
-        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_
         integer :: decimals_, hstat, dim_
 
         ext = ext_of(file_name)
@@ -7316,14 +7511,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
@@ -7331,7 +7527,7 @@ submodule (io_mod) file_io
                 if ( dim_ == 1 ) then
                     delim_ = ''
                 else
-                    if ( locale_ == 'us' ) then
+                    if ( locale_ == 'US' ) then
                         delim_ = ','
                     else
                         delim_ = ';'
@@ -7346,14 +7542,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -7383,10 +7580,8 @@ submodule (io_mod) file_io
     end procedure to_file_1dr32
 
     module procedure to_file_2dr128
-        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_
         integer :: decimals_
 
         ext = ext_of(file_name)
@@ -7406,19 +7601,20 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
             if ( .not. present(delim) ) then
-                if ( locale_ == 'us' ) then
+                if ( locale_ == 'US' ) then
                     delim_ = ','
                 else
                     delim_ = ';'
@@ -7428,14 +7624,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -7463,10 +7660,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2dr128
     module procedure to_file_2dr64
-        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_
         integer :: decimals_
 
         ext = ext_of(file_name)
@@ -7486,19 +7681,20 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
             if ( .not. present(delim) ) then
-                if ( locale_ == 'us' ) then
+                if ( locale_ == 'US' ) then
                     delim_ = ','
                 else
                     delim_ = ';'
@@ -7508,14 +7704,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -7543,10 +7740,8 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2dr64
     module procedure to_file_2dr32
-        character(len=:), allocatable :: ext, delim_
         character(len=:), allocatable, dimension(:) :: header_
-        character(len=2) :: locale_
-        character(len=1) :: fmt_
+        character(len=:), allocatable :: ext, locale_, delim_, fmt_
         integer :: decimals_
 
         ext = ext_of(file_name)
@@ -7566,19 +7761,20 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    locale_ = 'US'
+                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'". '// &
+                                       'Defaulting to US format.'// &
+                                   nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
 
             if ( .not. present(delim) ) then
-                if ( locale_ == 'us' ) then
+                if ( locale_ == 'US' ) then
                     delim_ = ','
                 else
                     delim_ = ';'
@@ -7588,14 +7784,15 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(fmt) ) then
-                fmt_ = 'e'
+                fmt_ = 'es'
             else
-                if ( (fmt == 'f') .or. (fmt == 'e') ) then
+                if ( any(real_fmts == fmt) ) then
                     fmt_ = fmt
                 else
-                    fmt_ = 'e'
-                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'".'// &
-                                   nl//'Format must be "f" or "e"... defaulting to "e".'
+                    fmt_ = 'es'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to exponential format.'// &
+                                   nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
 
@@ -8378,7 +8575,7 @@ submodule (io_mod) file_io
     end procedure to_file_15dr32
 
     module procedure to_file_1di64
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
         integer :: hstat, dim_
 
@@ -8444,12 +8641,26 @@ submodule (io_mod) file_io
                     delim_ = delim
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
             
-            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8460,7 +8671,7 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1di64
     module procedure to_file_1di32
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
         integer :: hstat, dim_
 
@@ -8527,11 +8738,25 @@ submodule (io_mod) file_io
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8542,7 +8767,7 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1di32
     module procedure to_file_1di16
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
         integer :: hstat, dim_
 
@@ -8609,11 +8834,25 @@ submodule (io_mod) file_io
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8624,7 +8863,7 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_1di16
     module procedure to_file_1di8
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
         integer :: hstat, dim_
 
@@ -8691,11 +8930,25 @@ submodule (io_mod) file_io
                 end if
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, dim=dim_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(dim) )    write(*,'(a)') nl//'WARNING: dim not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8707,7 +8960,7 @@ submodule (io_mod) file_io
     end procedure to_file_1di8
 
     module procedure to_file_2di64
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
 
         ext = ext_of(file_name)
@@ -8732,10 +8985,24 @@ submodule (io_mod) file_io
                 delim_ = delim
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8746,7 +9013,7 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2di64
     module procedure to_file_2di32
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
 
         ext = ext_of(file_name)
@@ -8771,10 +9038,24 @@ submodule (io_mod) file_io
                 delim_ = delim
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8785,7 +9066,7 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2di32
     module procedure to_file_2di16
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
 
         ext = ext_of(file_name)
@@ -8810,10 +9091,24 @@ submodule (io_mod) file_io
                 delim_ = delim
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -8824,7 +9119,7 @@ submodule (io_mod) file_io
         end if
     end procedure to_file_2di16
     module procedure to_file_2di8
-        character(len=:), allocatable :: ext, delim_
+        character(len=:), allocatable :: ext, delim_, fmt_
         character(len=:), allocatable, dimension(:) :: header_
 
         ext = ext_of(file_name)
@@ -8849,10 +9144,24 @@ submodule (io_mod) file_io
                 delim_ = delim
             end if
             
-            call to_text(x=x, file_name=file_name, header=header_, delim=delim_)
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
+            else
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    fmt_ = 'i'
+                    write(*,'(a)') nl//'WARNING: Invalid format "'//fmt//'" for file "'//file_name//'". '// &
+                                       'Defaulting to integer format.'// &
+                                   nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
+                end if
+            end if
+            
+            call to_text(x=x, file_name=file_name, header=header_, delim=delim_, fmt=fmt_)
         else if ( any(binary_ext == ext) ) then
             if ( present(header) ) write(*,'(a)') nl//'WARNING: header not supported for file type "'//ext//'".'
             if ( present(delim) )  write(*,'(a)') nl//'WARNING: delim not supported for file type "'//ext//'".'
+            if ( present(fmt) )    write(*,'(a)') nl//'WARNING: fmt not supported for file type "'//ext//'".'
 
             call to_binary(x=x, file_name=file_name)
         else
@@ -9866,8 +10175,7 @@ submodule (io_mod) file_io
 
     !! Reading Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure from_textfile_1dc128
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_, im_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -9880,18 +10188,35 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into complex array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = im
+            end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_, im=im_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -9928,8 +10253,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1dc128
     module procedure from_textfile_1dc64
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_, im_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -9942,18 +10266,35 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into complex array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = im
+            end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_, im=im_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -9990,8 +10331,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1dc64
     module procedure from_textfile_1dc32
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_, im_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -10004,18 +10344,35 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into complex array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = im
+            end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_, im=im_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -10053,8 +10410,7 @@ submodule (io_mod) file_io
     end procedure from_binaryfile_1dc32
 
     module procedure from_textfile_2dc128
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_, im_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -10067,18 +10423,35 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into complex array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = im
+            end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_, im=im_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -10115,8 +10488,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2dc128
     module procedure from_textfile_2dc64
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_, im_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -10129,18 +10501,35 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into complex array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = im
+            end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_, im=im_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -10177,8 +10566,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2dc64
     module procedure from_textfile_2dc32
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_, im_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -10191,18 +10579,35 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
                 end if
             end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into complex array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(im) ) then
+                im_ = ''
+            else
+                im_ = im
+            end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_, im=im_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -11150,8 +11555,7 @@ submodule (io_mod) file_io
     end procedure from_file_15dc32
 
     module procedure from_textfile_1dr128
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -11164,18 +11568,29 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into real array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -11212,8 +11627,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1dr128
     module procedure from_textfile_1dr64
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -11226,18 +11640,29 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into real array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -11274,8 +11699,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1dr64
     module procedure from_textfile_1dr32
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -11288,18 +11712,29 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into real array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -11337,8 +11772,7 @@ submodule (io_mod) file_io
     end procedure from_binaryfile_1dr32
 
     module procedure from_textfile_2dr128
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -11351,18 +11785,29 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into real array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -11399,8 +11844,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2dr128
     module procedure from_textfile_2dr64
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -11413,18 +11857,29 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into real array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -11461,8 +11916,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2dr64
     module procedure from_textfile_2dr32
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, locale_, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -11475,18 +11929,29 @@ submodule (io_mod) file_io
             end if
 
             if ( .not. present(locale) ) then
-                locale_ = 'us'
+                locale_ = 'US'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
+                if ( any(locales == locale) ) then
                     locale_ = locale
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid locale "'//locale//'" for read of file "'//file_name//'".'// &
+                               nl//'Locale must be one of: '//to_str(locales, delim=' ')
+                end if
+            end if
+
+            if ( .not. present(fmt) ) then
+                fmt_ = 'es'
+            else
+                if ( any(real_fmts == fmt) ) then
+                    fmt_ = fmt
+                else
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into real array.'// &
+                               nl//'Format must be one of: '//to_str(real_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, locale=locale_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12434,8 +12899,7 @@ submodule (io_mod) file_io
     end procedure from_file_15dr32
 
     module procedure from_textfile_1di64
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12447,19 +12911,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12496,8 +12960,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1di64
     module procedure from_textfile_1di32
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12509,19 +12972,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12558,8 +13021,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1di32
     module procedure from_textfile_1di16
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12571,19 +13033,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12620,8 +13082,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_1di16
     module procedure from_textfile_1di8
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12633,19 +13094,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12683,8 +13144,7 @@ submodule (io_mod) file_io
     end procedure from_binaryfile_1di8
 
     module procedure from_textfile_2di64
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12696,19 +13156,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12745,8 +13205,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2di64
     module procedure from_textfile_2di32
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12758,19 +13217,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12807,8 +13266,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2di32
     module procedure from_textfile_2di16
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12820,19 +13278,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -12869,8 +13327,7 @@ submodule (io_mod) file_io
         end if
     end procedure from_binaryfile_2di16
     module procedure from_textfile_2di8
-        character(len=:), allocatable :: ext
-        character(len=2) :: locale_
+        character(len=:), allocatable :: ext, fmt_
         logical :: header_
 
         ext = ext_of(file_name)
@@ -12882,19 +13339,19 @@ submodule (io_mod) file_io
                 header_ = header
             end if
 
-            if ( .not. present(locale) ) then
-                locale_ = 'us'
+            if ( .not. present(fmt) ) then
+                fmt_ = 'i'
             else
-                if ( (locale == 'us') .or. (locale == 'eu') ) then
-                    locale_ = locale
+                if ( any(int_fmts == fmt) ) then
+                    fmt_ = fmt
                 else
-                    locale_ = 'us'
-                    write(*,'(a)') nl//'WARNING: Invalid locale "'//locale//'" for file "'//file_name//'".'// &
-                                   nl//'Locale must be "us" or "eu"... defaulting to "us".'
+                    error stop nl//'FATAL: Invalid format "'//fmt//'" for read of file "'//file_name//'" '// &
+                                   'into integer array.'// &
+                               nl//'Format must be one of: '//to_str(int_fmts, delim=' ')
                 end if
             end if
             
-            call from_text(file_name=file_name, into=into, header=header_, locale=locale_)
+            call from_text(file_name=file_name, into=into, header=header_, fmt=fmt_)
         else
             if ( any(binary_ext == ext) ) then
                 error stop nl//'FATAL: Error reading file "'//file_name//'", data_shape must be specified '// &
@@ -14680,10 +15137,10 @@ submodule (io_mod) text_io
 
         if ( dim == 1 ) then
             do i = lbound(x, dim=1), ubound(x, dim=1)
-                write(unit=file_unit, fmt='(a)') str(x(i))
+                write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt)
             end do
         else if ( dim == 2 ) then
-            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim, fmt=fmt)
         end if
 
         close(file_unit)
@@ -14723,10 +15180,10 @@ submodule (io_mod) text_io
 
         if ( dim == 1 ) then
             do i = lbound(x, dim=1), ubound(x, dim=1)
-                write(unit=file_unit, fmt='(a)') str(x(i))
+                write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt)
             end do
         else if ( dim == 2 ) then
-            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim, fmt=fmt)
         end if
 
         close(file_unit)
@@ -14766,10 +15223,10 @@ submodule (io_mod) text_io
 
         if ( dim == 1 ) then
             do i = lbound(x, dim=1), ubound(x, dim=1)
-                write(unit=file_unit, fmt='(a)') str(x(i))
+                write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt)
             end do
         else if ( dim == 2 ) then
-            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim, fmt=fmt)
         end if
 
         close(file_unit)
@@ -14809,10 +15266,10 @@ submodule (io_mod) text_io
 
         if ( dim == 1 ) then
             do i = lbound(x, dim=1), ubound(x, dim=1)
-                write(unit=file_unit, fmt='(a)') str(x(i))
+                write(unit=file_unit, fmt='(a)') str(x(i), fmt=fmt)
             end do
         else if ( dim == 2 ) then
-            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x, delim=delim, fmt=fmt)
         end if
 
         close(file_unit)
@@ -14848,7 +15305,7 @@ submodule (io_mod) text_io
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim, fmt=fmt)
         end do
 
         close(file_unit)
@@ -14883,7 +15340,7 @@ submodule (io_mod) text_io
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim, fmt=fmt)
         end do
 
         close(file_unit)
@@ -14918,7 +15375,7 @@ submodule (io_mod) text_io
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim, fmt=fmt)
         end do
 
         close(file_unit)
@@ -14953,7 +15410,7 @@ submodule (io_mod) text_io
         end if
 
         do i = lbound(x, dim=1), ubound(x, dim=1)
-            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim)
+            write(unit=file_unit, fmt='(a)') to_str(x(i,:), delim=delim, fmt=fmt)
         end do
 
         close(file_unit)
@@ -14964,9 +15421,10 @@ submodule (io_mod) text_io
         logical :: exists, ignore_sep
         integer :: file_unit, iostat
         integer :: n_rows, n_columns, file_length
-        integer :: i, j, ind, l1, l2
+        integer :: i, j, ind, l1, l2, sep_pos
 
-        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        complex(real128) :: c
+        character(len=:), allocatable, dimension(:) :: im_chars, non_separating_chars
         character(len=:), allocatable :: file, decimal, sep, number
         character(len=1) :: prev_char, current_char
 
@@ -15030,13 +15488,33 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-            sep = ','
+        if ( len(im) > 0 ) then
+            allocate( character(len=1) :: im_chars(len(im)) )
+            do i = 1, len(im)
+                im_chars(i) = im(i:i)
+            end do
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            im_chars = ['']
+        end if
+
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f', '(', ')', '+']
+        else
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            end if
+        end if
+
+        if ( locale == 'US' ) then
+            sep = ','
+        else if ( locale == 'EU' ) then
             sep = ';'
         end if
 
@@ -15052,15 +15530,15 @@ submodule (io_mod) text_io
                 ignore_sep = .false.
             end if
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) .or. any(im_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     prev_char = current_char
                     cycle
                 end if
 
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) .or. any(im_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -15084,8 +15562,9 @@ submodule (io_mod) text_io
         ind = 1
         l1 = 1
         l2 = 1
+        i = 1
 
-        read_into: do i = 1, file_length
+        read_into: do while ( i <= file_length )
             current_char = file(i:i)
             if ( current_char == '(' ) then
                 ignore_sep = .true.
@@ -15096,33 +15575,60 @@ submodule (io_mod) text_io
             if ( any(non_separating_chars == current_char) ) then
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
+            else if ( current_char == im_chars(1) ) then
+                number = file(l1:i-1)
+                do j = 2, len(number)
+                    if ( (number(j:j) == '+') .or. (number(j:j) == '-') ) then
+                        if ( fmt == 'es' ) then
+                            if ( (number(j-1:j-1) /= 'E') .and. (number(j-1:j-1) /= 'e') ) then
+                                sep_pos = j
+                                exit
+                            end if
+                        else
+                            sep_pos = j
+                            exit
+                        end if
+                    end if
+                end do
+                if ( fmt == 'z' ) then
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                    read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
+                else
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                end if
+                into(ind) = c
+                if ( ind /= size(into) ) then
+                    ind = ind + 1
+                else
+                    exit read_into
+                end if
+                l2 = i
+                i = i + size(im_chars)
+                cycle read_into
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     l2 = i + 1
+                    i = i + 1
                     cycle read_into
                 end if
 
-                if ( any(letters == current_char) ) then
-                    number = file(l1:i)
-                    reformat: do j = 1, len(number)
-                        if ( number(j:j) == '+' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
-                        else if  ( number(j:j) == '-' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
-                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
-                            number = '('//number(:j-1)//')'
-                            exit reformat
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    number = file(l1+1:l2-1)
+                    do j = 1, len(number)
+                        if ( number(j:j) == sep ) then
+                            sep_pos = j
+                            exit
                         end if
-                    end do reformat
-                    read(unit=number, fmt=*, decimal=decimal) into(ind)
-                    if ( ind /= size(into) ) then
-                        ind = ind + 1
+                    end do
+                    if ( fmt == 'z' ) then
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        exit read_into
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
                     end if
-                    l2 = i
-                else if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    into(ind) = c
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -15133,15 +15639,17 @@ submodule (io_mod) text_io
                     l2 = i
                 end if
             end if
+            i = i + 1
         end do read_into
     end procedure from_text_1dc128
     module procedure from_text_1dc64
         logical :: exists, ignore_sep
         integer :: file_unit, iostat
         integer :: n_rows, n_columns, file_length
-        integer :: i, j, ind, l1, l2
+        integer :: i, j, ind, l1, l2, sep_pos
 
-        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        complex(real64) :: c
+        character(len=:), allocatable, dimension(:) :: im_chars, non_separating_chars
         character(len=:), allocatable :: file, decimal, sep, number
         character(len=1) :: prev_char, current_char
 
@@ -15205,13 +15713,33 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-            sep = ','
+        if ( len(im) > 0 ) then
+            allocate( character(len=1) :: im_chars(len(im)) )
+            do i = 1, len(im)
+                im_chars(i) = im(i:i)
+            end do
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            im_chars = ['']
+        end if
+
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f', '(', ')', '+']
+        else
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            end if
+        end if
+
+        if ( locale == 'US' ) then
+            sep = ','
+        else if ( locale == 'EU' ) then
             sep = ';'
         end if
 
@@ -15227,15 +15755,15 @@ submodule (io_mod) text_io
                 ignore_sep = .false.
             end if
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) .or. any(im_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     prev_char = current_char
                     cycle
                 end if
 
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) .or. any(im_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -15259,8 +15787,9 @@ submodule (io_mod) text_io
         ind = 1
         l1 = 1
         l2 = 1
+        i = 1
 
-        read_into: do i = 1, file_length
+        read_into: do while ( i <= file_length )
             current_char = file(i:i)
             if ( current_char == '(' ) then
                 ignore_sep = .true.
@@ -15271,33 +15800,60 @@ submodule (io_mod) text_io
             if ( any(non_separating_chars == current_char) ) then
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
+            else if ( current_char == im_chars(1) ) then
+                number = file(l1:i-1)
+                do j = 2, len(number)
+                    if ( (number(j:j) == '+') .or. (number(j:j) == '-') ) then
+                        if ( fmt == 'es' ) then
+                            if ( (number(j-1:j-1) /= 'E') .and. (number(j-1:j-1) /= 'e') ) then
+                                sep_pos = j
+                                exit
+                            end if
+                        else
+                            sep_pos = j
+                            exit
+                        end if
+                    end if
+                end do
+                if ( fmt == 'z' ) then
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                    read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
+                else
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                end if
+                into(ind) = c
+                if ( ind /= size(into) ) then
+                    ind = ind + 1
+                else
+                    exit read_into
+                end if
+                l2 = i
+                i = i + size(im_chars)
+                cycle read_into
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     l2 = i + 1
+                    i = i + 1
                     cycle read_into
                 end if
 
-                if ( any(letters == current_char) ) then
-                    number = file(l1:i)
-                    reformat: do j = 1, len(number)
-                        if ( number(j:j) == '+' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
-                        else if  ( number(j:j) == '-' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
-                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
-                            number = '('//number(:j-1)//')'
-                            exit reformat
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    number = file(l1+1:l2-1)
+                    do j = 1, len(number)
+                        if ( number(j:j) == sep ) then
+                            sep_pos = j
+                            exit
                         end if
-                    end do reformat
-                    read(unit=number, fmt=*, decimal=decimal) into(ind)
-                    if ( ind /= size(into) ) then
-                        ind = ind + 1
+                    end do
+                    if ( fmt == 'z' ) then
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        exit read_into
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
                     end if
-                    l2 = i
-                else if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    into(ind) = c
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -15308,15 +15864,17 @@ submodule (io_mod) text_io
                     l2 = i
                 end if
             end if
+            i = i + 1
         end do read_into
     end procedure from_text_1dc64
     module procedure from_text_1dc32
         logical :: exists, ignore_sep
         integer :: file_unit, iostat
         integer :: n_rows, n_columns, file_length
-        integer :: i, j, ind, l1, l2
+        integer :: i, j, ind, l1, l2, sep_pos
 
-        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        complex(real32) :: c
+        character(len=:), allocatable, dimension(:) :: im_chars, non_separating_chars
         character(len=:), allocatable :: file, decimal, sep, number
         character(len=1) :: prev_char, current_char
 
@@ -15380,13 +15938,33 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-            sep = ','
+        if ( len(im) > 0 ) then
+            allocate( character(len=1) :: im_chars(len(im)) )
+            do i = 1, len(im)
+                im_chars(i) = im(i:i)
+            end do
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            im_chars = ['']
+        end if
+
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f', '(', ')', '+']
+        else
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            end if
+        end if
+
+        if ( locale == 'US' ) then
+            sep = ','
+        else if ( locale == 'EU' ) then
             sep = ';'
         end if
 
@@ -15402,15 +15980,15 @@ submodule (io_mod) text_io
                 ignore_sep = .false.
             end if
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) .or. any(im_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     prev_char = current_char
                     cycle
                 end if
 
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) .or. any(im_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -15434,8 +16012,9 @@ submodule (io_mod) text_io
         ind = 1
         l1 = 1
         l2 = 1
+        i = 1
 
-        read_into: do i = 1, file_length
+        read_into: do while ( i <= file_length )
             current_char = file(i:i)
             if ( current_char == '(' ) then
                 ignore_sep = .true.
@@ -15446,33 +16025,60 @@ submodule (io_mod) text_io
             if ( any(non_separating_chars == current_char) ) then
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
+            else if ( current_char == im_chars(1) ) then
+                number = file(l1:i-1)
+                do j = 2, len(number)
+                    if ( (number(j:j) == '+') .or. (number(j:j) == '-') ) then
+                        if ( fmt == 'es' ) then
+                            if ( (number(j-1:j-1) /= 'E') .and. (number(j-1:j-1) /= 'e') ) then
+                                sep_pos = j
+                                exit
+                            end if
+                        else
+                            sep_pos = j
+                            exit
+                        end if
+                    end if
+                end do
+                if ( fmt == 'z' ) then
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                    read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
+                else
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                end if
+                into(ind) = c
+                if ( ind /= size(into) ) then
+                    ind = ind + 1
+                else
+                    exit read_into
+                end if
+                l2 = i
+                i = i + size(im_chars)
+                cycle read_into
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     l2 = i + 1
+                    i = i + 1
                     cycle read_into
                 end if
 
-                if ( any(letters == current_char) ) then
-                    number = file(l1:i)
-                    reformat: do j = 1, len(number)
-                        if ( number(j:j) == '+' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
-                        else if  ( number(j:j) == '-' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
-                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
-                            number = '('//number(:j-1)//')'
-                            exit reformat
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    number = file(l1+1:l2-1)
+                    do j = 1, len(number)
+                        if ( number(j:j) == sep ) then
+                            sep_pos = j
+                            exit
                         end if
-                    end do reformat
-                    read(unit=number, fmt=*, decimal=decimal) into(ind)
-                    if ( ind /= size(into) ) then
-                        ind = ind + 1
+                    end do
+                    if ( fmt == 'z' ) then
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        exit read_into
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
                     end if
-                    l2 = i
-                else if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    into(ind) = c
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -15483,6 +16089,7 @@ submodule (io_mod) text_io
                     l2 = i
                 end if
             end if
+            i = i + 1
         end do read_into
     end procedure from_text_1dc32
 
@@ -15490,9 +16097,10 @@ submodule (io_mod) text_io
         logical :: exists, ignore_sep
         integer :: file_unit, iostat
         integer :: n_rows, n_columns, file_length
-        integer :: i, j, row, column, l1, l2
+        integer :: i, j, row, column, l1, l2, sep_pos
 
-        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        complex(real128) :: c
+        character(len=:), allocatable, dimension(:) :: im_chars, non_separating_chars
         character(len=:), allocatable :: file, decimal, sep, number
         character(len=1) :: prev_char, current_char
 
@@ -15556,13 +16164,33 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-            sep = ','
+        if ( len(im) > 0 ) then
+            allocate( character(len=1) :: im_chars(len(im)) )
+            do i = 1, len(im)
+                im_chars(i) = im(i:i)
+            end do
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            im_chars = ['']
+        end if
+
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f', '(', ')', '+']
+        else
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            end if
+        end if
+
+        if ( locale == 'US' ) then
+            sep = ','
+        else if ( locale == 'EU' ) then
             sep = ';'
         end if
 
@@ -15578,15 +16206,15 @@ submodule (io_mod) text_io
                 ignore_sep = .false.
             end if
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) .or. any(im_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     prev_char = current_char
                     cycle
                 end if
 
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) .or. any(im_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -15604,8 +16232,9 @@ submodule (io_mod) text_io
         column = 1
         l1 = 1
         l2 = 1
+        i = 1
 
-        read_into: do i = 1, file_length
+        read_into: do while ( i <= file_length )
             current_char = file(i:i)
             if ( current_char == '(' ) then
                 ignore_sep = .true.
@@ -15616,38 +16245,65 @@ submodule (io_mod) text_io
             if ( any(non_separating_chars == current_char) ) then
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
+            else if ( current_char == im_chars(1) ) then
+                number = file(l1:i-1)
+                do j = 2, len(number)
+                    if ( (number(j:j) == '+') .or. (number(j:j) == '-') ) then
+                        if ( fmt == 'es' ) then
+                            if ( (number(j-1:j-1) /= 'E') .and. (number(j-1:j-1) /= 'e') ) then
+                                sep_pos = j
+                                exit
+                            end if
+                        else
+                            sep_pos = j
+                            exit
+                        end if
+                    end if
+                end do
+                if ( fmt == 'z' ) then
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                    read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
+                else
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                end if
+                into(row, column) = c
+                if ( column /= n_columns ) then
+                    column = column + 1
+                else
+                    if ( row /= n_rows ) then
+                        row = row + 1
+                        column = 1
+                    else
+                        exit read_into
+                    end if
+                end if
+                l2 = i
+                i = i + size(im_chars)
+                cycle read_into
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     l2 = i + 1
+                    i = i + 1
                     cycle read_into
                 end if
 
-                if ( any(letters == current_char) ) then
-                    number = file(l1:i)
-                    reformat: do j = 1, len(number)
-                        if ( number(j:j) == '+' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
-                        else if  ( number(j:j) == '-' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
-                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
-                            number = '('//number(:j-1)//')'
-                            exit reformat
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    number = file(l1+1:l2-1)
+                    do j = 1, len(number)
+                        if ( number(j:j) == sep ) then
+                            sep_pos = j
+                            exit
                         end if
-                    end do reformat
-                    read(unit=number, fmt=*, decimal=decimal) into(row, column)
-                    if ( column /= n_columns ) then
-                        column = column + 1
+                    end do
+                    if ( fmt == 'z' ) then
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        if ( row /= n_rows ) then
-                            row = row + 1
-                            column = 1
-                        else
-                            exit read_into
-                        end if
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
                     end if
-                    l2 = i
-                else if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    into(row, column) = c
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -15663,15 +16319,17 @@ submodule (io_mod) text_io
                     l2 = i
                 end if
             end if
+            i = i + 1
         end do read_into
     end procedure from_text_2dc128
     module procedure from_text_2dc64
         logical :: exists, ignore_sep
         integer :: file_unit, iostat
         integer :: n_rows, n_columns, file_length
-        integer :: i, j, row, column, l1, l2
+        integer :: i, j, row, column, l1, l2, sep_pos
 
-        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        complex(real64) :: c
+        character(len=:), allocatable, dimension(:) :: im_chars, non_separating_chars
         character(len=:), allocatable :: file, decimal, sep, number
         character(len=1) :: prev_char, current_char
 
@@ -15735,13 +16393,33 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-            sep = ','
+        if ( len(im) > 0 ) then
+            allocate( character(len=1) :: im_chars(len(im)) )
+            do i = 1, len(im)
+                im_chars(i) = im(i:i)
+            end do
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            im_chars = ['']
+        end if
+
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f', '(', ')', '+']
+        else
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            end if
+        end if
+
+        if ( locale == 'US' ) then
+            sep = ','
+        else if ( locale == 'EU' ) then
             sep = ';'
         end if
 
@@ -15757,15 +16435,15 @@ submodule (io_mod) text_io
                 ignore_sep = .false.
             end if
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) .or. any(im_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     prev_char = current_char
                     cycle
                 end if
 
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) .or. any(im_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -15783,8 +16461,9 @@ submodule (io_mod) text_io
         column = 1
         l1 = 1
         l2 = 1
+        i = 1
 
-        read_into: do i = 1, file_length
+        read_into: do while ( i <= file_length )
             current_char = file(i:i)
             if ( current_char == '(' ) then
                 ignore_sep = .true.
@@ -15795,38 +16474,65 @@ submodule (io_mod) text_io
             if ( any(non_separating_chars == current_char) ) then
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
+            else if ( current_char == im_chars(1) ) then
+                number = file(l1:i-1)
+                do j = 2, len(number)
+                    if ( (number(j:j) == '+') .or. (number(j:j) == '-') ) then
+                        if ( fmt == 'es' ) then
+                            if ( (number(j-1:j-1) /= 'E') .and. (number(j-1:j-1) /= 'e') ) then
+                                sep_pos = j
+                                exit
+                            end if
+                        else
+                            sep_pos = j
+                            exit
+                        end if
+                    end if
+                end do
+                if ( fmt == 'z' ) then
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                    read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
+                else
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                end if
+                into(row, column) = c
+                if ( column /= n_columns ) then
+                    column = column + 1
+                else
+                    if ( row /= n_rows ) then
+                        row = row + 1
+                        column = 1
+                    else
+                        exit read_into
+                    end if
+                end if
+                l2 = i
+                i = i + size(im_chars)
+                cycle read_into
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     l2 = i + 1
+                    i = i + 1
                     cycle read_into
                 end if
 
-                if ( any(letters == current_char) ) then
-                    number = file(l1:i)
-                    reformat: do j = 1, len(number)
-                        if ( number(j:j) == '+' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
-                        else if  ( number(j:j) == '-' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
-                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
-                            number = '('//number(:j-1)//')'
-                            exit reformat
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    number = file(l1+1:l2-1)
+                    do j = 1, len(number)
+                        if ( number(j:j) == sep ) then
+                            sep_pos = j
+                            exit
                         end if
-                    end do reformat
-                    read(unit=number, fmt=*, decimal=decimal) into(row, column)
-                    if ( column /= n_columns ) then
-                        column = column + 1
+                    end do
+                    if ( fmt == 'z' ) then
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        if ( row /= n_rows ) then
-                            row = row + 1
-                            column = 1
-                        else
-                            exit read_into
-                        end if
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
                     end if
-                    l2 = i
-                else if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    into(row, column) = c
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -15842,15 +16548,17 @@ submodule (io_mod) text_io
                     l2 = i
                 end if
             end if
+            i = i + 1
         end do read_into
     end procedure from_text_2dc64
     module procedure from_text_2dc32
         logical :: exists, ignore_sep
         integer :: file_unit, iostat
         integer :: n_rows, n_columns, file_length
-        integer :: i, j, row, column, l1, l2
+        integer :: i, j, row, column, l1, l2, sep_pos
 
-        character(len=:), allocatable, dimension(:) :: non_separating_chars
+        complex(real32) :: c
+        character(len=:), allocatable, dimension(:) :: im_chars, non_separating_chars
         character(len=:), allocatable :: file, decimal, sep, number
         character(len=1) :: prev_char, current_char
 
@@ -15914,13 +16622,33 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-            sep = ','
+        if ( len(im) > 0 ) then
+            allocate( character(len=1) :: im_chars(len(im)) )
+            do i = 1, len(im)
+                im_chars(i) = im(i:i)
+            end do
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            im_chars = ['']
+        end if
+
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f', '(', ')', '+']
+        else
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-', &
+                                        '(', ')']
+            end if
+        end if
+
+        if ( locale == 'US' ) then
+            sep = ','
+        else if ( locale == 'EU' ) then
             sep = ';'
         end if
 
@@ -15936,15 +16664,15 @@ submodule (io_mod) text_io
                 ignore_sep = .false.
             end if
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) .or. any(im_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     prev_char = current_char
                     cycle
                 end if
 
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) .or. any(im_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -15962,8 +16690,9 @@ submodule (io_mod) text_io
         column = 1
         l1 = 1
         l2 = 1
+        i = 1
 
-        read_into: do i = 1, file_length
+        read_into: do while ( i <= file_length )
             current_char = file(i:i)
             if ( current_char == '(' ) then
                 ignore_sep = .true.
@@ -15974,38 +16703,65 @@ submodule (io_mod) text_io
             if ( any(non_separating_chars == current_char) ) then
                 if ( .not. any(non_separating_chars == file(l2:l2)) ) l1 = i
                 l2 = i
+            else if ( current_char == im_chars(1) ) then
+                number = file(l1:i-1)
+                do j = 2, len(number)
+                    if ( (number(j:j) == '+') .or. (number(j:j) == '-') ) then
+                        if ( fmt == 'es' ) then
+                            if ( (number(j-1:j-1) /= 'E') .and. (number(j-1:j-1) /= 'e') ) then
+                                sep_pos = j
+                                exit
+                            end if
+                        else
+                            sep_pos = j
+                            exit
+                        end if
+                    end if
+                end do
+                if ( fmt == 'z' ) then
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                    read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
+                else
+                    read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                    read(unit=number(sep_pos:), fmt='('//fmt//')', decimal=decimal) c%im
+                end if
+                into(row, column) = c
+                if ( column /= n_columns ) then
+                    column = column + 1
+                else
+                    if ( row /= n_rows ) then
+                        row = row + 1
+                        column = 1
+                    else
+                        exit read_into
+                    end if
+                end if
+                l2 = i
+                i = i + size(im_chars)
+                cycle read_into
             else
-                if ( (current_char == sep) .and. ignore_sep ) then
+                if ( ignore_sep ) then
                     l2 = i + 1
+                    i = i + 1
                     cycle read_into
                 end if
 
-                if ( any(letters == current_char) ) then
-                    number = file(l1:i)
-                    reformat: do j = 1, len(number)
-                        if ( number(j:j) == '+' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number(j:j) = sep
-                        else if  ( number(j:j) == '-' ) then
-                            if ( .not. any(letters == number(j-1:j-1)) ) number = number(:j-1)//sep//number(j:)
-                        else if ( .not. any(non_separating_chars == number(j:j)) ) then
-                            number = '('//number(:j-1)//')'
-                            exit reformat
+                if ( any(non_separating_chars == file(l2:l2) ) ) then
+                    number = file(l1+1:l2-1)
+                    do j = 1, len(number)
+                        if ( number(j:j) == sep ) then
+                            sep_pos = j
+                            exit
                         end if
-                    end do reformat
-                    read(unit=number, fmt=*, decimal=decimal) into(row, column)
-                    if ( column /= n_columns ) then
-                        column = column + 1
+                    end do
+                    if ( fmt == 'z' ) then
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')') c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')') c%im
                     else
-                        if ( row /= n_rows ) then
-                            row = row + 1
-                            column = 1
-                        else
-                            exit read_into
-                        end if
+                        read(unit=number(:sep_pos-1), fmt='('//fmt//')', decimal=decimal) c%re
+                        read(unit=number(sep_pos+1:), fmt='('//fmt//')', decimal=decimal) c%im
                     end if
-                    l2 = i
-                else if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    into(row, column) = c
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -16021,6 +16777,7 @@ submodule (io_mod) text_io
                     l2 = i
                 end if
             end if
+            i = i + 1
         end do read_into
     end procedure from_text_2dc32
 
@@ -16094,12 +16851,17 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-']
+            end if
         end if
 
         prev_char = '0'
@@ -16108,10 +16870,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16141,7 +16903,11 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( fmt == 'z' ) then
+                        read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
+                    else
+                        read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    end if
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -16224,12 +16990,17 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-']
+            end if
         end if
 
         prev_char = '0'
@@ -16238,10 +17009,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16271,7 +17042,11 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( fmt == 'z' ) then
+                        read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
+                    else
+                        read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    end if
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -16354,12 +17129,17 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-']
+            end if
         end if
 
         prev_char = '0'
@@ -16368,10 +17148,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16401,7 +17181,11 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    if ( fmt == 'z' ) then
+                        read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
+                    else
+                        read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    end if
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -16485,12 +17269,17 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-']
+            end if
         end if
 
         prev_char = '0'
@@ -16499,10 +17288,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16526,7 +17315,11 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( fmt == 'z' ) then
+                        read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
+                    else
+                        read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    end if
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -16614,12 +17407,17 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-']
+            end if
         end if
 
         prev_char = '0'
@@ -16628,10 +17426,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16655,7 +17453,11 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( fmt == 'z' ) then
+                        read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
+                    else
+                        read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    end if
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -16743,12 +17545,17 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
+        if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+            if ( locale == 'US' ) then
+                decimal = 'POINT'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-']
+            else if ( locale == 'EU' ) then
+                decimal = 'COMMA'
+                non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', 'e', 'E', '+', '-']
+            end if
         end if
 
         prev_char = '0'
@@ -16757,10 +17564,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16784,7 +17591,11 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    if ( fmt == 'z' ) then
+                        read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
+                    else
+                        read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    end if
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -16810,7 +17621,7 @@ submodule (io_mod) text_io
         integer :: i, ind, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -16873,12 +17684,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -16887,10 +17697,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -16920,7 +17730,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -16940,7 +17750,7 @@ submodule (io_mod) text_io
         integer :: i, ind, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17003,12 +17813,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17017,10 +17826,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17050,7 +17859,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -17070,7 +17879,7 @@ submodule (io_mod) text_io
         integer :: i, ind, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17133,12 +17942,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17147,10 +17955,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17180,7 +17988,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -17200,7 +18008,7 @@ submodule (io_mod) text_io
         integer :: i, ind, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17263,12 +18071,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17277,10 +18084,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17310,7 +18117,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(ind)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(ind)
                     if ( ind /= size(into) ) then
                         ind = ind + 1
                     else
@@ -17331,7 +18138,7 @@ submodule (io_mod) text_io
         integer :: i, row, column, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17394,12 +18201,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17408,10 +18214,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17435,7 +18241,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -17460,7 +18266,7 @@ submodule (io_mod) text_io
         integer :: i, row, column, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17523,12 +18329,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17537,10 +18342,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17564,7 +18369,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -17589,7 +18394,7 @@ submodule (io_mod) text_io
         integer :: i, row, column, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17652,12 +18457,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17666,10 +18470,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17693,7 +18497,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
@@ -17718,7 +18522,7 @@ submodule (io_mod) text_io
         integer :: i, row, column, l1, l2
 
         character(len=:), allocatable, dimension(:) :: non_separating_chars
-        character(len=:), allocatable :: file, decimal
+        character(len=:), allocatable :: file
         character(len=1) :: prev_char, current_char
 
         inquire( file=file_name, exist=exists )
@@ -17781,12 +18585,11 @@ submodule (io_mod) text_io
             end if
         end do
 
-        if ( locale == 'us' ) then
-            non_separating_chars = non_separating_chars_us
-            decimal = 'POINT'
-        else
-            non_separating_chars = non_separating_chars_eu
-            decimal = 'COMMA'
+        if ( fmt == 'i' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        else if ( fmt == 'z' ) then
+            non_separating_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', &
+                                    'a', 'b', 'c', 'd', 'e', 'f']
         end if
 
         prev_char = '0'
@@ -17795,10 +18598,10 @@ submodule (io_mod) text_io
         do i = 1, file_length
             current_char = file(i:i)
 
-            if ( any(non_separating_chars == current_char) .or. any(letters == current_char) ) then
+            if ( any(non_separating_chars == current_char) ) then
                 prev_char = current_char
             else
-                if ( any(non_separating_chars == prev_char) .or. any(letters == prev_char) ) then
+                if ( any(non_separating_chars == prev_char) ) then
                     prev_char = current_char
                     n_columns = n_columns + 1
                 else
@@ -17822,7 +18625,7 @@ submodule (io_mod) text_io
                 l2 = i
             else
                 if ( any(non_separating_chars == file(l2:l2) ) ) then
-                    read(unit=file(l1:l2), fmt=*, decimal=decimal) into(row, column)
+                    read(unit=file(l1:l2), fmt='('//fmt//')') into(row, column)
                     if ( column /= n_columns ) then
                         column = column + 1
                     else
