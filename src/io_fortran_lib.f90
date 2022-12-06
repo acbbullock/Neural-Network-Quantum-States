@@ -5,7 +5,7 @@
 !!  conversion with a specified delimiter. This module is F2018 compliant, has no external dependencies, and has a max
 !!  line length of 120.
 !!---------------------------------------------------------------------------------------------------------------------
-module io_mod
+module io_fortran_lib
     use, intrinsic :: iso_fortran_env, only: real128,real64,real32, int64,int32,int16,int8, input_unit, output_unit
     implicit none (type,external)
     private
@@ -3788,9 +3788,9 @@ module io_mod
         end if
     end function ext_of
 
-end module io_mod
+end module io_fortran_lib
 
-submodule (io_mod) array_printing
+submodule (io_fortran_lib) array_printing
     contains
     module procedure aprint_1dc128
         character(len=:), allocatable, dimension(:) :: x_str
@@ -4770,7 +4770,7 @@ submodule (io_mod) array_printing
     end procedure aprint_2dchar
 end submodule array_printing
 
-submodule (io_mod) internal_io
+submodule (io_fortran_lib) internal_io
     contains
     module procedure str_c128
         character(len=:), allocatable :: locale_, fmt_, im_, sep
@@ -5805,7 +5805,7 @@ submodule (io_mod) internal_io
     end procedure to_str_1dchar
 end submodule internal_io
 
-submodule (io_mod) file_io
+submodule (io_fortran_lib) file_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure to_file_1dc128
@@ -14598,7 +14598,7 @@ submodule (io_mod) file_io
     end procedure from_file_15di8
 end submodule file_io
 
-submodule (io_mod) text_io
+submodule (io_fortran_lib) text_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure echo_string
@@ -18645,7 +18645,7 @@ submodule (io_mod) text_io
     end procedure from_text_2di8
 end submodule text_io
 
-submodule (io_mod) binary_io
+submodule (io_fortran_lib) binary_io
     contains
     !! Writing Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     module procedure to_binary_1dc128
