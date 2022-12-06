@@ -4,7 +4,7 @@
 !!---------------------------------------------------------------------------------------------------------------------
 module nnqs
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
-    use io_mod, only: nl, str                                                           !! I/O procedures and constants
+    use io_fortran_lib, only: nl, str                                                   !! I/O procedures and constants
     use lapack95, only: ppsvx                                 !! Routine for solving linear systems with packed storage
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public

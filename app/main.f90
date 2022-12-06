@@ -3,7 +3,7 @@
 !!---------------------------------------------------------------------------------------------------------------------
 program main
     use, intrinsic :: iso_fortran_env, only: rk=>real64                                        !! Import standard kinds
-    use io_mod, only: to_file                                                           !! I/O procedures and constants
+    use io_fortran_lib, only: to_file                                                   !! I/O procedures and constants
     use nnqs, only: RestrictedBoltzmannMachine                                                        !! Neural network
     implicit none (type,external)                                                    !! No implicit types or interfaces
 
@@ -28,8 +28,8 @@ program main
                                       correlations=correlations )                          !! Output correlations array
 
     if ( this_image() == 1 ) then                                                                  !! Do I/O on image 1
-        call to_file(energies, file_name='energies.csv', delim=',', header=['Energy', 'Error'])
-        call to_file(correlations, file_name='correlations.csv', delim=',', header=['Epoch'])
+        call to_file(energies, file_name='energies.csv', header=['Energy', 'Error'])
+        call to_file(correlations, file_name='correlations.csv', header=['Epoch'])
     end if
 
 end program main
