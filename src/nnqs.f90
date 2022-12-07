@@ -265,8 +265,8 @@ module nnqs
 		real(rk), allocatable :: energy, sqerr, stderr, tau, acc                                 !! Recording variables
 		integer :: epoch, max_epochs, n                                   !! Loop variable, max epochs, number of spins
 
-        integer(i64) t1, t2                                                                          !! Clock variables
-        real(rk) rate, telapse                                                                       !! Clock variables
+        integer(i64) :: t1, t2                                                                       !! Clock variables
+        real(rk) :: rate, telapse                                                                    !! Clock variables
 
 		call self%init()                                                                !! Initialize Boltzmann machine
 
