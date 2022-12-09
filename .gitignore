@@ -4,6 +4,5 @@ build
 *.dat
 *.png
 *.gif
-todo.md
+*.jl
 README_priv.md
-output.txt
