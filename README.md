@@ -2,13 +2,13 @@
 
 ## Contents
 
-1. [Introduction](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#introduction)
-2. [Restricted Boltzmann Machines](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#restricted-boltzmann-machines)
-3. [Neural Network Quantum States](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#neural-network-quantum-states)
-4. [Transverse Field Ising Model](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#transverse-field-ising-model)
-5. [Stochastic Optimization](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#stochastic-optimization)
-6. [Derivation of Optimization Algorithm](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#derivation-of-optimization-algorithm)
-7. [Building with fpm](https://github.com/acbbullock/Neural-Network-Quantum-States/tree/dev#building-with-fpm)
+1. [Introduction](https://github.com/acbbullock/Neural-Network-Quantum-States#introduction)
+2. [Restricted Boltzmann Machines](https://github.com/acbbullock/Neural-Network-Quantum-States#restricted-boltzmann-machines)
+3. [Neural Network Quantum States](https://github.com/acbbullock/Neural-Network-Quantum-States#neural-network-quantum-states)
+4. [Transverse Field Ising Model](https://github.com/acbbullock/Neural-Network-Quantum-States#transverse-field-ising-model)
+5. [Stochastic Optimization](https://github.com/acbbullock/Neural-Network-Quantum-States#stochastic-optimization)
+6. [Derivation of Optimization Algorithm](https://github.com/acbbullock/Neural-Network-Quantum-States#derivation-of-optimization-algorithm)
+7. [Building with fpm](https://github.com/acbbullock/Neural-Network-Quantum-States#building-with-fpm)
 
 ## Introduction
 
