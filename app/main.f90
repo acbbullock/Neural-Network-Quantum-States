@@ -28,8 +28,8 @@ program main
                                       correlations=correlations )                          !! Output correlations array
 
     if ( this_image() == 1 ) then                                                                  !! Do I/O on image 1
-        call to_file(energies, file_name='energies.csv', header=['Energy', 'Error'])
-        call to_file(correlations, file_name='correlations.csv', header=['Epoch'])
+        call to_file(energies, file_name='./data/energies.csv', header=['Energy', 'Error'])
+        call to_file(correlations, file_name='./data/correlations.csv', header=['Epoch'])
     end if
 
 end program main
