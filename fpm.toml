@@ -1,5 +1,5 @@
 name = "nnqs"
-version = "0.5.0"
+version = "1.0.0"
 license = "MIT"
 author = "Austin C Bullock, Andrew Wasserbeck"
 maintainer = "acb.bullock@gmail.com"
@@ -12,3 +12,6 @@ auto-examples = true
 
 [install]
 library = false
+
+[dependencies]
+IO-Fortran-Library = { git="https://github.com/acbbullock/IO-Fortran-Library", branch="main" }
