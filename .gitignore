@@ -1,7 +1,5 @@
 test
 build
-*.csv
-*.dat
 *.png
 *.gif
 *.jl
