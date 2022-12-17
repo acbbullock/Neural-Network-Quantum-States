@@ -1,0 +1,142 @@
+Stochastic Optimization - date: 20221216 | time: 172543.460
+-----------------------------------------------------------
+
+    Epoch 1: E[ψ(α(τ=0.000))] = -122.825 ± 2.885
+    Epoch 2: E[ψ(α(τ=0.010))] = -126.540 ± 3.253
+    Epoch 3: E[ψ(α(τ=0.020))] = -129.931 ± 3.558
+    Epoch 4: E[ψ(α(τ=0.030))] = -150.570 ± 4.915
+    Epoch 5: E[ψ(α(τ=0.040))] = -188.703 ± 7.215
+    Epoch 6: E[ψ(α(τ=0.050))] = -260.750 ± 8.805
+    Epoch 7: E[ψ(α(τ=0.060))] = -386.208 ± 6.145
+    Epoch 8: E[ψ(α(τ=0.070))] = -454.904 ± 0.612
+    Epoch 9: E[ψ(α(τ=0.080))] = -476.790 ± 0.489
+    Epoch 10: E[ψ(α(τ=0.090))] = -489.682 ± 0.378
+    Epoch 11: E[ψ(α(τ=0.100))] = -496.575 ± 0.294
+    Epoch 12: E[ψ(α(τ=0.110))] = -500.517 ± 0.181
+    Epoch 13: E[ψ(α(τ=0.120))] = -502.648 ± 0.141
+    Epoch 14: E[ψ(α(τ=0.130))] = -503.491 ± 0.098
+    Epoch 15: E[ψ(α(τ=0.140))] = -503.729 ± 0.068
+    Epoch 16: E[ψ(α(τ=0.150))] = -503.772 ± 0.060
+    Epoch 17: E[ψ(α(τ=0.160))] = -503.487 ± 0.057
+    Epoch 18: E[ψ(α(τ=0.170))] = -503.238 ± 0.071
+    Epoch 19: E[ψ(α(τ=0.180))] = -502.827 ± 0.063
+    Epoch 20: E[ψ(α(τ=0.190))] = -502.663 ± 0.085
+    Epoch 21: E[ψ(α(τ=0.200))] = -502.324 ± 0.110
+    Epoch 22: E[ψ(α(τ=0.210))] = -502.044 ± 0.095
+    Epoch 23: E[ψ(α(τ=0.220))] = -501.761 ± 0.106
+    Epoch 24: E[ψ(α(τ=0.230))] = -501.592 ± 0.115
+
+    Optimization time: 11.473 seconds for n = 1001 spins.
+    Ground state energy: E[ψ(α(τ → ∞))] = -501.592 ± 0.115 for J = 0.5 and B = 0.1
+    Ground state accuracy: 0.999867
+
+    This program was built and run with compiler "Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.7.1 Build 20221019_000000" using compiler options "/Ibuild\ifort_C066CF0C6EAD169F /c /O3 /arch:CORE-AVX2 /Qiopenmp /Qcoarray /Qcoarray-num-images:16 /heap-arrays:0 /module:build\ifort_C066CF0C6EAD169F /o:build\ifort_C066CF0C6EAD169F\nnqs\src_nnqs.f90.o".
+
+Stochastic Optimization - date: 20221216 | time: 172904.162
+-----------------------------------------------------------
+
+    Epoch 1: E[ψ(α(τ=0.000))] = -120.708 ± 2.902
+    Epoch 2: E[ψ(α(τ=0.010))] = -128.021 ± 3.437
+    Epoch 3: E[ψ(α(τ=0.020))] = -140.078 ± 4.604
+    Epoch 4: E[ψ(α(τ=0.030))] = -179.842 ± 6.701
+    Epoch 5: E[ψ(α(τ=0.040))] = -263.019 ± 8.961
+    Epoch 6: E[ψ(α(τ=0.050))] = -419.725 ± 2.974
+    Epoch 7: E[ψ(α(τ=0.060))] = -461.903 ± 0.580
+    Epoch 8: E[ψ(α(τ=0.070))] = -481.611 ± 0.460
+    Epoch 9: E[ψ(α(τ=0.080))] = -492.983 ± 0.345
+    Epoch 10: E[ψ(α(τ=0.090))] = -499.128 ± 0.223
+    Epoch 11: E[ψ(α(τ=0.100))] = -502.312 ± 0.157
+    Epoch 12: E[ψ(α(τ=0.110))] = -503.744 ± 0.107
+    Epoch 13: E[ψ(α(τ=0.120))] = -504.347 ± 0.067
+    Epoch 14: E[ψ(α(τ=0.130))] = -504.387 ± 0.060
+    Epoch 15: E[ψ(α(τ=0.140))] = -504.155 ± 0.052
+    Epoch 16: E[ψ(α(τ=0.150))] = -503.905 ± 0.061
+    Epoch 17: E[ψ(α(τ=0.160))] = -503.568 ± 0.074
+    Epoch 18: E[ψ(α(τ=0.170))] = -503.381 ± 0.094
+    Epoch 19: E[ψ(α(τ=0.180))] = -502.827 ± 0.094
+    Epoch 20: E[ψ(α(τ=0.190))] = -502.566 ± 0.111
+    Epoch 21: E[ψ(α(τ=0.200))] = -502.599 ± 0.133
+    Epoch 22: E[ψ(α(τ=0.210))] = -502.165 ± 0.128
+    Epoch 23: E[ψ(α(τ=0.220))] = -501.645 ± 0.098
+    Epoch 24: E[ψ(α(τ=0.230))] = -501.583 ± 0.133
+    Epoch 25: E[ψ(α(τ=0.240))] = -501.745 ± 0.168
+    Epoch 26: E[ψ(α(τ=0.250))] = -501.301 ± 0.140
+
+    Optimization time: 12.970 seconds for n = 1001 spins.
+    Ground state energy: E[ψ(α(τ → ∞))] = -501.301 ± 0.140 for J = 0.5 and B = 0.1
+    Ground state accuracy: 1.000000
+
+    This program was built and run with compiler "Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.7.1 Build 20221019_000000" using compiler options "-Ibuild/ifort_73B76E70705D0ADC -c -O3 -arch CORE-AVX2 -qiopenmp -coarray -coarray-num-images=16 -heap-arrays 0 -module build/ifort_73B76E70705D0ADC -o build/ifort_73B76E70705D0ADC/nnqs/src_nnqs.f90.o".
+
+Stochastic Optimization - date: 20221216 | time: 173047.014
+-----------------------------------------------------------
+
+    Epoch 1: E[ψ(α(τ=0.000))] = -122.366 ± 2.960
+    Epoch 2: E[ψ(α(τ=0.010))] = -125.518 ± 3.263
+    Epoch 3: E[ψ(α(τ=0.020))] = -126.808 ± 3.224
+    Epoch 4: E[ψ(α(τ=0.030))] = -145.407 ± 4.789
+    Epoch 5: E[ψ(α(τ=0.040))] = -181.524 ± 6.742
+    Epoch 6: E[ψ(α(τ=0.050))] = -254.520 ± 8.763
+    Epoch 7: E[ψ(α(τ=0.060))] = -387.289 ± 6.049
+    Epoch 8: E[ψ(α(τ=0.070))] = -457.070 ± 0.635
+    Epoch 9: E[ψ(α(τ=0.080))] = -478.083 ± 0.493
+    Epoch 10: E[ψ(α(τ=0.090))] = -490.172 ± 0.345
+    Epoch 11: E[ψ(α(τ=0.100))] = -498.134 ± 0.236
+    Epoch 12: E[ψ(α(τ=0.110))] = -501.709 ± 0.179
+    Epoch 13: E[ψ(α(τ=0.120))] = -503.439 ± 0.108
+    Epoch 14: E[ψ(α(τ=0.130))] = -504.126 ± 0.079
+    Epoch 15: E[ψ(α(τ=0.140))] = -504.088 ± 0.057
+    Epoch 16: E[ψ(α(τ=0.150))] = -504.052 ± 0.054
+    Epoch 17: E[ψ(α(τ=0.160))] = -503.670 ± 0.053
+    Epoch 18: E[ψ(α(τ=0.170))] = -503.401 ± 0.068
+    Epoch 19: E[ψ(α(τ=0.180))] = -502.963 ± 0.079
+    Epoch 20: E[ψ(α(τ=0.190))] = -502.757 ± 0.098
+    Epoch 21: E[ψ(α(τ=0.200))] = -502.402 ± 0.107
+    Epoch 22: E[ψ(α(τ=0.210))] = -501.922 ± 0.087
+    Epoch 23: E[ψ(α(τ=0.220))] = -501.950 ± 0.120
+    Epoch 24: E[ψ(α(τ=0.230))] = -501.688 ± 0.107
+    Epoch 25: E[ψ(α(τ=0.240))] = -501.453 ± 0.125
+    Epoch 26: E[ψ(α(τ=0.250))] = -501.332 ± 0.126
+
+    Optimization time: 11.851 seconds for n = 1001 spins.
+    Ground state energy: E[ψ(α(τ → ∞))] = -501.332 ± 0.126 for J = -0.5 and B = 0.1
+    Ground state accuracy: 0.999933
+
+    This program was built and run with compiler "Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.7.1 Build 20221019_000000" using compiler options "/Ibuild\ifort_C066CF0C6EAD169F /c /O3 /arch:CORE-AVX2 /Qiopenmp /Qcoarray /Qcoarray-num-images:16 /heap-arrays:0 /module:build\ifort_C066CF0C6EAD169F /o:build\ifort_C066CF0C6EAD169F\nnqs\src_nnqs.f90.o".
+
+Stochastic Optimization - date: 20221216 | time: 173157.613
+-----------------------------------------------------------
+
+    Epoch 1: E[ψ(α(τ=0.000))] = -120.848 ± 2.992
+    Epoch 2: E[ψ(α(τ=0.010))] = -137.039 ± 4.336
+    Epoch 3: E[ψ(α(τ=0.020))] = -144.650 ± 4.899
+    Epoch 4: E[ψ(α(τ=0.030))] = -183.548 ± 6.919
+    Epoch 5: E[ψ(α(τ=0.040))] = -266.598 ± 8.972
+    Epoch 6: E[ψ(α(τ=0.050))] = -415.689 ± 3.236
+    Epoch 7: E[ψ(α(τ=0.060))] = -461.043 ± 0.613
+    Epoch 8: E[ψ(α(τ=0.070))] = -479.997 ± 0.468
+    Epoch 9: E[ψ(α(τ=0.080))] = -492.115 ± 0.333
+    Epoch 10: E[ψ(α(τ=0.090))] = -497.917 ± 0.262
+    Epoch 11: E[ψ(α(τ=0.100))] = -501.147 ± 0.191
+    Epoch 12: E[ψ(α(τ=0.110))] = -503.238 ± 0.133
+    Epoch 13: E[ψ(α(τ=0.120))] = -504.109 ± 0.076
+    Epoch 14: E[ψ(α(τ=0.130))] = -504.164 ± 0.062
+    Epoch 15: E[ψ(α(τ=0.140))] = -504.050 ± 0.050
+    Epoch 16: E[ψ(α(τ=0.150))] = -503.859 ± 0.060
+    Epoch 17: E[ψ(α(τ=0.160))] = -503.471 ± 0.074
+    Epoch 18: E[ψ(α(τ=0.170))] = -503.341 ± 0.104
+    Epoch 19: E[ψ(α(τ=0.180))] = -502.843 ± 0.092
+    Epoch 20: E[ψ(α(τ=0.190))] = -502.731 ± 0.115
+    Epoch 21: E[ψ(α(τ=0.200))] = -502.228 ± 0.101
+    Epoch 22: E[ψ(α(τ=0.210))] = -502.083 ± 0.112
+    Epoch 23: E[ψ(α(τ=0.220))] = -501.844 ± 0.145
+    Epoch 24: E[ψ(α(τ=0.230))] = -501.620 ± 0.125
+    Epoch 25: E[ψ(α(τ=0.240))] = -501.182 ± 0.073
+    Epoch 26: E[ψ(α(τ=0.250))] = -501.027 ± 0.078
+
+    Optimization time: 13.085 seconds for n = 1001 spins.
+    Ground state energy: E[ψ(α(τ → ∞))] = -501.027 ± 0.078 for J = -0.5 and B = 0.1
+    Ground state accuracy: 1.000000
+
+    This program was built and run with compiler "Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.7.1 Build 20221019_000000" using compiler options "-Ibuild/ifort_73B76E70705D0ADC -c -O3 -arch CORE-AVX2 -qiopenmp -coarray -coarray-num-images=16 -heap-arrays 0 -module build/ifort_73B76E70705D0ADC -o build/ifort_73B76E70705D0ADC/nnqs/src_nnqs.f90.o".
+
