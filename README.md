@@ -135,7 +135,7 @@ where $\mathcal{O}(\delta\tau^2)$ denotes the term involving $\delta\tau^2$. Sin
 
 ## Building with fpm
 
-The only external dependency of this project is a system installation of LAPACK that supports the lapack95 interfaces, such as the Intel MKL distribution of LAPACK. With a system installation of [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html) Base and HPC toolkits (including MKL), the project can be built and run on Windows 10/11 and Linux with the Fortran Package Manager [fpm](https://github.com/fortran-lang/fpm) from the project root using a single command, assuming the shell environment has sourced the oneAPI environment variables beforehand.
+The only dependency of this project is the Intel MKL distribution of LAPACK. With a system installation of [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html) Base and HPC toolkits (including MKL), the project can be built and run on Windows 10/11 and Linux with [fpm](https://github.com/fortran-lang/fpm) from the project root using a single command, assuming the shell environment has sourced the oneAPI environment variables beforehand.
 
 On Windows, the project can be built and run using the command
 
@@ -151,4 +151,4 @@ Similarly, the project may be built and run on Linux using the command
 fpm run --compiler ifort --flag "-O3 -arch CORE-AVX2 -qiopenmp -coarray -coarray-num-images=n -heap-arrays 0" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5"
 ```
 
-with identical features.
+with identical features. The link lines are provided by the [Intel Link Line Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
