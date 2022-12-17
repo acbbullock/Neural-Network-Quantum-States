@@ -3,8 +3,9 @@
 !!  of the Ising spin model by representing the wave-functions 𝜓(s,α) as a type RestrictedBoltzmannMachine.
 !!---------------------------------------------------------------------------------------------------------------------
 module nnqs
-    use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, i64=>int64                  !! Import standard kinds
-    use io_fortran_lib, only: nl, str                                                   !! I/O procedures and constants
+    use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, int64, compiler_version, compiler_options
+    use, intrinsic :: ieee_arithmetic, only: ieee_is_nan
+    use io_fortran_lib, only: echo, nl, str, to_file                                    !! I/O procedures and constants
     use lapack95, only: ppsvx                                 !! Routine for solving linear systems with packed storage
 	implicit none (type,external)                                                    !! No implicit types or interfaces
 	private                            !! All objects in scope are inaccessible outside of scope unless declared public
@@ -25,38 +26,114 @@ module nnqs
 		complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
 		contains
 			private
-			procedure, pass, public :: stochastic_optimization      !! Public facing procedure for finding ground state
-            procedure, pass :: init                                     !! Procedure for initializing Boltzmann machine
-			procedure, pass :: sample_distribution             !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
-            procedure, pass :: prob_ratio                     !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
-            procedure, pass :: ising_energy                    !! Computes Ising local energy for given configuration s
-            procedure, pass :: propagate                                   !! Procedure for updating weights and biases
+			procedure, pass(self), public :: stochastic_optimization                       !! Public training procedure
+            procedure, pass(self) :: init                               !! Procedure for initializing Boltzmann machine
+			procedure, pass(self) :: sample_distribution       !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
+            procedure, pass(self) :: prob_ratio               !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
+            procedure, pass(self) :: ising_energy              !! Computes Ising local energy for given configuration s
+            procedure, pass(self) :: propagate                             !! Procedure for updating weights and biases
 	end type RestrictedBoltzmannMachine
 
 	interface RestrictedBoltzmannMachine                                         !! Interface for structure constructor
-		procedure :: new
+        module procedure :: new
 	end interface
 
-	contains  !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    interface                                                                               !! Submodule initialization
+        pure type(RestrictedBoltzmannMachine) module function new(v_units, h_units) result(self)
+            !! Function for constructing a RestrictedBoltzmannMachine
+            integer, intent(in) :: v_units, h_units                 !! Number of visible and hidden units to initialize
+        end function new
 
-    !! Initialization Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        impure module subroutine init(self)
+            !! Procedure for initialization
+            class(RestrictedBoltzmannMachine), intent(inout) :: self                               !! Boltzmann machine
+        end subroutine init
+    end interface
 
-	pure type(RestrictedBoltzmannMachine) function new(v_units, h_units) result(self)
-		!! Function for constructing RestrictedBoltzmannMachine
-		integer, intent(in) :: v_units, h_units                     !! Number of visible and hidden units to initialize
+    interface                                                                                  !! Submodule monte_carlo
+        pure real(rk) module function ising_energy(self, s, theta, ising_strengths) result(energy)
+            !! Function for calculating local energy of configuration s in Ising model
+            class(RestrictedBoltzmannMachine), intent(in) :: self                                  !! Boltzmann machine
+            integer(ik), contiguous, dimension(:), intent(in) :: s                               !! Configuration input
+            complex(rk), contiguous, dimension(:), intent(in) :: theta                        !! Cached value of b + ws
+            real(rk), contiguous, dimension(:), intent(in) :: ising_strengths                       !! Ising parameters
+        end function ising_energy
 
-		self%v_units = v_units                     !! Set number of visible units (always equal to the number of spins)
+        impure module subroutine sample_distribution(self, epoch, ising_strengths, start_sample, samples, e_local, &
+                                                     corrs, energy, sqerr)
+            !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2 with Metropolis-Hastings algorithm
+            class(RestrictedBoltzmannMachine), intent(in) :: self                         !! Distribution to be sampled
+            integer, intent(in) :: epoch                                                               !! Current epoch
+            real(rk), contiguous, dimension(:), intent(in) :: ising_strengths                       !! Ising parameters
+            integer(ik), contiguous, dimension(:), intent(inout) :: start_sample      !! Sample to begin thermalization
+            integer(ik), allocatable, dimension(:,:), intent(out) :: samples                          !! Output samples
+            real(rk), allocatable, dimension(:), intent(out) :: e_local, corrs   !! Local energies, sample correlations
+            real(rk), allocatable, intent(out) :: energy, sqerr                         !! Energy average, square error
+        end subroutine sample_distribution
+
+        pure real module function prob_ratio(self, s1, s2, theta_1) result(p)
+            !! Function for computing the ratio of probabilities |𝜓(s_2)/𝜓(s_1)|^2 for two given configurations
+            class(RestrictedBoltzmannMachine), intent(in) :: self                                  !! Boltzmann machine
+            integer(ik), contiguous, dimension(:), intent(in) :: s1, s2                               !! Configurations
+            complex(rk), contiguous, dimension(:), intent(in) :: theta_1                    !! Cached value of b + ws_1
+        end function prob_ratio
+
+        impure module function random_sample(n) result(s_random)
+            !! Function for generating a random spin configuration
+            integer, intent(in) :: n                                             !! Length of configuration to generate
+            integer(ik), allocatable :: s_random(:)                                                 !! Generated sample
+        end function random_sample
+    end interface
+
+    interface                                                                                 !! Submodule optimization
+        impure module subroutine stochastic_optimization(self, ising_strengths)
+            !! Public interface for training RBM
+            class(RestrictedBoltzmannMachine), intent(inout) :: self                               !! Boltzmann machine
+            real(rk), contiguous, dimension(:), intent(in) :: ising_strengths                       !! Ising parameters
+        end subroutine stochastic_optimization
+
+        pure module subroutine propagate(self, epoch, e_local, samples)
+            !! Procedure for updating parameters according to stochastic optimization update rule
+            class(RestrictedBoltzmannMachine), intent(inout) :: self                               !! Boltzmann machine
+            integer, intent(in) :: epoch                                                               !! Current epoch
+            real(rk), contiguous, dimension(:), intent(in) :: e_local                                 !! Local energies
+            integer(ik), contiguous, dimension(:,:), intent(in) :: samples                            !! Network inputs
+        end subroutine propagate
+    end interface
+
+    interface                                                                     !! Submodule supplementary_procedures
+        pure real(rk) module function var(x) result(variance)
+            !! Function for calculating sample variance of a real vector using canonical two-pass algorithm
+            real(rk), contiguous, dimension(:), intent(in) :: x
+        end function var
+
+        pure module function corr(samples, alignment) result(correlations)
+            !! Function for calculating spin-spin correlations of sampled configurations given alignment 'F' or 'A'
+            integer(ik), contiguous, dimension(:,:), intent(in) :: samples                             !! Input samples
+            character(len=1), intent(in) :: alignment                                      !! Spin alignment 'F' or 'A'
+            real(rk), allocatable, dimension(:) :: correlations                                  !! Output correlations
+        end function corr
+
+        impure real(rk) module function gauss(mu, sig) result(random_gaussian)
+            !! Function for sampling normal distribution with mean mu and standard deviation sig
+            real(rk), intent(in) :: mu, sig
+        end function gauss
+    end interface
+    
+end module nnqs
+
+submodule (nnqs) initialization
+    contains
+    module procedure new
+        self%v_units = v_units                     !! Set number of visible units (always equal to the number of spins)
 		self%h_units = h_units                  !! Set number of hidden units (chosen arbitrarily to optimize learning)
-	end function new
+    end procedure new
 
-    subroutine init(self)
-		!! Procedure for initialization
-		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-
-		integer :: n, m                                                                     !! Visible and hidden units
+    module procedure init
+        integer :: n, m, i, j                                                               !! Sizes and loop variables
 
 		if ( this_image() == 1 ) then
-			if (.not. allocated(self%v_units)) error stop 'Structure not declared... terminating'  !! Error termination
+			if (.not. allocated(self%v_units)) error stop nl//'FATAL: Structure not declared.'     !! Error termination
 			sync images(*)                                                                   !! Respond to other images
         else
             sync images (1)                                                           !! Wait for response from image 1
@@ -73,19 +150,17 @@ module nnqs
         allocate( self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk, 0.0_rk) )   !! Allocate hidden layer bias arrays
 		allocate( self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk, 0.0_rk) )        !! Allocate weight arrays
 
-		self%w%re = gauss_matrix(dims=shape(self%w), mu=0.01_rk, sig=1e-4_rk)                   !! Initialize real part
-		self%w%im = gauss_matrix(dims=shape(self%w), mu=-0.005_rk, sig=1e-5_rk)            !! Initialize imaginary part
-	end subroutine init
+        do j = 1, n
+            do i = 1, m
+                self%w(i,j) = cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
+            end do
+        end do
+    end procedure init
+end submodule initialization
 
-	!! Ising Model Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    pure real(rk) function ising_energy(self, s, theta, ising_strengths) result(energy)
-		!! Function for calculating local energy of configuration s in Ising model
-		class(RestrictedBoltzmannMachine), intent(in) :: self                                      !! Boltzmann machine
-		integer(ik), contiguous, dimension(:), intent(in) :: s                                   !! Configuration input
-        complex(rk), contiguous, dimension(:), intent(in) :: theta                            !! Cached value of b + ws
-        real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
-
+submodule (nnqs) monte_carlo
+    contains
+    module procedure ising_energy
         real(rk), allocatable, dimension(:) :: s_unit, neighbor_couplings, field_couplings        !! s -> ±1, couplings
 		complex(rk), allocatable, dimension(:) :: arg_theta                                               !! 1 + exp(𝜃)
 		real(rk), allocatable :: e_interaction, e_transverse             !! Interaction energy, transverse field energy
@@ -113,20 +188,9 @@ module nnqs
 		e_transverse = -B_str*sum(field_couplings)                              !! Local energy due to transverse field
 
 		energy = e_interaction + e_transverse       !! Local energy is sum of interaction and transverse field energies
-	end function ising_energy
+    end procedure ising_energy
 
-	!!  Sampling Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    subroutine sample_distribution(self, epoch, ising_strengths, start_sample, samples, e_local, corrs, energy, sqerr)
-		!! Markov Chain Monte Carlo procedure for sampling |𝜓|^2 with Metropolis-Hastings algorithm
-		class(RestrictedBoltzmannMachine), intent(in) :: self                             !! Distribution to be sampled
-		integer, intent(in) :: epoch                                                                   !! Current epoch
-        real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
-        integer(ik), contiguous, dimension(:), intent(inout) :: start_sample          !! Sample to begin thermalization
-		integer(ik), allocatable, dimension(:,:), intent(out) :: samples                              !! Output samples
-		real(rk), allocatable, dimension(:), intent(out) :: e_local, corrs       !! Local energies, sample correlations
-		real(rk), allocatable, intent(out) :: energy, sqerr                             !! Energy average, square error
-
+    module procedure sample_distribution
         complex(rk), allocatable, dimension(:) :: theta                                                   !! 𝜃 = b + ws
 		integer :: n, num_samples                                                 !! Number of spins, number of samples
 
@@ -183,7 +247,7 @@ module nnqs
 			rind = floor(n*r) + 1                                                   !! Generate random indices in [1,n]
 			call random_number(r)                                                                 !! Repopulate randoms
 
-			do concurrent (k = 1:num_samples) local(theta,this_sample,s_prop,acc_prob) shared(r,rind,samples,e_local)
+			do concurrent (k = 1:num_samples)
 				this_sample = start_sample                                                     !! Transfer start sample
 
 				metropolis_hastings: do pass = 1, passes
@@ -206,15 +270,10 @@ module nnqs
 		energy = sum(e_local)/num_samples                                                        !! Average of energies
 		sqerr = var(e_local)/num_samples                                                    !! Square error of energies
         start_sample = samples(:,num_samples)               !! Record stationary sample to begin next round of sampling
-	end subroutine sample_distribution
+    end procedure sample_distribution
 
-    pure real function prob_ratio(self, s1, s2, theta_1) result(p)
-		!! Function for computing the ratio of probabilities |𝜓(s_2)/𝜓(s_1)|^2 for two given configurations
-		class(RestrictedBoltzmannMachine), intent(in) :: self                                      !! Boltzmann machine
-		integer(ik), contiguous, dimension(:), intent(in) :: s1, s2                                   !! Configurations
-        complex(rk), contiguous, dimension(:), intent(in) :: theta_1                        !! Cached value of b + ws_1
-
-		complex(rk), allocatable :: sum_as, amplitude_prob_ratio                          !! ∑_j a_j*s_j, 𝜓(s_2)/𝜓(s_1)
+    module procedure prob_ratio
+        complex(rk), allocatable :: sum_as, amplitude_prob_ratio                          !! ∑_j a_j*s_j, 𝜓(s_2)/𝜓(s_1)
 		complex(rk), allocatable, dimension(:) :: theta_2                                                   !! b + ws_2
 		integer(ik), allocatable, dimension(:) :: s                                                !! Sample difference
 		integer, allocatable, dimension(:) :: indices, contributors                              !! For sorting indices
@@ -236,37 +295,42 @@ module nnqs
 		amplitude_prob_ratio = exp(sum_as + sum(log(1.0_rk+exp(theta_2)) - log(1.0_rk+exp(theta_1))))  !! 𝜓(s_2)/𝜓(s_1)
 
 		p = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                                 !! |𝜓(s_2)/𝜓(s_1)|^2
-	end function prob_ratio
+    end procedure prob_ratio
 
-	function random_sample(n) result(s_random)
-		!! Function for generating a random spin configuration
-		integer, intent(in) :: n                                                 !! Length of configuration to generate
-		integer(ik), allocatable :: s_random(:)                                                     !! Generated sample
-
-		real, allocatable :: r(:)                                                                !! Random number array
+    module procedure random_sample
+        real, allocatable :: r(:)                                                                !! Random number array
 
 		allocate( r(n) )                                                                            !! Allocate randoms
 		call random_number(r)                             !! Generate random numbers from uniform distribution on [0,1)
 		s_random = nint(r, kind=ik)                                                 !! Quantize to nearest whole number
-	end function random_sample
+    end procedure random_sample
+end submodule monte_carlo
 
-	!! Training Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    subroutine stochastic_optimization(self, ising_strengths, energies, correlations)
-		!! Top-level public procedure for evolving variational state to ground state
-		use, intrinsic :: ieee_arithmetic, only: ieee_is_nan                                   !! IEEE inquiry function
-		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        real(rk), dimension(2), intent(in) :: ising_strengths         !! Specifies coupling strength and field strength
-		real(rk), allocatable, dimension(:,:), intent(out) :: energies, correlations       !! Energies and correlations
-
+submodule (nnqs) optimization
+    contains
+    module procedure stochastic_optimization
+        real(rk), allocatable, dimension(:,:) :: energies, correlations                    !! Energies and correlations
         integer(ik), allocatable, dimension(:) :: start_sample                          !! Start sample for Monte Carlo
         integer(ik), allocatable, dimension(:,:) :: samples                                     !! Sample storage array
 		real(rk), allocatable, dimension(:) :: e_local, corrs                    !! Local energies, sample correlations
 		real(rk), allocatable :: energy, sqerr, stderr, tau, acc                                 !! Recording variables
 		integer :: epoch, max_epochs, n                                   !! Loop variable, max epochs, number of spins
 
-        integer(i64) :: t1, t2                                                                       !! Clock variables
+        character(len=:), allocatable :: logfile, logmsg                                         !! Recording variables
+        character(len=10) :: date, time                                                                !! Date and time
+        integer(int64) :: t1, t2                                                                     !! Clock variables
         real(rk) :: rate, telapse                                                                    !! Clock variables
+
+        if ( this_image() == 1 ) then                                    !! Check validity of Ising strength parameters
+            if ( size(ising_strengths) /= 2 ) then
+                error stop nl//'FATAL: Invalid size for ising_strengths... size must be (2).'// &
+                           nl//'USAGE: ising_strengths = [J,B] where J is the neighbor coupling strength and B '// &
+                               'is the transverse field strength.'//nl
+            end if
+            sync images (*)                                                                  !! Respond to other images
+        else
+            sync images (1)                                                           !! Wait for response from image 1
+        end if
 
 		call self%init()                                                                !! Initialize Boltzmann machine
 
@@ -283,10 +347,13 @@ module nnqs
 		if ( this_image() == 1 ) then                                                      !! Do preparation on image 1
             allocate( energies(max_epochs, 2), correlations(n, max_epochs) )                 !! Allocate storage arrays
 
-            write(*,'(a)') nl//'Stochastic Optimization - Ising Model: |ψ(α(τ))⟩ → |ψ₀⟩ as τ → ∞'// &
-                           nl//'----------------------------------------------------------------'//nl
+            logfile = 'optimization_results.log'                                                        !! Set log file
+            call date_and_time(date=date, time=time)                                               !! Get date and time
 
-            call system_clock(t1)                                                                        !! Start clock
+            logmsg = 'Stochastic Optimization - date: '//trim(adjustl(date))//' | time: '//time   !! Training log title
+            call echo(string=logmsg//nl//repeat('-', ncopies=len(logmsg))//nl, file_name=logfile)       !! Echo to file
+
+            call system_clock(t1)                                                                        !! Start timer
         end if
 
 		learning: do epoch = 1, max_epochs                                                            !! Begin learning
@@ -300,16 +367,17 @@ module nnqs
 			call co_sum(sqerr); stderr = sqrt(sqerr)/num_images()                        !! Average error across images
 			call co_sum(corrs); corrs = corrs/num_images()                        !! Average correlations across images
 
-            if ( this_image() == 1 ) then                                       !! Do data recording and I/O on image 1
+            if ( this_image() == 1 ) then                                               !! Do data recording on image 1
                 energies(epoch,:) = [energy, stderr]                              !! Record energy and error to storage
 			    correlations(:,epoch) = corrs                                         !! Record correlations to storage
 
                 !! Write progress report:
-                tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                              !! Current time
-                write(*,'(a)') '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau, fmt='f', decimals=3)//'))] = ' &
-                                    //str(energy, fmt='f', decimals=3)//' ± '//str(stderr, fmt='f', decimals=3)
+                tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                            !! Imaginary time
+                logmsg = '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau, fmt='f', decimals=3)//'))] = ' &
+                              //str(energy, fmt='f', decimals=3)//' ± '//str(stderr, fmt='f', decimals=3)
+                call echo(logmsg, logfile)
 
-				if ( ieee_is_nan(energy) ) error stop 'Numerical instability... terminating'       !! Error termination
+				if ( ieee_is_nan(energy) ) error stop nl//'FATAL: Numerical instability.'          !! Error termination
 				sync images (*)                                                              !! Respond to other images
             else
                 sync images (1)                                                       !! Wait for response from image 1
@@ -321,31 +389,30 @@ module nnqs
 		end do learning
 
         if ( this_image() == 1 ) then                                             !! Do finalization and I/O on image 1
-            call system_clock(t2, count_rate=rate)                                                        !! Stop clock
+            call system_clock(t2, count_rate=rate)                                                        !! Stop timer
             telapse = real((t2-t1), kind=rk)/rate                                 !! Total elapsed wall clock time in s
 
             acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)             !! Get ground state accuracy
 
-            write(*,'(a)') nl//'    Optimization time: '//str(telapse, fmt='f', decimals=3)//' seconds for n = '// & 
-                                    str(n)//' spins.'// &
-                           nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
-                                    ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
-                                    str(ising_strengths(1), fmt='f', decimals=1)//' and B = '// &
-                                    str(ising_strengths(2), fmt='f', decimals=1)// &
-                           nl//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//nl
+            logmsg = nl//'    Optimization time: '//str(telapse, fmt='f', decimals=3)//' seconds for n = '// & 
+                              str(n)//' spins.'// &
+                     nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
+                              ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
+                              str(ising_strengths(1), fmt='f', decimals=1)//' and B = '// &
+                              str(ising_strengths(2), fmt='f', decimals=1)// &
+                     nl//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//nl// &
+                     nl//'    This program was built and run with compiler "'//compiler_version()//'" '// &
+                              'using compiler options "'//compiler_options()//'".'//nl
 
-            energies = energies(1:epoch,:)                                                           !! Truncate output
-            correlations = correlations(:,1:epoch)                                                   !! Truncate output
+            call echo(logmsg, logfile)
+            call to_file( energies(1:epoch,:), file_name='./data/energies_'//self%alignment//'.csv', &
+                                               header=['Energy', 'Error'] )
+            call to_file( correlations(:,1:epoch), file_name='./data/correlations_'//self%alignment//'.csv', &
+                                                   header=['Epoch'] )
         end if
-	end subroutine stochastic_optimization
+    end procedure stochastic_optimization
 
-    pure subroutine propagate(self, epoch, e_local, samples)
-        !! Procedure for updating parameters according to stochastic optimization update rule
-		class(RestrictedBoltzmannMachine), intent(inout) :: self                                   !! Boltzmann machine
-        integer, intent(in) :: epoch                                                                   !! Current epoch
-        real(rk), contiguous, dimension(:), intent(in) :: e_local                                     !! Local energies
-		integer(ik), contiguous, dimension(:,:), intent(in) :: samples                                !! Network inputs
-
+    module procedure propagate
         real(rk), allocatable, dimension(:) :: e_local_cent                                  !! Centered local energies
         real(rk), allocatable, dimension(:,:) :: dlna                                                !! Log derivatives
         complex(rk), allocatable, dimension(:,:) :: dlnb                                             !! Log derivatives
@@ -385,7 +452,7 @@ module nnqs
 
             allocate( sr_matrix((n*(n+1))/2) )                            !! Allocate stochastic reconfiguration matrix
 
-            cov_mat: do concurrent (jj = 1:n, j = 1:n, j>=jj) local(ind) shared(sr_matrix)
+            cov_mat: do concurrent (jj = 1:n, j = 1:n, j>=jj)
                 ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                 !! Packed index mapping
                 sr_matrix(ind) = sum(dlna_cent(:,j)*dlna_cent(:,jj))*covar_norm                           !! Covariance
                 if (j == jj) sr_matrix(ind) = sr_matrix(ind) + delta                 !! Add regularization to diagonals
@@ -426,7 +493,7 @@ module nnqs
 
             allocate( sr_matrix((m*(m+1))/2) )                            !! Allocate stochastic reconfiguration matrix
 
-            cov_mat: do concurrent (ii = 1:m, i = 1:m, i>=ii) local(ind) shared(sr_matrix)
+            cov_mat: do concurrent (ii = 1:m, i = 1:m, i>=ii)
                 ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                 !! Packed index mapping
                 sr_matrix(ind) = sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*covar_norm                      !! Covariance
                 if (i == ii) sr_matrix(ind) = sr_matrix(ind)%re + delta              !! Add regularization to diagonals
@@ -467,7 +534,7 @@ module nnqs
 
             allocate( sr_matrix((m*(m+1))/2, n) )                         !! Allocate stochastic reconfiguration matrix
 
-            cov_mat: do concurrent (j = 1:n, ii = 1:m, i = 1:m, i>=ii) local(ind) shared(sr_matrix)
+            cov_mat: do concurrent (j = 1:n, ii = 1:m, i = 1:m, i>=ii)
                 ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                 !! Packed index mapping
                 sr_matrix(ind,j) = sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*covar_norm                !! Covariance
                 if (i == ii) sr_matrix(ind,j) = sr_matrix(ind,j)%re + delta          !! Add regularization to diagonals
@@ -475,7 +542,7 @@ module nnqs
 
             allocate( x, mold=forces )                                                            !! Allocate solutions
 
-			stochastic_reconfiguration: do concurrent (j = 1:n) shared(forces, sr_matrix, x)
+			stochastic_reconfiguration: do concurrent (j = 1:n)
 				call ppsvx(AP=sr_matrix(:,j), b=forces(:,j), x=x(:,j), uplo='L', fact='E')  !! Sto reconfig x = S^{-1}F
 			end do stochastic_reconfiguration
 
@@ -487,30 +554,22 @@ module nnqs
 
 			self%w = self%w - dtau*x                                                                  !! Update weights
 		end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	end subroutine propagate
+    end procedure propagate
+end submodule optimization
 
-	!! Supplementary Procedures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    pure real(rk) function var(x) result(variance)
-		!! Function for calculating sample variance of a real vector using canonical two-pass algorithm
-        real(rk), contiguous, dimension(:), intent(in) :: x
-
-		real(rk), allocatable, dimension(:) :: x_cent
+submodule (nnqs) supplementary_procedures
+    contains
+    module procedure var
+        real(rk), allocatable, dimension(:) :: x_cent
 		integer :: n
 
 		n = size(x)
 		x_cent = x - sum(x)/n
-
 		variance = sum(x_cent**2)/(n-1)
-	end function var
+    end procedure var
 
-    pure function corr(samples, alignment) result(correlations)
-		!! Function for calculating spin-spin correlations of sampled configurations given alignment 'F' or 'A'
-		integer(ik), contiguous, dimension(:,:), intent(in) :: samples                                 !! Input samples
-        character(len=1), intent(in) :: alignment                                          !! Spin alignment 'F' or 'A'
-		real(rk), allocatable, dimension(:) :: correlations                                      !! Output correlations
-
-		integer(ik), allocatable, dimension(:,:) :: S                                              !! Transformed spins
+    module procedure corr
+        integer(ik), allocatable, dimension(:,:) :: S                                              !! Transformed spins
 		integer(ik), allocatable, dimension(:) :: ref_spin                                            !! Reference spin
 		integer :: n, num_samples, j, agrees, disagrees                 !! Size and loop variables, agreement variables
 
@@ -521,15 +580,20 @@ module nnqs
 
 		allocate( correlations(n), source=1.0_rk )
 
-		get_correlations: do concurrent (j = 1:n, j /= n/2+1) local(agrees, disagrees) shared(correlations)
-            if ( (alignment == 'A') .and. (mod(j,2) == 0) ) S(:,j) = 1_ik - S(:,j)    !! Conform spins to 'A' alignment
-            agrees = count( S(:,j)==ref_spin )                                              !! Get number of agreements
+		get_correlations: do concurrent (j = 1:n, j /= n/2+1)
+            if ( alignment == 'A' ) then
+                if ( mod(j,2) == 0 ) then
+                    S(:,j) = 1_ik - S(:,j)                                            !! Conform spins to 'A' alignment
+                end if
+            end if
+            agrees = count( S(:,j) == ref_spin )                                            !! Get number of agreements
             disagrees = num_samples - agrees                                             !! Get number of disagreements
             correlations(j) = real(agrees - disagrees, kind=rk)/num_samples                 !! Mean agreement on [-1,1]
 		end do get_correlations
-	end function corr
+    end procedure corr
 
-    function gauss_matrix(dims, mu, sig) result(gauss_sample_matrix)
+    module procedure gauss
+        !!-------------------------------------------------------------------------------------------------------------
         !! Samples random numbers from the standard Normal (Gaussian) Distribution with the given mean and sigma.
         !! Uses the Acceptance-complement ratio from W. Hoermann and G. Derflinger.
         !! This is one of the fastest existing methods for generating normal random variables.
@@ -540,108 +604,98 @@ module nnqs
         !!
         !! Implementation taken from <https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00274>
         !! UNURAN (c) 2000  W. Hoermann & J. Leydold, Institut f. Statistik, WU Wien
-        use, intrinsic :: iso_fortran_env, only: dp=>real64
-        integer, dimension(2), intent(in) :: dims
-        real(rk), intent(in) :: mu, sig
-        real(rk), dimension(dims(1), dims(2)) :: gauss_sample_matrix
-
-        real(dp), allocatable :: kC1, kC2, kC3, kD1, kD2, kD3, kHm, kZm, kHp, kZp, kPhln, kHm1
-        real(dp), allocatable :: kHp1, kHzm, kHzmp, kAs, kBs, kCs, kB, kX0, kYm, kS, kT
-        real(dp) :: rn, x, y, z, res
+        !!-------------------------------------------------------------------------------------------------------------
+        real(rk) :: kC1, kC2, kC3, kD1, kD2, kD3, kHm, kZm, kHp, kZp, kPhln, kHm1
+        real(rk) :: kHp1, kHzm, kHzmp, kAs, kBs, kCs, kB, kX0, kYm, kS, kT
+        real(rk) :: rn, x, y, z, res
         integer :: i, j
 
-        if ( any(dims < 1) ) error stop 'All gauss_matrix dimensions must be at least 1... terminating'
-
-        kC1 = 1.448242853_dp
-        kC2 = 3.307147487_dp
-        kC3 = 1.46754004_dp
-        kD1 = 1.036467755_dp
-        kD2 = 5.295844968_dp
-        kD3 = 3.631288474_dp
-        kHm = 0.483941449_dp
-        kZm = 0.107981933_dp
-        kHp = 4.132731354_dp
-        kZp = 18.52161694_dp
-        kPhln = 0.4515827053_dp
-        kHm1 = 0.516058551_dp
-        kHp1 = 3.132731354_dp
-        kHzm = 0.375959516_dp
-        kHzmp = 0.591923442_dp
+        kC1 = 1.448242853_rk
+        kC2 = 3.307147487_rk
+        kC3 = 1.46754004_rk
+        kD1 = 1.036467755_rk
+        kD2 = 5.295844968_rk
+        kD3 = 3.631288474_rk
+        kHm = 0.483941449_rk
+        kZm = 0.107981933_rk
+        kHp = 4.132731354_rk
+        kZp = 18.52161694_rk
+        kPhln = 0.4515827053_rk
+        kHm1 = 0.516058551_rk
+        kHp1 = 3.132731354_rk
+        kHzm = 0.375959516_rk
+        kHzmp = 0.591923442_rk
         
-        kAs = 0.8853395638_dp
-        kBs = 0.2452635696_dp
-        kCs = 0.2770276848_dp
-        kB  = 0.5029324303_dp
-        kX0 = 0.4571828819_dp
-        kYm = 0.187308492_dp
-        kS  = 0.7270572718_dp
-        kT  = 0.03895759111_dp
+        kAs = 0.8853395638_rk
+        kBs = 0.2452635696_rk
+        kCs = 0.2770276848_rk
+        kB  = 0.5029324303_rk
+        kX0 = 0.4571828819_rk
+        kYm = 0.187308492_rk
+        kS  = 0.7270572718_rk
+        kT  = 0.03895759111_rk
 
-        columns: do j = 1, dims(2)
-            rows: do i = 1, dims(1)
-                outer: do
-                    call random_number(y)
+        outer: do
+            call random_number(y)
 
-                    if ( y > kHm1 ) then
-                        res = kHp*y - kHp1; exit outer
-                    else if ( y < kZm ) then
-                        rn = kZp*y - 1.0_dp
+            if ( y > kHm1 ) then
+                res = kHp*y - kHp1; exit outer
+            else if ( y < kZm ) then
+                rn = kZp*y - 1.0_rk
 
-                        if ( rn > 0.0_dp ) then
-                            res = 1.0_dp + rn; exit outer
-                        else
-                            res = -1.0_dp + rn; exit outer
-                        end if
-                    else if ( y < kHm ) then
-                        call random_number(rn)
-                        rn = rn - 1.0_dp + rn
+                if ( rn > 0.0_rk ) then
+                    res = 1.0_rk + rn; exit outer
+                else
+                    res = -1.0_rk + rn; exit outer
+                end if
+            else if ( y < kHm ) then
+                call random_number(rn)
+                rn = rn - 1.0_rk + rn
 
-                        if ( rn > 0.0_dp ) then
-                            z = 2.0_dp - rn
-                        else
-                            z = -2.0_dp - rn
-                        end if
+                if ( rn > 0.0_rk ) then
+                    z = 2.0_rk - rn
+                else
+                    z = -2.0_rk - rn
+                end if
 
-                        if ( ((kC1-y)*(kC3+abs(z))) < kC2 ) then
-                            res = z; exit outer
-                        else
-                            x = rn*rn
-                            if ( ((y+kD1)*(kD3+x)) < kD2 ) then
-                                res = rn; exit outer
-                            else if ( (kHzmp-y) < exp(-(z*z+kPhln)/2) ) then
-                                res = z; exit outer
-                            else if ( (y+kHzm) < exp(-(x+kPhln)/2) ) then
-                                res = rn; exit outer
-                            end if
-                        end if
+                if ( ((kC1-y)*(kC3+abs(z))) < kC2 ) then
+                    res = z; exit outer
+                else
+                    x = rn*rn
+                    if ( ((y+kD1)*(kD3+x)) < kD2 ) then
+                        res = rn; exit outer
+                    else if ( (kHzmp-y) < exp(-(z*z+kPhln)/2) ) then
+                        res = z; exit outer
+                    else if ( (y+kHzm) < exp(-(x+kPhln)/2) ) then
+                        res = rn; exit outer
                     end if
+                end if
+            end if
 
-                    inner: do
-                        call random_number(x)
-                        call random_number(y)
-                        y = kYm*y
-                        z = kX0 - kS*x - y
+            inner: do
+                call random_number(x)
+                call random_number(y)
+                y = kYm*y
+                z = kX0 - kS*x - y
 
-                        if ( z > 0.0_dp ) then
-                            rn = 2.0_dp + y/x
-                        else
-                            x = 1.0_dp - x
-                            y = kYm - y
-                            rn = -(2.0_dp + y/x)
-                        end if
+                if ( z > 0.0_rk ) then
+                    rn = 2.0_rk + y/x
+                else
+                    x = 1.0_rk - x
+                    y = kYm - y
+                    rn = -(2.0_rk + y/x)
+                end if
 
-                        if ( ((y-kAs+x)*(kCs+x)+kBs) < 0.0_dp ) then
-                            res = rn; exit inner
-                        else if ( y < (x+kT) ) then
-                            if ( (rn*rn) < (4.0_dp*(kB-log(x))) ) then
-                                res = rn; exit inner
-                            end if
-                        end if
-                    end do inner
-                end do outer
+                if ( ((y-kAs+x)*(kCs+x)+kBs) < 0.0_rk ) then
+                    res = rn; exit inner
+                else if ( y < (x+kT) ) then
+                    if ( (rn*rn) < (4.0_rk*(kB-log(x))) ) then
+                        res = rn; exit inner
+                    end if
+                end if
+            end do inner
+        end do outer
 
-                gauss_sample_matrix(i,j) = res*sig + mu
-            end do rows
-        end do columns
-    end function gauss_matrix
-end module nnqs
+        random_gaussian = res*sig + mu
+    end procedure gauss
+end submodule supplementary_procedures
