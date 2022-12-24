@@ -1,6 +1,6 @@
 test
 build
-*.png
+*.pdf
 *.gif
 *.jl
 README_priv.md

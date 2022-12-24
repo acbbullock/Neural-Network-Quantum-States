@@ -13,7 +13,7 @@ program main
     !! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     call random_init(repeatable=.false., image_distinct=.true.)                   !! Initialize random number generator
 
-    spins = 1001                                                                         !! Set number of visible units
+    spins = 1000                                                                         !! Set number of visible units
     hidden_units = 50                                                                     !! Set number of hidden units
 
     psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                            !! Create instance
