@@ -1,6 +1,6 @@
 # Learning Quantum States with Neural Networks
 
-![Correlations_A](data/correlations_A.csv)
+![Correlations_A](data/correlations_A.png)
 
 ## Contents
 
