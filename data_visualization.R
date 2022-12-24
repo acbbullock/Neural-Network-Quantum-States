@@ -1,8 +1,10 @@
-## Load dependencies
-if (!require('pacman')) install.packages('pacman')
-pacman::p_load(gplots, ggplot2, cowplot, latex2exp)
+#######################################################################################################################
+##  This script file writes png files for visualizing the csv data output of the stochastic_optimization subroutine.
+#######################################################################################################################
+if (!require('pacman')) install.packages('pacman')                                            ## Require pacman package
+pacman::p_load(gplots, ggplot2, cowplot, latex2exp)                                                ## Load dependencies
 
-## Load correlation data
+## Load data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 corr_F_data <- read.csv('./data/correlations_F.csv', header=TRUE, sep=',')                ## Ferromagnetic correlations
 corr_F <- as.matrix(corr_F_data)                                                                  ## Convert to numeric
 num_spins_F <- as.character(nrow(corr_F))                                              ## Get number of spins as string
@@ -11,6 +13,10 @@ corr_A_data <- read.csv('./data/correlations_A.csv', header=TRUE, sep=',')      
 corr_A <- as.matrix(corr_A_data)                                                                  ## Convert to numeric
 num_spins_A <- as.character(nrow(corr_A))                                              ## Get number of spins as string
 
+energies_F_data <- read.csv('./data/energies_F.csv', header=TRUE, sep=',')                    ## Ferromagnetic energies
+energies_A_data <- read.csv('./data/energies_A.csv', header=TRUE, sep=',')                ## Antiferromagnetic energies
+
+## Visualize correlations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 heatmap_colors <- colorpanel(100, 'salmon2', 'white', 'skyblue2')                       ## Set color panel for heatmaps
 
 png('./data/correlations_F.png', res=600, width=10.67, height=6, units='in')              ## Open png device for saving
@@ -31,10 +37,7 @@ heatmap.2(                                                                    ##
          )
 dev.off()                                                                                               ## Close device
 
-## Load energy data
-energies_F_data <- read.csv('./data/energies_F.csv', header=TRUE, sep=',')                    ## Ferromagnetic energies
-energies_A_data <- read.csv('./data/energies_A.csv', header=TRUE, sep=',')                ## Antiferromagnetic energies
-
+## Visualize energies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 energies_F_plot <- ggplot(data=energies_F_data, aes(x=c(1:nrow(energies_F_data)), y=Energy)) +           ## Energy plot
     geom_line(color='skyblue') +
     geom_point(size=0.5) +
