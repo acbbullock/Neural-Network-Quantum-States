@@ -1,6 +1,10 @@
 # Learning Quantum States with Neural Networks
 
 ![Correlations_A](data/correlations_A.png)
+Figure 1: Map of statistical spin configurations of an Ising chain of $n=1000$ spins relative to the middle spin at site $n/2+1=501$ over the course of learning for the antiferromagnetic Ising model ($J<0$). The spin configuration approaches the ground state configuration as the energy approaches the ground state energy.
+
+![Energies_A](data/energies_A.png)
+Figure 2: Statistical expectation of the energy with standard error of the mean over the course of learning for the antiferromagnetic Ising model with $J = -0.5$ and $B = 0.1$.
 
 ## Contents
 
