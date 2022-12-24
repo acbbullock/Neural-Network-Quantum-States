@@ -1,5 +1,7 @@
 # Learning Quantum States with Neural Networks
 
+![Correlations_A](data/correlations_A.csv)
+
 ## Contents
 
 1. [Introduction](https://github.com/acbbullock/Neural-Network-Quantum-States#introduction)
