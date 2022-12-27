@@ -16,7 +16,7 @@ module nnqs
 	!! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type RestrictedBoltzmannMachine                     !! Custom class for implementing a Restricted Boltzmann Machine
 		private
-        character(len=1) :: alignment = 'N'                                              !! For setting spin alignments
+        character(len=1) :: alignment = 'N'                                              !! For tracking spin alignment
 		integer, allocatable :: v_units, h_units                                   !! Number of visble and hidden units
 		real(rk), allocatable, dimension(:) :: a                                                !! Visible layer biases
 		complex(rk), allocatable, dimension(:) :: b                                              !! Hidden layer biases
@@ -35,14 +35,14 @@ module nnqs
 	end type RestrictedBoltzmannMachine
 
 	interface RestrictedBoltzmannMachine                                         !! Interface for structure constructor
-        module procedure :: new
+        module procedure :: new_rbm
 	end interface
 
     interface                                                                               !! Submodule initialization
-        pure type(RestrictedBoltzmannMachine) module function new(v_units, h_units) result(self)
+        pure type(RestrictedBoltzmannMachine) module function new_rbm(v_units, h_units) result(self)
             !! Function for constructing a RestrictedBoltzmannMachine
             integer, intent(in) :: v_units, h_units                 !! Number of visible and hidden units to initialize
-        end function new
+        end function new_rbm
 
         impure module subroutine init(self)
             !! Procedure for initialization
@@ -81,7 +81,7 @@ module nnqs
         impure module function random_sample(n) result(s_random)
             !! Function for generating a random spin configuration
             integer, intent(in) :: n                                             !! Length of configuration to generate
-            integer(ik), allocatable :: s_random(:)                                                 !! Generated sample
+            integer(ik), allocatable, dimension(:) :: s_random                                      !! Generated sample
         end function random_sample
     end interface
 
@@ -124,10 +124,10 @@ end module nnqs
 
 submodule (nnqs) initialization
     contains
-    module procedure new
+    module procedure new_rbm
         self%v_units = v_units                     !! Set number of visible units (always equal to the number of spins)
 		self%h_units = h_units                  !! Set number of hidden units (chosen arbitrarily to optimize learning)
-    end procedure new
+    end procedure new_rbm
 
     module procedure init
         integer :: n, m, i, j                                                               !! Sizes and loop variables
@@ -266,7 +266,7 @@ submodule (nnqs) monte_carlo
 			end do
 		end block stationary_sampling
 
-        corrs = corr(samples=samples, alignment=self%alignment)         !! Spin correlations given alignment 'F' or 'A'
+        corrs = corr(samples, alignment=self%alignment)                            !! Spin correlations given alignment
 		energy = sum(e_local)/num_samples                                                        !! Average of energies
 		sqerr = var(e_local)/num_samples                                                    !! Square error of energies
         start_sample = samples(:,num_samples)               !! Record stationary sample to begin next round of sampling
@@ -319,7 +319,7 @@ submodule (nnqs) optimization
         character(len=:), allocatable :: logfile, logmsg                                         !! Recording variables
         character(len=10) :: date, time                                                                !! Date and time
         integer(int64) :: t1, t2                                                                     !! Clock variables
-        real(rk) :: rate, telapse                                                                    !! Clock variables
+        real(rk) :: rate, wall_time                                                                  !! Clock variables
 
         if ( this_image() == 1 ) then                                    !! Check validity of Ising strength parameters
             if ( size(ising_strengths) /= 2 ) then
@@ -390,11 +390,11 @@ submodule (nnqs) optimization
 
         if ( this_image() == 1 ) then                                             !! Do finalization and I/O on image 1
             call system_clock(t2, count_rate=rate)                                                        !! Stop timer
-            telapse = real((t2-t1), kind=rk)/rate                                 !! Total elapsed wall clock time in s
+            wall_time = real(t2-t1, kind=rk)/rate                                 !! Total elapsed wall clock time in s
 
             acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)             !! Get ground state accuracy
 
-            logmsg = nl//'    Optimization time: '//str(telapse, fmt='f', decimals=3)//' seconds for n = '// & 
+            logmsg = nl//'    Optimization time: '//str(wall_time, fmt='f', decimals=3)//' seconds for n = '// & 
                               str(n)//' spins.'// &
                      nl//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
                               ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
@@ -445,9 +445,9 @@ submodule (nnqs) optimization
 
             allocate( dlna_cent(num_samples, n), forces(n) )         !! Allocate centered data storage, gradient vector
 
-            grad: do concurrent (j = 1:n)                                      !! Generalized forces (gradient of E[𝜓])
+            grad: do concurrent (j = 1:n)                                                         !! Generalized forces
                 dlna_cent(:,j) = dlna(:,j) - sum(dlna(:,j))/num_samples            !! Center each column about its mean
-                forces(j) = sum(dlna_cent(:,j)*e_local_cent)*covar_norm                           !! F(j) = 𝜕/𝜕a_j E[𝜓]
+                forces(j) = sum(dlna_cent(:,j)*e_local_cent)*covar_norm                       !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
             end do grad
 
             allocate( sr_matrix((n*(n+1))/2) )                            !! Allocate stochastic reconfiguration matrix
@@ -485,10 +485,10 @@ submodule (nnqs) optimization
 
             allocate( dlnb_cent(num_samples, m), dlnb_cent_conj(num_samples, m), forces(m) ) !! Centered data, gradient
 
-            grad: do concurrent (i = 1:m)                                      !! Generalized forces (gradient of E[𝜓])
+            grad: do concurrent (i = 1:m)                                                         !! Generalized forces
                 dlnb_cent(:,i) = dlnb(:,i) - sum(dlnb(:,i))/num_samples            !! Center each column about its mean
                 dlnb_cent_conj(:,i) = conjg(dlnb_cent(:,i))                        !! Cache conjugates of centered data
-                forces(i) = sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                      !! F(i) = 𝜕/𝜕b_i E[𝜓]
+                forces(i) = sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                  !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
             end do grad
 
             allocate( sr_matrix((m*(m+1))/2) )                            !! Allocate stochastic reconfiguration matrix
@@ -526,10 +526,10 @@ submodule (nnqs) optimization
 
             allocate( dlnw_cent(num_samples, m, n), dlnw_cent_conj(num_samples, m, n), forces(m, n) )
 
-            grad: do concurrent (j = 1:n, i = 1:m)                             !! Generalized forces (gradient of E[𝜓])
+            grad: do concurrent (j = 1:n, i = 1:m)                                                !! Generalized forces
                 dlnw_cent(:,i,j) = dlnw(:,i,j) - sum(dlnw(:,i,j))/num_samples      !! Center each column about its mean
                 dlnw_cent_conj(:,i,j) = conjg(dlnw_cent(:,i,j))                    !! Cache conjugates of centered data
-                forces(i,j) = sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm               !! F(i,j) = 𝜕/𝜕w_ij E[𝜓]
+                forces(i,j) = sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm         !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
             end do grad
 
             allocate( sr_matrix((m*(m+1))/2, n) )                         !! Allocate stochastic reconfiguration matrix
@@ -610,20 +610,20 @@ submodule (nnqs) supplementary_procedures
         real(rk) :: rn, x, y, z, res
         integer :: i, j
 
-        kC1 = 1.448242853_rk
-        kC2 = 3.307147487_rk
-        kC3 = 1.46754004_rk
-        kD1 = 1.036467755_rk
-        kD2 = 5.295844968_rk
-        kD3 = 3.631288474_rk
-        kHm = 0.483941449_rk
-        kZm = 0.107981933_rk
-        kHp = 4.132731354_rk
-        kZp = 18.52161694_rk
+        kC1   = 1.448242853_rk
+        kC2   = 3.307147487_rk
+        kC3   = 1.46754004_rk
+        kD1   = 1.036467755_rk
+        kD2   = 5.295844968_rk
+        kD3   = 3.631288474_rk
+        kHm   = 0.483941449_rk
+        kZm   = 0.107981933_rk
+        kHp   = 4.132731354_rk
+        kZp   = 18.52161694_rk
         kPhln = 0.4515827053_rk
-        kHm1 = 0.516058551_rk
-        kHp1 = 3.132731354_rk
-        kHzm = 0.375959516_rk
+        kHm1  = 0.516058551_rk
+        kHp1  = 3.132731354_rk
+        kHzm  = 0.375959516_rk
         kHzmp = 0.591923442_rk
         
         kAs = 0.8853395638_rk
