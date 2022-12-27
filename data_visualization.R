@@ -7,11 +7,9 @@ pacman::p_load(gplots, ggplot2, cowplot, latex2exp)                             
 ## Load data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 corr_F_data <- read.csv('./data/correlations_F.csv', header=TRUE, sep=',')                ## Ferromagnetic correlations
 corr_F <- as.matrix(corr_F_data)                                                                  ## Convert to numeric
-num_spins_F <- as.character(nrow(corr_F))                                              ## Get number of spins as string
 
 corr_A_data <- read.csv('./data/correlations_A.csv', header=TRUE, sep=',')            ## Antiferromagnetic correlations
 corr_A <- as.matrix(corr_A_data)                                                                  ## Convert to numeric
-num_spins_A <- as.character(nrow(corr_A))                                              ## Get number of spins as string
 
 energies_F_data <- read.csv('./data/energies_F.csv', header=TRUE, sep=',')                    ## Ferromagnetic energies
 energies_A_data <- read.csv('./data/energies_A.csv', header=TRUE, sep=',')                ## Antiferromagnetic energies
