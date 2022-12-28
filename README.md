@@ -8,13 +8,14 @@ Figure 2: Statistical expectation of the energy with standard error of the mean 
 
 ## Contents
 
-1. [Introduction](https://github.com/acbbullock/Neural-Network-Quantum-States#introduction)
-2. [Restricted Boltzmann Machines](https://github.com/acbbullock/Neural-Network-Quantum-States#restricted-boltzmann-machines)
-3. [Neural Network Quantum States](https://github.com/acbbullock/Neural-Network-Quantum-States#neural-network-quantum-states)
-4. [Transverse Field Ising Model](https://github.com/acbbullock/Neural-Network-Quantum-States#transverse-field-ising-model)
-5. [Stochastic Optimization](https://github.com/acbbullock/Neural-Network-Quantum-States#stochastic-optimization)
-6. [Derivation of Optimization Algorithm](https://github.com/acbbullock/Neural-Network-Quantum-States#derivation-of-optimization-algorithm)
-7. [Building with fpm](https://github.com/acbbullock/Neural-Network-Quantum-States#building-with-fpm)
+1. [Introduction](#introduction)
+2. [Restricted Boltzmann Machines](#restricted-boltzmann-machines)
+3. [Neural Network Quantum States](#neural-network-quantum-states)
+4. [Transverse Field Ising Model](#transverse-field-ising-model)
+5. [Stochastic Optimization](#stochastic-optimization)
+6. [Derivation of Optimization Algorithm](#derivation-of-optimization-algorithm)
+7. [Fortran Implementation](#fortran-implementation)
+8. [Building with fpm](#building-with-fpm)
 
 ## Introduction
 
@@ -138,6 +139,58 @@ is the infinitesimal change in the parameters $\alpha(\tau) \in \mathcal{M}$ due
 It must be noted that the initialization of the parameters can have a dramatic effect on the performance of the algorithm. The initial state $\ket{\psi(\alpha(0))}$ must be chosen such that $\langle \psi_0, \psi(\alpha(0)) \rangle \neq 0$, or else learning is not possible. The more overlap there is with the ground state, the more efficient the algorithm will be. With at least some overlap, we will expect that $\ket{\psi(\alpha(\tau))} \to \ket{\psi_0}$ as $\tau \to \infty$ for a sufficiently small time step $\delta\tau$. This can be seen by noting the change in the energy functional over the interval $[\tau, \tau + \delta \tau]$, by taking the expectation of $H$ in the state $\ket{\psi(\alpha(\tau + \delta\tau))} \approx \ket{\psi(\alpha(\tau))} - \delta \tau \Delta H \ket{\psi(\alpha(\tau))} = \ket{\psi(\alpha(\tau))} + \delta \tau \Delta \frac{d}{d\tau} \ket{\psi(\alpha(\tau))}$, i.e.
     $$E[\psi(\alpha(\tau + \delta\tau))] = E[\psi(\alpha(\tau))] - 2\delta\tau F^\dagger(\alpha) S^{-1}(\alpha) F(\alpha) + \mathcal{O}(\delta\tau^2)$$
 where $\mathcal{O}(\delta\tau^2)$ denotes the term involving $\delta\tau^2$. Since $\delta\tau > 0$ and $S(\alpha)$ is positive-definite, the second term will be strictly negative, such that the change in energy $E[\psi(\alpha(\tau + \delta\tau))] - E[\psi(\alpha(\tau))] < 0$ for a sufficiently small time step $\delta\tau$.
+
+## Fortran Implementation
+
+We implement the stochastic optimization algorithm as a type-bound procedure of a type `RestrictedBoltzmannMachine`:
+
+```fortran
+type RestrictedBoltzmannMachine                     !! Custom class for implementing a Restricted Boltzmann Machine
+    private
+    character(len=1) :: alignment = 'N'                                              !! For tracking spin alignment
+    integer, allocatable :: v_units, h_units                                   !! Number of visble and hidden units
+    real(rk), allocatable, dimension(:) :: a                                                !! Visible layer biases
+    complex(rk), allocatable, dimension(:) :: b                                              !! Hidden layer biases
+    complex(rk), allocatable, dimension(:,:) :: w                                                        !! Weights
+    real(rk), allocatable, dimension(:) :: p_a, r_a                                            !! ADAM arrays for a
+    complex(rk), allocatable, dimension(:) :: p_b, r_b                                         !! ADAM arrays for b
+    complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
+    contains
+        private
+        procedure, pass(self), public :: stochastic_optimization                       !! Public training procedure
+        procedure, pass(self) :: init                               !! Procedure for initializing Boltzmann machine
+        procedure, pass(self) :: sample_distribution       !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
+        procedure, pass(self) :: prob_ratio               !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
+        procedure, pass(self) :: ising_energy              !! Computes Ising local energy for given configuration s
+        procedure, pass(self) :: propagate                             !! Procedure for updating weights and biases
+end type RestrictedBoltzmannMachine
+```
+
+In practice, we define the visible layer biases `a` as type `real` due to the fact that the logarithmic derivatives $O_{a_j}(s,a,b,w) = s_j$ are real for all $j \in [1,n]$ such that the imaginary component will remain zero over the course of learning. Additionally, we define complementary arrays for each `a`, `b`, and `w`, which we use to supplement the stochastic optimization algorithm with ADAM (Adaptive Moment Estimation) for the purpose of numerical stability and for smoothing the learning process for less well-behaved energy functionals. The following is a dependency tree for the type-bound procedures:
+
+```text
+RestrictedBoltzmannMachine
+    |---stochastic_optimization
+    |   |---init
+    |   |---sample_distribution
+    |   |   |---prob_ratio
+    |   |   |---ising_energy
+    |   |---propagate
+```
+
+The `stochastic_optimization` routine takes advantage of the coarray features of Fortran 2008 and, in particular, the collective subroutine extensions of Fortran 2018, allowing for many images of the program to run concurrently with collective communication. This allows us to average the weights across images in each epoch of learning, which dramatically improves stability and time to convergence in a stochastic framework.
+
+From a main program, we simply need to initialize the random number generator, instantiate a `RestrictedBoltzmannMachine`, and call the `stochastic_optimization` routine with the desired Ising model parameters:
+
+```fortran
+call random_init(repeatable=.false., image_distinct=.true.)
+psi = RestrictedBoltzmannMachine(v_units, h_units)
+call psi%stochastic_optimization( ising_strengths=[J, B] )
+```
+
+The output data consists of energies and spin correlations, which will be written to separate `csv` files in the `/data` folder upon successful execution.
+
+Note: with `init`, the biases are initialized to zero prior to training, and the weights have both real and imaginary parts initialized with samples from a standard Gaussian distribution using a routine adapted from [ROOT](https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00274).
 
 ## Building with fpm
 
