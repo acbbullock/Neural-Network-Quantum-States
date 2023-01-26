@@ -4,7 +4,7 @@
 Figure 1: Map of statistical spin configurations of an Ising chain of $n=1000$ spins relative to the middle spin at site $n/2+1=501$ over the course of learning for the antiferromagnetic Ising model $J<0$. The spin configuration approaches the ground state configuration as the energy approaches the ground state energy.
 
 ![Energies_A](data/energies_A.png)
-Figure 2: Statistical expectation of the energy with standard error of the mean over the course of learning for the antiferromagnetic Ising model with $J=-0.5$ and $B=0.1$.
+Figure 2: Statistical expectation of the energy with standard error of the mean over the course of learning for the antiferromagnetic Ising model with $J=-0.5$ and $B=0.1$ for $n=1000$ spins.
 
 ## Contents
 
@@ -145,24 +145,24 @@ where $\mathcal{O}(\delta\tau^2)$ denotes the term involving $\delta\tau^2$. Sin
 We implement the stochastic optimization algorithm as a type-bound procedure of a type `RestrictedBoltzmannMachine`:
 
 ```fortran
-type RestrictedBoltzmannMachine                     !! Custom class for implementing a Restricted Boltzmann Machine
+type RestrictedBoltzmannMachine
     private
-    character(len=1) :: alignment = 'N'                                              !! For tracking spin alignment
-    integer, allocatable :: v_units, h_units                                   !! Number of visble and hidden units
-    real(rk), allocatable, dimension(:) :: a                                                !! Visible layer biases
-    complex(rk), allocatable, dimension(:) :: b                                              !! Hidden layer biases
-    complex(rk), allocatable, dimension(:,:) :: w                                                        !! Weights
-    real(rk), allocatable, dimension(:) :: p_a, r_a                                            !! ADAM arrays for a
-    complex(rk), allocatable, dimension(:) :: p_b, r_b                                         !! ADAM arrays for b
-    complex(rk), allocatable, dimension(:,:) :: p_w, r_w                                       !! ADAM arrays for w
+    character(len=1) :: alignment = 'N'                      !! For tracking spin alignment
+    integer, allocatable :: v_units, h_units           !! Number of visble and hidden units
+    real(rk), allocatable, dimension(:) :: a                        !! Visible layer biases
+    complex(rk), allocatable, dimension(:) :: b                      !! Hidden layer biases
+    complex(rk), allocatable, dimension(:,:) :: w                                !! Weights
+    real(rk), allocatable, dimension(:) :: p_a, r_a                    !! ADAM arrays for a
+    complex(rk), allocatable, dimension(:) :: p_b, r_b                 !! ADAM arrays for b
+    complex(rk), allocatable, dimension(:,:) :: p_w, r_w               !! ADAM arrays for w
     contains
         private
-        procedure, pass(self), public :: stochastic_optimization                       !! Public training procedure
-        procedure, pass(self) :: init                               !! Procedure for initializing Boltzmann machine
-        procedure, pass(self) :: sample_distribution       !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2
-        procedure, pass(self) :: prob_ratio               !! Computes |𝜓(s_2)/𝜓(s_1)|^2 for configurations s_1, s_2
-        procedure, pass(self) :: ising_energy              !! Computes Ising local energy for given configuration s
-        procedure, pass(self) :: propagate                             !! Procedure for updating weights and biases
+        procedure, pass(self), public :: stochastic_optimization !! Public training routine
+        procedure, pass(self) :: init                             !! Initialization routine
+        procedure, pass(self) :: sample_distribution     !! MCMC routine for sampling |𝜓|^2
+        procedure, pass(self) :: prob_ratio          !! Probability ratio |𝜓(s_2)/𝜓(s_1)|^2
+        procedure, pass(self) :: ising_energy                         !! Ising local energy
+        procedure, pass(self) :: propagate       !! Routine for updating weights and biases
 end type RestrictedBoltzmannMachine
 ```
 
@@ -199,7 +199,7 @@ The only dependency of this project is the Intel MKL distribution of LAPACK. Wit
 On Windows, the project can be built and run using the command
 
 ```powershell
-fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qiopenmp /Qcoarray /Qcoarray-num-images:n /heap-arrays:0" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
+fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qcoarray /Qcoarray-num-images:n /heap-arrays:0" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
 ```
 
 for a CPU with the AVX2 instruction set extension for best performance, where `n` is the number of images to use. The `O3` flag enables the highest optimization level, the `arch` flag specifies which instruction sets to target, the `Qiopenmp` flag generates multi-threaded code based on OpenMP directives, the `Qcoarray` flag enables the coarray feature of Fortran 2008 with `Qcoarray-num-images:n` specifying the number of images to use, and the `heap-arrays:0` flag puts all automatic arrays on the heap, which may be necessary to avoid stack overflows for larger systems but can be omitted for smaller systems. The link flag specifies the MKL and OpenMP runtime libraries for static linking.
@@ -207,7 +207,7 @@ for a CPU with the AVX2 instruction set extension for best performance, where `n
 Similarly, the project may be built and run on Linux using the command
 
 ```bash
-fpm run --compiler ifort --flag "-O3 -arch CORE-AVX2 -qiopenmp -coarray -coarray-num-images=n -heap-arrays 0" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5"
+fpm run --compiler ifort --flag "-O3 -arch CORE-AVX2 -coarray -coarray-num-images=n -heap-arrays 0" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5"
 ```
 
 with identical features. The link lines are provided by the [Intel Link Line Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
