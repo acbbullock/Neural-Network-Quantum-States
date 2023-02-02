@@ -1,9 +1,9 @@
 name = "nnqs"
-version = "1.0.0"
+version = "1.0.5"
 license = "MIT"
 author = "Austin C Bullock, Andrew Wasserbeck"
 maintainer = "acb.bullock@gmail.com"
-copyright = "© 2022, Austin Bullock & Andrew Wasserbeck"
+copyright = "© 2022-2023, Austin Bullock & Andrew Wasserbeck"
 
 [build]
 auto-executables = true
