@@ -148,7 +148,7 @@ We implement the stochastic optimization algorithm as a type-bound procedure of 
 type RestrictedBoltzmannMachine
     private
     character(len=1) :: alignment = 'N'                      !! For tracking spin alignment
-    integer, allocatable :: v_units, h_units           !! Number of visble and hidden units
+    integer :: v_units = 0, h_units = 0                !! Number of visble and hidden units
     real(rk), allocatable, dimension(:) :: a                        !! Visible layer biases
     complex(rk), allocatable, dimension(:) :: b                      !! Hidden layer biases
     complex(rk), allocatable, dimension(:,:) :: w                                !! Weights
@@ -202,7 +202,7 @@ On Windows, the project can be built and run using the command
 fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qcoarray /Qcoarray-num-images:n /heap-arrays:0" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
 ```
 
-for a CPU with the AVX2 instruction set extension for best performance, where `n` is the number of images to use. The `O3` flag enables the highest optimization level, the `arch` flag specifies which instruction sets to target, the `Qiopenmp` flag generates multi-threaded code based on OpenMP directives, the `Qcoarray` flag enables the coarray feature of Fortran 2008 with `Qcoarray-num-images:n` specifying the number of images to use, and the `heap-arrays:0` flag puts all automatic arrays on the heap, which may be necessary to avoid stack overflows for larger systems but can be omitted for smaller systems. The link flag specifies the MKL and OpenMP runtime libraries for static linking.
+for a CPU with the AVX2 instruction set extension for best performance, where `n` is the number of images to use. The `O3` flag enables the highest optimization level, the `arch` flag specifies which instruction sets to target, the `Qcoarray` flag enables the coarray feature of Fortran 2008 with `Qcoarray-num-images:n` specifying the number of images to use, and the `heap-arrays:0` flag puts all automatic arrays on the heap, which may be necessary to avoid stack overflows for larger systems but can be omitted for smaller systems. The link flag specifies the MKL and OpenMP runtime libraries for static linking.
 
 Similarly, the project may be built and run on Linux using the command
 
