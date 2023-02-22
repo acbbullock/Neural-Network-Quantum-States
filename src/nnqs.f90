@@ -16,7 +16,7 @@ module nnqs
 	!! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type RestrictedBoltzmannMachine
 		private
-		integer :: v_units = 0								                                  !! Number of visble units
+		integer :: v_units = 0								                                 !! Number of visible units
 		integer :: h_units = 0								                    	          !! Number of hidden units
 		real(rk), allocatable, dimension(:) :: a, p_a, r_a						  !! Visible layer biases & ADAM arrays
 		complex(rk), allocatable, dimension(:) :: b, p_b, r_b					   !! Hidden layer biases & ADAM arrays
