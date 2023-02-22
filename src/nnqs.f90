@@ -16,14 +16,12 @@ module nnqs
 	!! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type RestrictedBoltzmannMachine
 		private
+		integer :: v_units = 0								                                  !! Number of visble units
+		integer :: h_units = 0								                    	          !! Number of hidden units
+		real(rk), allocatable, dimension(:) :: a, p_a, r_a						  !! Visible layer biases & ADAM arrays
+		complex(rk), allocatable, dimension(:) :: b, p_b, r_b					   !! Hidden layer biases & ADAM arrays
+		complex(rk), allocatable, dimension(:,:) :: w, p_w, r_w								   !! Weights & ADAM arrays
 		character(len=1) :: alignment = 'N'												 !! For tracking spin alignment
-		integer :: v_units = 0, h_units = 0										   !! Number of visble and hidden units
-		real(rk), allocatable, dimension(:) :: a												!! Visible layer biases
-		complex(rk), allocatable, dimension(:) :: b												 !! Hidden layer biases
-		complex(rk), allocatable, dimension(:,:) :: w														 !! Weights
-		real(rk), allocatable, dimension(:) :: p_a, r_a											   !! ADAM arrays for a
-		complex(rk), allocatable, dimension(:) :: p_b, r_b										   !! ADAM arrays for b
-		complex(rk), allocatable, dimension(:,:) :: p_w, r_w									   !! ADAM arrays for w
 		contains
 			private
 			procedure, pass(self), public :: stochastic_optimization						 !! Public training routine
