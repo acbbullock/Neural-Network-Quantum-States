@@ -1,11 +1,10 @@
 # Learning Quantum States with Neural Networks
 
-![Correlations_A](data/correlations_A.png)
-Figure 1: Map of statistical spin configurations of an Ising chain of $n=1000$ spins relative to the middle spin at site $n/2+1=501$ over the course of learning for the antiferromagnetic Ising model $J<0$. The spin configuration approaches the ground state configuration as the energy approaches the ground state energy.
-
 ![Energies_A](data/energies_A.png)
-Figure 2: Statistical expectation of the energy with standard error of the mean over the course of learning for the antiferromagnetic Ising model with $J=-0.5$ and $B=0.1$ for $n=1000$ spins.
+Figure 1: Statistical expectation of the energy and standard error of the mean over the course of learning for the antiferromagnetic Ising model with $J = -0.5$ and $B = 0.1$ for $n = 1000$ spins.
 
+![Correlations_A](data/correlations_A.png)
+Figure 2: Antiferromagnetic Ising model correlations over the course of learning for $n = 1000$ spins with $J = -0.5$ and $B = 0.1$.
 ## Contents
 
 1. [Introduction](#introduction)
@@ -147,22 +146,20 @@ We implement the stochastic optimization algorithm as a type-bound procedure of 
 ```fortran
 type RestrictedBoltzmannMachine
     private
-    character(len=1) :: alignment = 'N'                      !! For tracking spin alignment
-    integer :: v_units = 0, h_units = 0                !! Number of visble and hidden units
-    real(rk), allocatable, dimension(:) :: a                        !! Visible layer biases
-    complex(rk), allocatable, dimension(:) :: b                      !! Hidden layer biases
-    complex(rk), allocatable, dimension(:,:) :: w                                !! Weights
-    real(rk), allocatable, dimension(:) :: p_a, r_a                    !! ADAM arrays for a
-    complex(rk), allocatable, dimension(:) :: p_b, r_b                 !! ADAM arrays for b
-    complex(rk), allocatable, dimension(:,:) :: p_w, r_w               !! ADAM arrays for w
+    integer :: v_units = 0                                            !! Number of visible units
+    integer :: h_units = 0                                             !! Number of hidden units
+    real(kind=rk),    allocatable, dimension(:)   :: a, p_a, r_a !! Visible biases & ADAM arrays
+    complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b  !! Hidden biases & ADAM arrays
+    complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w        !! Weights & ADAM arrays
+    character(len=1) :: alignment = 'N'                           !! For tracking spin alignment
     contains
         private
-        procedure, pass(self), public :: stochastic_optimization !! Public training routine
-        procedure, pass(self) :: init                             !! Initialization routine
-        procedure, pass(self) :: sample_distribution     !! MCMC routine for sampling |𝜓|^2
-        procedure, pass(self) :: prob_ratio          !! Probability ratio |𝜓(s_2)/𝜓(s_1)|^2
-        procedure, pass(self) :: ising_energy                         !! Ising local energy
-        procedure, pass(self) :: propagate       !! Routine for updating weights and biases
+        procedure, pass(self), public :: stochastic_optimization      !! Public training routine
+        procedure, pass(self) :: init                                  !! Initialization routine
+        procedure, pass(self) :: sample_distribution           !! MCMC routine for sampling p(s)
+        procedure, pass(self) :: prob_ratio                   !! Probability ratio p(s_2)/p(s_1)
+        procedure, pass(self) :: ising_energy                              !! Ising local energy
+        procedure, pass(self) :: propagate            !! Routine for updating weights and biases
 end type RestrictedBoltzmannMachine
 ```
 
