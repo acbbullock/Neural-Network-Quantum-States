@@ -568,56 +568,56 @@ module nnqs
         kHm1  = 0.516058551_rk
         kHp1  = 3.132731354_rk
         kHzm  = 0.375959516_rk
-kHzmp = 0.591923442_rk
+        kHzmp = 0.591923442_rk
 
-kAs = 0.8853395638_rk
-kBs = 0.2452635696_rk
-kCs = 0.2770276848_rk
-kB  = 0.5029324303_rk
+        kAs = 0.8853395638_rk
+        kBs = 0.2452635696_rk
+        kCs = 0.2770276848_rk
+        kB  = 0.5029324303_rk
         kX0 = 0.4571828819_rk
-kYm = 0.187308492_rk
-kS  = 0.7270572718_rk
-kT  = 0.03895759111_rk
+        kYm = 0.187308492_rk
+        kS  = 0.7270572718_rk
+        kT  = 0.03895759111_rk
 
         outer: do
             call random_number(y)
 
-if ( y > kHm1 ) then
-res = kHp*y - kHp1; exit outer
+            if ( y > kHm1 ) then
+                res = kHp*y - kHp1; exit outer
             else if ( y < kZm ) then
-rn = kZp*y - 1.0_rk
+                rn = kZp*y - 1.0_rk
 
-if ( rn > 0.0_rk ) then
-res = 1.0_rk + rn; exit outer
+                if ( rn > 0.0_rk ) then
+                    res = 1.0_rk + rn; exit outer
                 else
                     res = -1.0_rk + rn; exit outer
                 end if
-else if ( y < kHm ) then
+            else if ( y < kHm ) then
                 call random_number(rn)
-rn = rn - 1.0_rk + rn
+                rn = rn - 1.0_rk + rn
 
                 if ( rn > 0.0_rk ) then
-z = 2.0_rk - rn
-else
-z = -2.0_rk - rn
+                    z = 2.0_rk - rn
+                else
+                    z = -2.0_rk - rn
                 end if
 
-if ( (kC1-y)*(kC3+abs(z)) < kC2 ) then
+                if ( (kC1-y)*(kC3+abs(z)) < kC2 ) then
                     res = z; exit outer
                 else
-x = rn*rn
+                    x = rn*rn
                     if ( (y+kD1)*(kD3+x) < kD2 ) then
-res = rn; exit outer
+                        res = rn; exit outer
                     else if ( kHzmp-y < exp(-(z*z+kPhln)/2.0_rk) ) then
                         res = z; exit outer
-else if ( y+kHzm < exp(-(x+kPhln)/2.0_rk) ) then
-res = rn; exit outer
+                    else if ( y+kHzm < exp(-(x+kPhln)/2.0_rk) ) then
+                        res = rn; exit outer
                     end if
                 end if
             end if
 
-inner: do
-call random_number(x); call random_number(y)
+            inner: do
+                call random_number(x); call random_number(y)
                 y = kYm*y
                 z = kX0 - kS*x - y
 
@@ -630,7 +630,7 @@ call random_number(x); call random_number(y)
                 end if
 
                 if ( (y-kAs+x)*(kCs+x)+kBs < 0.0_rk ) then
-res = rn; exit inner
+                    res = rn; exit inner
                 else if ( y < x+kT ) then
                     if ( rn*rn < 4.0_rk*(kB-log(x)) ) then
                         res = rn; exit inner
@@ -639,7 +639,7 @@ res = rn; exit inner
             end do inner
 
             exit outer
-end do outer
+        end do outer
 
         gauss_res = res*sig + mu
     end function gauss
