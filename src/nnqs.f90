@@ -1,7 +1,7 @@
 module nnqs
     !-------------------------------------------------------------------------------------------------------------------
     !! This module contains an implementation of the stochastic optimization algorithm for learning the ground state
-    !! of the Ising spin model by representing the wave-functions 𝜓(s,α) as a type RestrictedBoltzmannMachine.
+    !! of the Ising spin model by representing the wave-functions ψ(s,α) as a type RestrictedBoltzmannMachine.
     !-------------------------------------------------------------------------------------------------------------------
     use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, int64, compiler_version, compiler_options
     use, intrinsic :: ieee_arithmetic, only: ieee_is_nan
@@ -23,16 +23,16 @@ module nnqs
         complex(rk), allocatable, dimension(:,:) :: w, p_w, r_w                                 !! Weights & ADAM arrays
         character(len=1) :: alignment = 'N'                                               !! For tracking spin alignment
         contains
-        private
-        procedure, pass(self), public :: stochastic_optimization                              !! Public training routine
-        procedure, pass(self) :: init                                                          !! Initialization routine
-        procedure, pass(self) :: sample_distribution                                  !! MCMC routine for sampling |𝜓|^2
-        procedure, pass(self) :: prob_ratio                                       !! Probability ratio |𝜓(s_2)/𝜓(s_1)|^2
-        procedure, pass(self) :: ising_energy                                                      !! Ising local energy
-        procedure, pass(self) :: propagate                                    !! Routine for updating weights and biases
+            private
+            procedure, pass(self), public :: stochastic_optimization                          !! Public training routine
+            procedure, pass(self) :: init                                                      !! Initialization routine
+            procedure, pass(self) :: sample_distribution                              !! MCMC routine for sampling |ψ|^2
+            procedure, pass(self) :: prob_ratio                                   !! Probability ratio |ψ(s_2)/ψ(s_1)|^2
+            procedure, pass(self) :: ising_energy                                                  !! Ising local energy
+            procedure, pass(self) :: propagate                                !! Routine for updating weights and biases
     end type RestrictedBoltzmannMachine
 
-        generic :: RestrictedBoltzmannMachine => new_rbm                                          !! Constructor fuction
+        generic :: RestrictedBoltzmannMachine => new_rbm                  !! Constructor function with same name as type
 
     contains
     pure type(RestrictedBoltzmannMachine) function new_rbm(v_units, h_units) result(new)
@@ -65,9 +65,12 @@ module nnqs
 
         if ( this_image() == 1 ) then                                     !! Check validity of Ising strength parameters
             if ( size(ising_strengths) /= 2 ) then
-                error stop    LF//'FATAL: Invalid size for ising_strengths... size must be (2).'// &
-                LF//'USAGE: ising_strengths = [J,B] where J is the neighbor coupling strength and B '// &
-                'is the transverse field strength.'//LF
+                error stop  LF//'FATAL: Invalid size for ising_strengths... size must be (2).'// &
+                            LF//'USAGE: ising_strengths = [J,B] where J is the neighbor coupling strength and B '// &
+                                'is the transverse field strength.'//LF
+            end if
+            if ( abs(ising_strengths(2)) >= 1.0_rk ) then
+                error stop LF//'FATAL: Invalid field strength parameter... try again with |B| < 1.'//LF
             end if
             sync images (*)                                                                   !! Respond to other images
         else
@@ -118,7 +121,7 @@ module nnqs
                 !! Write progress report ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 tau = (epoch-1)*merge(1.0_rk/n, 10.0_rk/n, mask=(n < 100))                             !! Imaginary time
                 logmsg = '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau, fmt='f', decimals=3)//'))] = '// &
-                str(energy, fmt='f', decimals=3)//' ± '//str(stderr, fmt='f', decimals=3)
+                         str(energy, fmt='f', decimals=3)//' ± '//str(stderr, fmt='f', decimals=3)
                 call echo(logmsg, logfile)
 
                 if ( ieee_is_nan(energy) ) error stop LF//'FATAL: Numerical instability.'           !! Error termination
@@ -137,15 +140,15 @@ module nnqs
 
             acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)              !! Get ground state accuracy
 
-            logmsg =    LF//'    Optimization time: '//str(wall_time, fmt='f', decimals=3)//' seconds for n = '// &
-            str(n)//' spins.'// &
-            LF//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
-            ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
-            str(ising_strengths(1), fmt='f', decimals=1)//' and B = '// &
-            str(ising_strengths(2), fmt='f', decimals=1)// &
-            LF//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//LF// &
-            LF//'    This program was built and run with compiler "'//compiler_version()//'" '// &
-            'using compiler options "'//compiler_options()//'".'//LF
+            logmsg = LF//'    Optimization time: '//str(wall_time, fmt='f', decimals=3)//' seconds for n = '// &
+                         str(n)//' spins.'// &
+                     LF//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
+                         ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
+                         str(ising_strengths(1), fmt='f', decimals=1)//' and B = '// &
+                         str(ising_strengths(2), fmt='f', decimals=1)// &
+                     LF//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//LF// &
+                     LF//'    This program was built and run with compiler "'//compiler_version()//'" '// &
+                         'using compiler options "'//compiler_options()//'".'//LF
 
             call echo(logmsg, logfile)
             call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.csv', header=['Energy', 'Error'] )
@@ -167,14 +170,14 @@ module nnqs
             if ( (n < 1) .or. (m < 1) ) then
                 error stop LF//'FATAL: Structure has not been declared or has invalid number of units.'
             end if
-            sync images(*)                                                                    !! Respond to other images
+            sync images (*)                                                                   !! Respond to other images
         else
             sync images (1)                                                            !! Wait for response from image 1
         end if
 
-        if ( allocated(self%a) ) deallocate(    self%a, self%p_a, self%r_a, &
-            self%b, self%p_b, self%r_b, &
-        self%w, self%p_w, self%r_w    )              !! Reset components if needed
+        if ( allocated(self%a) ) deallocate(self%a, self%p_a, self%r_a, &
+                                            self%b, self%p_b, self%r_b, &
+                                            self%w, self%p_w, self%r_w)                    !! Reset components if needed
 
         allocate( self%a(n), self%p_a(n), self%r_a(n), source=0.0_rk )             !! Allocate visible layer bias arrays
         allocate( self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk, 0.0_rk) )    !! Allocate hidden layer bias arrays
@@ -189,7 +192,7 @@ module nnqs
 
     impure subroutine sample_distribution(self, epoch,ising_strengths,start_sample,samples,e_local,corrs,energy,sqerr)
         !---------------------------------------------------------------------------------------------------------------
-        !! Markov Chain Monte Carlo procedure for sampling |𝜓|^2 with Metropolis-Hastings algorithm
+        !! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
         !---------------------------------------------------------------------------------------------------------------
         class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
         integer, intent(in) :: epoch                                                                    !! Current epoch
@@ -199,75 +202,75 @@ module nnqs
         real(rk), contiguous, dimension(:), intent(out) :: e_local, corrs         !! Local energies, sample correlations
         real(rk), intent(out) :: energy, sqerr                                           !! Energy average, square error
 
-        complex(rk), dimension(self%h_units) :: theta                                                     !! 𝜃 = b + ws
+        complex(rk), dimension(self%h_units) :: theta                                                      !! θ = b + ws
         integer :: n, passes, num_samples                                            !! Number of spins, passes, samples
 
         n = self%v_units                                                                          !! Get number of spins
         num_samples = size(samples, dim=2)                                               !! Number of samples to produce
-        theta = conjg(self%b) + matmul(self%w, start_sample)                                           !! Get initial 𝜃
+        theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
         thermalization: block
-        integer(ik), dimension(n) :: new_proposal, s_prop                                            !! Proposal samples
-        real :: acc_prob, prob, r                                                        !! M-H acceptance probabilities
-        integer :: k, j, max_thermal_time                                                              !! Loop variables
+            integer(ik), dimension(n) :: new_proposal, s_prop                                        !! Proposal samples
+            real :: acc_prob, prob, r                                                    !! M-H acceptance probabilities
+            integer :: k, j, max_thermal_time                                                          !! Loop variables
 
-        max_thermal_time = 2001 - 2*epoch                                           !! Set time limit for thermalization
+            max_thermal_time = 2001 - 2*epoch                                       !! Set time limit for thermalization
 
-        thermalize: do k = 1, max_thermal_time
-            s_prop = start_sample                                                         !! Transfer sample to proposal
-            s_prop(1) = 1_ik - s_prop(1)                                                          !! Flip the first spin
-            acc_prob = self%prob_ratio(s1=start_sample, s2=s_prop, theta_1=theta)              !! Acceptance probability
+            thermalize: do k = 1, max_thermal_time
+                s_prop = start_sample                                                     !! Transfer sample to proposal
+                s_prop(1) = 1_ik - s_prop(1)                                                      !! Flip the first spin
+                acc_prob = self%prob_ratio(s1=start_sample, s2=s_prop, theta_1=theta)          !! Acceptance probability
 
-            get_best_proposal: do j = 2, n                          !! Find proposal with largest acceptance probability
-                new_proposal = s_prop                                                               !! Transfer proposal
-                new_proposal(j) = 1_ik - new_proposal(j)                                               !! Flip j-th spin
-                prob = self%prob_ratio(s1=start_sample, s2=new_proposal, theta_1=theta)               !! New probability
-                if ( prob > acc_prob ) then                                              !! If new probability is better
-                    s_prop = new_proposal                                                 !! Update with better proposal
-                    acc_prob = prob                                            !! Update with new acceptance probability
+                get_best_proposal: do j = 2, n                      !! Find proposal with largest acceptance probability
+                    new_proposal = s_prop                                                           !! Transfer proposal
+                    new_proposal(j) = 1_ik - new_proposal(j)                                           !! Flip j-th spin
+                    prob = self%prob_ratio(s1=start_sample, s2=new_proposal, theta_1=theta)           !! New probability
+                    if ( prob > acc_prob ) then                                          !! If new probability is better
+                        s_prop = new_proposal                                             !! Update with better proposal
+                        acc_prob = prob                                        !! Update with new acceptance probability
+                    end if
+                end do get_best_proposal
+
+                call random_number(r)                                       !! Sample from uniform distribution on [0,1)
+                if ( r < acc_prob ) then                                                     !! M-H acceptance criterion
+                    start_sample = s_prop                                                               !! Update sample
+                    theta = conjg(self%b) + matmul(self%w, start_sample)                                     !! Update θ
+                else
+                    exit thermalization                                            !! Sample is sufficiently thermalized
                 end if
-            end do get_best_proposal
-
-            call random_number(r)                                           !! Sample from uniform distribution on [0,1)
-            if ( r < acc_prob ) then                                                         !! M-H acceptance criterion
-                start_sample = s_prop                                                                   !! Update sample
-                theta = conjg(self%b) + matmul(self%w, start_sample)                                         !! Update 𝜃
-            else
-                exit thermalization                                                !! Sample is sufficiently thermalized
-            end if
-        end do thermalize
+            end do thermalize
         end block thermalization
 
         passes = 2*n - min(2*epoch, 2*n-1)                               !! Number of passes to make on the start sample
 
         stationary_sampling: block
-        integer(ik), dimension(n) :: this_sample, s_prop                                        !! Sample storage arrays
-        integer, dimension(passes, num_samples) :: rind                                                !! Random indices
-        real, dimension(passes, num_samples) :: r                                                      !! Random numbers
-        real :: acc_prob                                                                   !! M-H acceptance probability
-        integer :: k, pass                                                                             !! Loop variables
+            integer(ik), dimension(n) :: this_sample, s_prop                                    !! Sample storage arrays
+            integer, dimension(passes, num_samples) :: rind                                            !! Random indices
+            real, dimension(passes, num_samples) :: r                                                  !! Random numbers
+            real :: acc_prob                                                               !! M-H acceptance probability
+            integer :: k, pass                                                                         !! Loop variables
 
-        call random_number(r)                                                                    !! Get randoms on [0,1)
-        rind = floor(n*r) + 1                                                        !! Generate random indices in [1,n]
-        call random_number(r)                                                                      !! Repopulate randoms
+            call random_number(r)                                                                !! Get randoms on [0,1)
+            rind = floor(n*r) + 1                                                    !! Generate random indices in [1,n]
+            call random_number(r)                                                                  !! Repopulate randoms
 
-        do concurrent (k = 1:num_samples)
-            this_sample = start_sample                                                          !! Transfer start sample
+            do concurrent (k = 1:num_samples)
+                this_sample = start_sample                                                      !! Transfer start sample
 
-            metropolis_hastings: do pass = 1, passes
-                s_prop = this_sample                                                      !! Transfer sample to proposal
-                s_prop(rind(pass, k)) = 1_ik - s_prop(rind(pass, k))                        !! Flip spin at random index
-                acc_prob = self%prob_ratio(s1=this_sample, s2=s_prop, theta_1=theta)           !! Acceptance probability
+                metropolis_hastings: do pass = 1, passes
+                    s_prop = this_sample                                                  !! Transfer sample to proposal
+                    s_prop(rind(pass, k)) = 1_ik - s_prop(rind(pass, k))                    !! Flip spin at random index
+                    acc_prob = self%prob_ratio(s1=this_sample, s2=s_prop, theta_1=theta)       !! Acceptance probability
 
-                if ( r(pass, k) < acc_prob ) then                                            !! M-H acceptance criterion
-                    theta = theta + self%w(:,rind(pass,k))*(-2.0_rk*this_sample(rind(pass,k)) + 1.0_rk)      !! Update 𝜃
-                    this_sample = s_prop                                                                !! Update sample
-                end if
-            end do metropolis_hastings
+                    if ( r(pass, k) < acc_prob ) then                                        !! M-H acceptance criterion
+                        theta = theta + self%w(:,rind(pass,k))*(-2.0_rk*this_sample(rind(pass,k)) + 1.0_rk)  !! Update θ
+                        this_sample = s_prop                                                            !! Update sample
+                    end if
+                end do metropolis_hastings
 
-            samples(:,k) = this_sample                                                      !! Transfer sample to output
-            e_local(k) = self%ising_energy(s=this_sample, theta=theta, ising_strengths=ising_strengths)      !! E_loc(s)
-        end do
+                samples(:,k) = this_sample                                                  !! Transfer sample to output
+                e_local(k) = self%ising_energy(s=this_sample, theta=theta, ising_strengths=ising_strengths)  !! E_loc(s)
+            end do
         end block stationary_sampling
 
         corrs = corr(samples, alignment=self%alignment)                             !! Spin correlations given alignment
@@ -278,13 +281,13 @@ module nnqs
 
     pure real function prob_ratio(self, s1, s2, theta_1) result(p)
         !---------------------------------------------------------------------------------------------------------------
-        !! Function for computing the ratio of probabilities |𝜓(s_2)/𝜓(s_1)|^2 for two given configurations
+        !! Function for computing the ratio of probabilities |ψ(s_2)/ψ(s_1)|^2 for two given configurations
         !---------------------------------------------------------------------------------------------------------------
         class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
         integer(ik), contiguous, dimension(:), intent(in) :: s1, s2                                    !! Configurations
         complex(rk), contiguous, dimension(:), intent(in) :: theta_1                         !! Cached value of b + ws_1
 
-        complex(rk) :: sum_as, amplitude_prob_ratio                                        !! ∑_j a_j*s_j, 𝜓(s_2)/𝜓(s_1)
+        complex(rk) :: sum_as, amplitude_prob_ratio                                        !! ∑_j a_j*s_j, ψ(s_2)/ψ(s_1)
         complex(rk), dimension(self%h_units) :: theta_2                                                      !! b + ws_2
         integer(ik), dimension(self%v_units) :: s                                                   !! Sample difference
         integer, dimension(self%v_units) :: indices                                                       !! Index array
@@ -302,9 +305,9 @@ module nnqs
 
         sum_as = sum( self%a(contributors)*s(contributors) )                                              !! ∑_j a_j s_j
 
-        amplitude_prob_ratio = exp(sum_as + sum(log(1.0_rk+exp(theta_2)) - log(1.0_rk+exp(theta_1))))   !! 𝜓(s_2)/𝜓(s_1)
+        amplitude_prob_ratio = exp(sum_as + sum(log(1.0_rk+exp(theta_2)) - log(1.0_rk+exp(theta_1))))   !! ψ(s_2)/ψ(s_1)
 
-        p = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                                  !! |𝜓(s_2)/𝜓(s_1)|^2
+        p = real(conjg(amplitude_prob_ratio)*amplitude_prob_ratio)                                  !! |ψ(s_2)/ψ(s_1)|^2
     end function prob_ratio
 
     pure real(rk) function ising_energy(self, s, theta, ising_strengths) result(energy)
@@ -318,7 +321,7 @@ module nnqs
 
         real(rk), dimension(self%v_units) :: s_unit, field_couplings                         !! s -> ±1, field couplings
         real(rk), dimension(self%v_units - 1) :: neighbor_couplings                                !! Neighbor couplings
-        complex(rk), dimension(self%h_units) :: arg_theta                                                  !! 1 + exp(𝜃)
+        complex(rk), dimension(self%h_units) :: arg_theta                                                  !! 1 + exp(θ)
         real(rk) :: J_str, B_str, e_interaction, e_transverse                        !! Ising model parameters, energies
         integer :: j, n                                                                !! Loop variable, number of spins
 
@@ -332,7 +335,7 @@ module nnqs
         arg_theta = 1.0_rk + exp(theta)                                                   !! 1 + exp(b + ws) for input s
 
         get_field_couplings: do concurrent (j = 1:n)
-            field_couplings(j) = exp( self%a(j)*s_unit(j) + &                                   !! 𝜓(s')/𝜓(s) for all s'
+            field_couplings(j) = exp( self%a(j)*s_unit(j) + &                                   !! ψ(s')/ψ(s) for all s'
             sum(log(1.0_rk + exp(theta + self%w(:,j)*s_unit(j))) - log(arg_theta)) )    !! Forgets im part on assignment
         end do get_field_couplings
 
@@ -375,107 +378,107 @@ module nnqs
 
         e_local_cent = e_local - sum(e_local)/num_samples                                   !! Center the local energies
 
-        dlna = transpose(samples)                               !! O_a(k,j) = 𝜕/𝜕a_j ln 𝜓(s^k) = s_kj, k=1,…,K , j=1,…,n
+        dlna = transpose(samples)                               !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_kj, k=1,…,K , j=1,…,n
 
         update_a: block !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        real(rk), dimension(num_samples, n) :: dlna_cent                                                !! Centered data
-        real(rk), dimension(n) :: forces, x                                                 !! Forces and solution array
-        real(rk), dimension((n*(n+1))/2) :: sr_matrix                                                       !! SR matrix
+            real(rk), dimension(num_samples, n) :: dlna_cent                                            !! Centered data
+            real(rk), dimension(n) :: forces, x                                             !! Forces and solution array
+            real(rk), dimension((n*(n+1))/2) :: sr_matrix                                                   !! SR matrix
 
-        grad: do concurrent (j = 1:n)                                                              !! Generalized forces
-            dlna_cent(:,j) = dlna(:,j) - sum(dlna(:,j))/num_samples                 !! Center each column about its mean
-            forces(j) = sum(dlna_cent(:,j)*e_local_cent)*covar_norm                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
-        end do grad
+            grad: do concurrent (j = 1:n)                                                          !! Generalized forces
+                dlna_cent(:,j) = dlna(:,j) - sum(dlna(:,j))/num_samples             !! Center each column about its mean
+                forces(j) = sum(dlna_cent(:,j)*e_local_cent)*covar_norm                        !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
+            end do grad
 
-        cov_mat: do concurrent (jj = 1:n, j = 1:n, j>=jj)
-            ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                      !! Packed index mapping
-            sr_matrix(ind) = sum(dlna_cent(:,j)*dlna_cent(:,jj))*covar_norm                                !! Covariance
-            if (j == jj) sr_matrix(ind) = sr_matrix(ind) + delta                      !! Add regularization to diagonals
-        end do cov_mat
+            cov_mat: do concurrent (jj = 1:n, j = 1:n, j>=jj)
+                ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                  !! Packed index mapping
+                sr_matrix(ind) = sum(dlna_cent(:,j)*dlna_cent(:,jj))*covar_norm                            !! Covariance
+                if (j == jj) sr_matrix(ind) = sr_matrix(ind) + delta                  !! Add regularization to diagonals
+            end do cov_mat
 
-        call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')            !! Stochastic reconfiguration x = S^{-1}F
+            call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')        !! Stochastic reconfiguration x = S^{-1}F
 
-        self%p_a = beta_1*self%p_a + (1.0_rk - beta_1)*x                                 !! Biased first moment estimate
-        self%r_a = beta_2*self%r_a + (1.0_rk - beta_2)*(x**2)                       !! Biased second raw moment estimate
+            self%p_a = beta_1*self%p_a + (1.0_rk - beta_1)*x                             !! Biased first moment estimate
+            self%r_a = beta_2*self%r_a + (1.0_rk - beta_2)*(x**2)                   !! Biased second raw moment estimate
 
-        !! Modify gradient with bias-corrected moments:
-        x = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )
+            !! Modify gradient with bias-corrected moments:
+            x = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )
 
-        self%a = self%a - dtau*x                                                                !! Update visible biases
+            self%a = self%a - dtau*x                                                            !! Update visible biases
         end block update_a !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        dlnb = matmul(self%w, samples)                                                                     !! 𝜃 - b = ws
+        dlnb = matmul(self%w, samples)                                                                     !! θ - b = ws
 
         get_effective_angles: do concurrent (k = 1:num_samples)
-            dlnb(:,k) = exp(conjg(self%b) + dlnb(:,k))                           !! exp(𝜃) = exp(b + ws) for each sample
+            dlnb(:,k) = exp(conjg(self%b) + dlnb(:,k))                           !! exp(θ) = exp(b + ws) for each sample
         end do get_effective_angles
 
-        dlnb = transpose(dlnb/(1.0_rk + dlnb))                         !! O_b(k,i) = 𝜕/𝜕b_i ln 𝜓(s^k), k=1,…,K , i=1,…,m
+        dlnb = transpose(dlnb/(1.0_rk + dlnb))                         !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k), k=1,…,K , i=1,…,m
 
         update_b: block !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        complex(rk), dimension(num_samples, m) :: dlnb_cent, dlnb_cent_conj                             !! Centered data
-        complex(rk), dimension(m) :: forces, x                                              !! Forces and solution array
-        complex(rk), dimension((m*(m+1))/2) :: sr_matrix                                                    !! SR matrix
+            complex(rk), dimension(num_samples, m) :: dlnb_cent, dlnb_cent_conj                         !! Centered data
+            complex(rk), dimension(m) :: forces, x                                          !! Forces and solution array
+            complex(rk), dimension((m*(m+1))/2) :: sr_matrix                                                !! SR matrix
 
-        grad: do concurrent (i = 1:m)                                                              !! Generalized forces
-            dlnb_cent(:,i) = dlnb(:,i) - sum(dlnb(:,i))/num_samples                 !! Center each column about its mean
-            dlnb_cent_conj(:,i) = conjg(dlnb_cent(:,i))                             !! Cache conjugates of centered data
-            forces(i) = sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                       !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
-        end do grad
+            grad: do concurrent (i = 1:m)                                                          !! Generalized forces
+                dlnb_cent(:,i) = dlnb(:,i) - sum(dlnb(:,i))/num_samples             !! Center each column about its mean
+                dlnb_cent_conj(:,i) = conjg(dlnb_cent(:,i))                         !! Cache conjugates of centered data
+                forces(i) = sum(dlnb_cent_conj(:,i)*e_local_cent)*covar_norm                   !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
+            end do grad
 
-        cov_mat: do concurrent (ii = 1:m, i = 1:m, i>=ii)
-            ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
-            sr_matrix(ind) = sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*covar_norm                           !! Covariance
-            if (i == ii) sr_matrix(ind) = sr_matrix(ind)%re + delta                   !! Add regularization to diagonals
-        end do cov_mat
+            cov_mat: do concurrent (ii = 1:m, i = 1:m, i>=ii)
+                ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                  !! Packed index mapping
+                sr_matrix(ind) = sum(dlnb_cent_conj(:,i)*dlnb_cent(:,ii))*covar_norm                       !! Covariance
+                if (i == ii) sr_matrix(ind) = sr_matrix(ind)%re + delta               !! Add regularization to diagonals
+            end do cov_mat
 
-        call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')            !! Stochastic reconfiguration x = S^{-1}F
+            call ppsvx(AP=sr_matrix, b=forces, x=x, uplo='L', fact='E')        !! Stochastic reconfiguration x = S^{-1}F
 
-        self%p_b = beta_1*self%p_b + (1.0_rk - beta_1)*x                                 !! Biased first moment estimate
-        self%r_b = beta_2*self%r_b + (1.0_rk - beta_2)*(x**2)                       !! Biased second raw moment estimate
+            self%p_b = beta_1*self%p_b + (1.0_rk - beta_1)*x                             !! Biased first moment estimate
+            self%r_b = beta_2*self%r_b + (1.0_rk - beta_2)*(x**2)                   !! Biased second raw moment estimate
 
-        !! Modify gradient with bias-corrected moments:
-        x = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )
+            !! Modify gradient with bias-corrected moments:
+            x = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )
 
-        self%b = self%b - dtau*x                                                                 !! Update hidden biases
+            self%b = self%b - dtau*x                                                             !! Update hidden biases
         end block update_b !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         allocate( dlnw(num_samples, m, n) )                                               !! k=1,…,K , i=1,…,m , j=1,…,n
 
         do concurrent (j = 1:n, i = 1:m)
-            dlnw(:,i,j) = dlna(:,j)*dlnb(:,i)     !! O_w(k,i,j) = 𝜕/𝜕w_ij ln 𝜓(s^k) = s_kj exp(𝜃(k,i))/(1 + exp(𝜃(k,i)))
+            dlnw(:,i,j) = dlna(:,j)*dlnb(:,i)     !! O_w(k,i,j) = 𝜕/𝜕w_ij ln ψ(s^k) = s_kj exp(θ(k,i))/(1 + exp(θ(k,i)))
         end do
 
         deallocate(dlna,dlnb)
 
         update_w: block !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        complex(rk), dimension(num_samples, m, n) :: dlnw_cent, dlnw_cent_conj                          !! Centered data
-        complex(rk), dimension(m, n) :: forces, x                                           !! Forces and solution array
-        complex(rk), dimension((m*(m+1))/2, n) :: sr_matrix                                                 !! SR matrix
+            complex(rk), dimension(num_samples, m, n) :: dlnw_cent, dlnw_cent_conj                      !! Centered data
+            complex(rk), dimension(m, n) :: forces, x                                       !! Forces and solution array
+            complex(rk), dimension((m*(m+1))/2, n) :: sr_matrix                                             !! SR matrix
 
-        grad: do concurrent (j = 1:n, i = 1:m)                                                     !! Generalized forces
-            dlnw_cent(:,i,j) = dlnw(:,i,j) - sum(dlnw(:,i,j))/num_samples           !! Center each column about its mean
-            dlnw_cent_conj(:,i,j) = conjg(dlnw_cent(:,i,j))                         !! Cache conjugates of centered data
-            forces(i,j) = sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm              !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
-        end do grad
+            grad: do concurrent (j = 1:n, i = 1:m)                                                 !! Generalized forces
+                dlnw_cent(:,i,j) = dlnw(:,i,j) - sum(dlnw(:,i,j))/num_samples       !! Center each column about its mean
+                dlnw_cent_conj(:,i,j) = conjg(dlnw_cent(:,i,j))                     !! Cache conjugates of centered data
+                forces(i,j) = sum(dlnw_cent_conj(:,i,j)*e_local_cent)*covar_norm          !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
+            end do grad
 
-        cov_mat: do concurrent (j = 1:n, ii = 1:m, i = 1:m, i>=ii)
-            ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
-            sr_matrix(ind,j) = sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*covar_norm                     !! Covariance
-            if (i == ii) sr_matrix(ind,j) = sr_matrix(ind,j)%re + delta               !! Add regularization to diagonals
-        end do cov_mat
+            cov_mat: do concurrent (j = 1:n, ii = 1:m, i = 1:m, i>=ii)
+                ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                  !! Packed index mapping
+                sr_matrix(ind,j) = sum(dlnw_cent_conj(:,i,j)*dlnw_cent(:,ii,j))*covar_norm                 !! Covariance
+                if (i == ii) sr_matrix(ind,j) = sr_matrix(ind,j)%re + delta           !! Add regularization to diagonals
+            end do cov_mat
 
-        stochastic_reconfiguration: do concurrent (j = 1:n)
-            call ppsvx(AP=sr_matrix(:,j), b=forces(:,j), x=x(:,j), uplo='L', fact='E')       !! Sto reconfig x = S^{-1}F
-        end do stochastic_reconfiguration
+            stochastic_reconfiguration: do concurrent (j = 1:n)
+                call ppsvx(AP=sr_matrix(:,j), b=forces(:,j), x=x(:,j), uplo='L', fact='E')   !! Sto reconfig x = S^{-1}F
+            end do stochastic_reconfiguration
 
-        self%p_w = beta_1*self%p_w + (1.0_rk - beta_1)*x                                 !! Biased first moment estimate
-        self%r_w = beta_2*self%r_w + (1.0_rk - beta_2)*(x**2)                       !! Biased second raw moment estimate
+            self%p_w = beta_1*self%p_w + (1.0_rk - beta_1)*x                             !! Biased first moment estimate
+            self%r_w = beta_2*self%r_w + (1.0_rk - beta_2)*(x**2)                   !! Biased second raw moment estimate
 
-        !! Modify gradient with bias-corrected moments:
-        x = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )
+            !! Modify gradient with bias-corrected moments:
+            x = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )
 
-        self%w = self%w - dtau*x                                                                       !! Update weights
+            self%w = self%w - dtau*x                                                                   !! Update weights
         end block update_w !! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     end subroutine propagate
 
@@ -536,18 +539,18 @@ module nnqs
     end function corr
 
     impure real(rk) function gauss(mu, sig) result(gauss_res)
-        !!--------------------------------------------------------------------------------------------------------------
+        !---------------------------------------------------------------------------------------------------------------
         !! Samples random numbers from the standard Normal (Gaussian) Distribution with the given mean and sigma.
         !! Uses the Acceptance-complement ratio from W. Hoermann and G. Derflinger.
         !! This is one of the fastest existing methods for generating normal random variables.
         !!
         !! REFERENCE:  - W. Hoermann and G. Derflinger (1990):
-        !!              The ACR Method for generating normal random variables,
-        !!              OR Spektrum 12 (1990), 181-185.
+        !!               The ACR Method for generating normal random variables,
+        !!               OR Spektrum 12 (1990), 181-185.
         !!
         !! Implementation taken from <https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00274>
         !! UNURAN (c) 2000  W. Hoermann & J. Leydold, Institut f. Statistik, WU Wien
-        !!--------------------------------------------------------------------------------------------------------------
+        !---------------------------------------------------------------------------------------------------------------
         real(rk), intent(in) :: mu, sig
 
         real(rk) :: kC1, kC2, kC3, kD1, kD2, kD3, kHm, kZm, kHp, kZp, kPhln, kHm1
