@@ -50,11 +50,11 @@ where we define the variational local energies $E_{\text{loc}}(s,\alpha) = \sum_
 
 ## Transverse Field Ising Model
 
-In this demonstration, we assume the prototypical Ising spin model for a one-dimensional lattice of spin $\frac{1}{2}$ particles, whose Hamiltonian is given by
-    $$H = -J \sum_{j=1}^{n-1} \sigma_j^z \sigma_{j+1}^z - B \sum_{j=1}^n \sigma_j^x$$
-where we use the shorthand notation $\sigma_j^z \sigma_{j+1}^z = I^{(1)} \otimes \cdots \otimes \sigma_z^{(j)} \otimes \sigma_z^{(j+1)} \otimes \cdots \otimes I^{(n)}$ to denote the tensor product of the $2 \times 2$ identity matrix with the Pauli matrix $\sigma_z$ located at positions $j$ and $j+1$, and where $\sigma_j^x = I^{(1)} \otimes \cdots \otimes \sigma_x^{(j)} \otimes \cdots \otimes I^{(n)}$ denotes $\sigma_x$ at position $j$. The size of $H$ is $2^n \times 2^n$, which would require an enormous amount of storage space even for relatively few particles, and would be impossible to diagonalize with finite computational resources. The constant $J$ represents the nearest neighbor coupling strength, and $B$ represents the strength of the transverse field restricted to $|B| < 1$ to correspond to the ordered phase of the Ising material. When $J>0$, nearest neighbors tend to align parallel (ferromagnetic), and tend to align anti-parallel when $J<0$ (anti-ferromagnetic). The local energy of a configuration $s \in S$ in the Ising model can be seen to be
+In this demonstration, we assume the prototypical Ising spin model for a one-dimensional lattice of spin $\frac{1}{2}$ particles, whose Hamiltonian is a $2^n \times 2^n$ matrix given by
+    $$H = -J \sum_{j=1}^{n-1} \sigma_z^{(j)} \sigma_z^{(j+1)} - B \sum_{j=1}^n \sigma_x^{(j)}$$
+where we use the shorthand notation $\sigma_z^{(j)} \sigma_z^{(j+1)} = I^{(1)} \otimes \cdots \otimes \sigma_z^{(j)} \otimes \sigma_z^{(j+1)} \otimes \cdots \otimes I^{(n)}$ to denote the tensor product of the $2 \times 2$ identity matrix with the Pauli matrix $\sigma_z$ located at positions $j$ and $j+1$, and where $\sigma_x^{(j)} = I^{(1)} \otimes \cdots \otimes \sigma_x^{(j)} \otimes \cdots \otimes I^{(n)}$ denotes $\sigma_x$ at position $j$. The constant $J$ represents the nearest neighbor coupling strength, and $B$ represents the strength of the transverse field restricted to $|B| < 1$ to correspond to the ordered phase of the Ising material. When $J>0$, nearest neighbors tend to align parallel (ferromagnetic), and tend to align anti-parallel when $J<0$ (anti-ferromagnetic). The local energy of a configuration $s \in S$ in the Ising model can be seen to be
     $$E_{\text{loc}}(s,\alpha) =-J \sum_{j=1}^{n-1} \sigma_j \sigma_{j+1} - B \sum_{s' \in S_f} \frac{\psi(s',\alpha)}{\psi(s,\alpha)}$$
-where $\sigma_j = -2s_j + 1 \in \\{1,-1\\}$ and $S_f$ consists of $n$ configurations in which a single spin of $s$ has been inverted.
+where $\sigma_j = -2s_j + 1 \in \\{1,-1\\}$ and $S_f$ consists of $n$ configurations in which each respective spin in the configuration $s$ has been inverted.
 
 ## Stochastic Optimization
 
