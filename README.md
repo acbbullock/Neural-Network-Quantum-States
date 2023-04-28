@@ -196,15 +196,15 @@ The only dependency of this project is the Intel MKL distribution of LAPACK. Wit
 To target a multi-core CPU with the AVX2 instruction set for best performance, the project may be built and run on Windows 10/11 using the command
 
 ```powershell
-fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qcoarray /Qcoarray-num-images:n /heap-arrays:0 /Qparallel /Qmkl:parallel /Qopenmp /Qopenmp-simd /fp:fast" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
+fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qcoarray /Qcoarray-num-images:n /heap-arrays:0 /Qparallel /Qmkl:parallel /Qopenmp /Qopenmp-simd /fp:precise" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
 ```
 
 and on Linux using the command
 
 ```bash
-fpm run --compiler ifort --flag "-O3 -march=core-avx2 -coarray -coarray-num-images=n -heap-arrays 0 -parallel -qmkl=parallel -qopenmp -qopenmp-simd -fp-model=fast" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lpthread -lm -ldl"
+fpm run --compiler ifort --flag "-O3 -march=core-avx2 -coarray -coarray-num-images=n -heap-arrays 0 -parallel -qmkl=parallel -qopenmp -qopenmp-simd -fp-model=precise" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lpthread -lm -ldl"
 ```
 
 with equivalent features.
 
-Here, the AVX2 instructions may be replaced with `-xHost` (`/QxHost`) or another instruction set, and `n` is the number of images to execute, which generally should equal the number of CPU cores available. The `heap-arrays` option may be omitted for smaller systems, but is necessary to avoid stack overflows for larger systems (unless `ulimit` is sufficiently raised on Linux). Finally, the link flag specifies the MKL and OpenMP runtime libraries for static linking, provided by the [Intel Link Line Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
+Here, the AVX2 instructions may be replaced with `-xHost` (`/QxHost`) or another instruction set, and `n` is the number of images to execute, which generally should equal the number of CPU cores available. The `heap-arrays` option may be omitted for smaller systems, but is necessary to avoid stack overflows for larger systems (unless `ulimit` is sufficiently raised on Linux). We then enable the generation of multi-threaded code with OpenMP and SIMD compilation. Finally, the link flag specifies the MKL and OpenMP runtime libraries for static linking, provided by the [Intel Link Line Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
