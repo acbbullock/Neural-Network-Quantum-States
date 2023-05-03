@@ -66,6 +66,8 @@ module nnqs
 
         character(len=:), allocatable :: logfile, logmsg                                          !! Recording variables
         character(len=10)             :: date, time                                                     !! Date and time
+        character(len=1000)           :: errmsg                                                         !! Error message
+        integer :: stat                                                                                    !! Error stat
 
         integer(int64) :: t1, t2                                                                      !! Clock variables
         real(rk)       :: rate, wall_time                                                             !! Clock variables
@@ -98,15 +100,19 @@ module nnqs
         m = self%h_units                                                                   !! Get number of hidden units
         max_epochs = 1000                                                                          !! Set maximum epochs
         num_samples = 15                                                             !! Set number of samples to produce
+        stat = 0                                                                                       !! Set error stat
 
-        allocate( start_sample(n), samples(num_samples, n), source=0_ik )                      !! Initialize work arrays
-        allocate( e_loc(num_samples), corrs(n), source=0.0_rk )                                !! Initialize work arrays
+        allocate( start_sample(n), samples(num_samples, n), source=0_ik, stat=stat, errmsg=errmsg ) !! Initialize arrays
+        if (stat /= 0) error stop LF//errmsg                                                    !! Check error condition
+        allocate( e_loc(num_samples), corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg )           !! Initialize arrays
+        if (stat /= 0) error stop LF//errmsg                                                    !! Check error condition
 
         call random_sample(start_sample)                                                !! Randomize the starting sample
         theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
         if ( this_image() == 1 ) then                                                       !! Do preparation on image 1
-            allocate( energies(max_epochs, 2), correlations(n, max_epochs), source=0.0_rk ) !! Initialize storage arrays
+            allocate( energies(max_epochs, 2), correlations(n, max_epochs), source=0.0_rk, stat=stat, errmsg=errmsg )
+            if (stat /= 0) error stop LF//errmsg                                                !! Check error condition
 
             logfile = 'optimization_results.log'                                                         !! Set log file
             call date_and_time(date=date, time=time)                                                !! Get date and time
