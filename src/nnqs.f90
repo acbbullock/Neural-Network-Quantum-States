@@ -85,8 +85,6 @@ module nnqs
 			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
-		! call ieee_set_halting_mode([ieee_divide_by_zero, ieee_invalid], halting=.true.)                         !! Debug
-
 		call self%init()                                                                 !! Initialize Boltzmann machine
 
 		if ( ising_strengths(1) < 0.0_rk ) then                                       !! Check sign of coupling strength
@@ -405,28 +403,27 @@ module nnqs
 		O_a = real(samples, kind=rk)                                              !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
 
 		O_b = matmul(samples, transpose(self%w))                                               !! ws^k for all samples k
-		do i = 1, m
+		do concurrent (i = 1:m) shared(O_b, self)
 			O_b(:,i) = exp(conjg(self%b(i)) + O_b(:,i))      !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
 			O_b(:,i) = O_b(:,i)/(1.0_rk + O_b(:,i))         !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
 		end do
 
-		do j = 1, n; do i = 1, m
+		do concurrent (j = 1:n, i = 1:m) shared(O_a, O_b, O_w)
 			O_w(:,i,j) = O_a(:,j)*O_b(:,i)         !! O_w(k,i,j) = 𝜕/𝜕w_ij ln ψ(s^k) = s_j^k exp(θ_i^k)/(1 + exp(θ_i^k))
-		end do; end do
+		end do
 		!! End Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		! do j = 1, n
 		do concurrent (j = 1:n) shared(O_a, F_a, e_loc, num_samples, covar_norm)
 			O_a(:,j) = O_a(:,j) - sum(O_a(:,j))/num_samples                         !! Center each column about its mean
 			F_a(j) = sum(O_a(:,j)*e_loc)*covar_norm                                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
 		end do
 
-		do jj = 1, n; do j = 1, n; if (j < jj) cycle
+		do concurrent (jj = 1:n, j = 1:n, j >= jj) shared(S_a, O_a, covar_norm, delta) local(ind)
 			ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                      !! Packed index mapping
 			S_a(ind) = sum(O_a(:,j)*O_a(:,jj))*covar_norm                                                  !! Covariance
 			if (j == jj) S_a(ind) = S_a(ind) + delta                                  !! Add regularization to diagonals
-		end do; end do
+		end do
 
 		call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
@@ -437,16 +434,16 @@ module nnqs
 		!! End Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do i = 1, m
+		do concurrent (i = 1:m) shared(O_b, F_b, e_loc, num_samples, covar_norm)
 			O_b(:,i) = O_b(:,i) - sum(O_b(:,i))/num_samples                         !! Center each column about its mean
 			F_b(i) = sum(conjg(O_b(:,i))*e_loc)*covar_norm                                     !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
 		end do
 
-		do ii = 1, m; do i = 1, m; if (i < ii) cycle
+		do concurrent (ii = 1:m, i = 1:m, i >= ii) shared(S_b, O_b, covar_norm, delta) local(ind)
 			ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
 			S_b(ind) = sum(conjg(O_b(:,i))*O_b(:,ii))*covar_norm                                           !! Covariance
 			if (i == ii) S_b(ind) = S_b(ind)%re + delta                               !! Add regularization to diagonals
-		end do; end do
+		end do
 
 		call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
@@ -457,16 +454,16 @@ module nnqs
 		!! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do j = 1, n; do i = 1, m
+		do concurrent (j = 1:n, i = 1:m) shared(O_w, F_w, e_loc, num_samples, covar_norm)
 			O_w(:,i,j) = O_w(:,i,j) - sum(O_w(:,i,j))/num_samples                   !! Center each column about its mean
 			F_w(i,j) = sum(conjg(O_w(:,i,j))*e_loc)*covar_norm                            !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
-		end do; end do
+		end do
 
-		do j = 1, n; do ii = 1, m; do i = 1, m; if (i < ii) cycle
+		do concurrent (j = 1:n, ii = 1:m, i = 1:m, i >= ii) shared(S_w, O_w, covar_norm, delta) local(ind)
 			ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
 			S_w(ind,j) = sum(conjg(O_w(:,i,j))*O_w(:,ii,j))*covar_norm                                     !! Covariance
 			if (i == ii) S_w(ind,j) = S_w(ind,j)%re + delta                           !! Add regularization to diagonals
-		end do; end do; end do
+		end do
 
 		do j = 1, n
 			call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')       !! Stochastic reconfig x = S^{-1}F
