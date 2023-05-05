@@ -3,12 +3,10 @@ module nnqs
 	!! This module contains an implementation of the stochastic optimization algorithm for learning the ground state
 	!! of the Ising spin model by representing the wave-functions ψ(s,α) as a type RestrictedBoltzmannMachine.
 	!-------------------------------------------------------------------------------------------------------------------
-	use, intrinsic :: iso_fortran_env, only: rk=>real64, ik=>int8, int64, compiler_version, compiler_options
+	use, intrinsic :: iso_fortran_env, only: rk=>real32, ik=>int8, int64, compiler_version, compiler_options
 	use, intrinsic :: ieee_arithmetic, only: ieee_is_nan
-	! use, intrinsic :: ieee_exceptions, only: ieee_set_halting_mode, ieee_invalid, ieee_divide_by_zero
 	use io_fortran_lib, only: echo, LF, str, to_file                                     !! I/O procedures and constants
 	use lapack95, only: ppsvx                                  !! Routine for solving linear systems with packed storage
-	use omp_lib                                                                                         !! OpenMP module
 	implicit none (type,external)                                                     !! No implicit types or interfaces
 	private                             !! All objects in scope are inaccessible outside of scope unless declared public
 
@@ -165,6 +163,7 @@ module nnqs
 			if ( (acc > 0.9999_rk) .or. (epoch == max_epochs) ) exit learning                         !! Exit conditions
 
 			e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
+
 			call self%propagate(epoch=epoch, e_loc=e_loc, samples=samples)                          !! Update parameters
 		end do learning
 
@@ -183,8 +182,10 @@ module nnqs
 			write(unit=*, fmt='(a)') logmsg                                                     !! Print log message
 
 			call echo(logmsg, logfile)
-			call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.csv', header=['Energy', 'Error'] )
-			call to_file(correlations(:,:epoch), './data/correlations_'//self%alignment//'.csv', header=['Epoch'] )
+			! call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.csv', header=['Energy', 'Error'] )
+			! call to_file(correlations(:,:epoch), './data/correlations_'//self%alignment//'.csv', header=['Epoch'] )
+			call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.dat')
+			call to_file(correlations(:,:epoch), './data/correlations_'//self%alignment//'.dat')
 		end if
 	end subroutine stochastic_optimization
 
@@ -397,7 +398,7 @@ module nnqs
 		end if
 
 		allocate( O_a(num_samples, n),    F_a(n),    S_a((n*(n+1))/2),    x_a(n),    source=0.0_rk )
-		allocate( O_b(num_samples, m),    F_b(m),    S_b((m*(m+1))/2),    x_b(n),    source=(0.0_rk, 0.0_rk) )
+		allocate( O_b(num_samples, m),    F_b(m),    S_b((m*(m+1))/2),    x_b(m),    source=(0.0_rk, 0.0_rk) )
 		allocate( O_w(num_samples, m, n), F_w(m, n), S_w((m*(m+1))/2, n), x_w(m, n), source=(0.0_rk, 0.0_rk) )
 
 		!! Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -415,7 +416,8 @@ module nnqs
 		!! End Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do j = 1, n
+		! do j = 1, n
+		do concurrent (j = 1:n) shared(O_a, F_a, e_loc, num_samples, covar_norm)
 			O_a(:,j) = O_a(:,j) - sum(O_a(:,j))/num_samples                         !! Center each column about its mean
 			F_a(j) = sum(O_a(:,j)*e_loc)*covar_norm                                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
 		end do
