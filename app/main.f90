@@ -10,7 +10,7 @@ program main
 	!! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type(RestrictedBoltzmannMachine) :: psi                                                            !! Neural network
 
-	integer, parameter :: spins = 1024, hidden_units = 64                            !! Number of spins and hidden units
+	integer, parameter :: spins = 1*1024, hidden_units = 1*64                        !! Number of spins and hidden units
 
 	!! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	call random_init(repeatable=.true., image_distinct=.true.)                     !! Initialize random number generator
@@ -18,6 +18,6 @@ program main
 
 	psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                             !! Create instance
 
-	call psi%stochastic_optimization(ising_strengths=[ -0.5_rk, 0.1_rk ])                                 !! Input [J,B]
+	call psi%stochastic_optimization(ising_params=[ -0.5_rk, 0.1_rk ])                                    !! Input [J,B]
 
 end program main

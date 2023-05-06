@@ -22,6 +22,7 @@ module nnqs
 		complex(rk), allocatable, dimension(:)   :: b, p_b, r_b                     !! Hidden layer biases & ADAM arrays
 		complex(rk), allocatable, dimension(:,:) :: w, p_w, r_w                                 !! Weights & ADAM arrays
 		character(len=1) :: alignment = 'N'                                               !! For tracking spin alignment
+		logical          :: initialized = .false.                                               !! Initialization status
 		contains
 			private
 			procedure, pass(self), public :: stochastic_optimization                          !! Public training routine
@@ -47,21 +48,29 @@ module nnqs
 		new%h_units = h_units                    !! Set number of hidden units (chosen arbitrarily to optimize learning)
 	end function new_rbm
 
-	impure recursive subroutine stochastic_optimization(self, ising_strengths)
+	impure recursive subroutine stochastic_optimization(self, ising_params)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Public routine for training RBM
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
-		real(rk), contiguous, dimension(:), intent(in)   :: ising_strengths                          !! Ising parameters
+		real(rk), contiguous, dimension(:), intent(in)   :: ising_params                             !! Ising parameters
 
 		integer(ik), allocatable, dimension(:)   :: start_sample                         !! Start sample for Monte Carlo
 		integer(ik), allocatable, dimension(:,:) :: samples                                      !! Sample storage array
 		integer :: epoch, max_epochs, num_samples, n, m           !! Loop variable, max epochs, number of samples, spins
 
 		real(rk),    allocatable, dimension(:)   :: e_loc, corrs                  !! Local energies, sample correlations
-		real(rk),    allocatable, dimension(:,:) :: energies, correlations                  !! Energies and correlations
+		real(rk),    allocatable, dimension(:,:) :: energies, correlations             !! Energy and correlation storage
 		complex(rk), allocatable, dimension(:)   :: theta                                 !! θ = b + ws for start sample
 		real(rk) :: energy, sqerr, stderr, tau, acc                                               !! Recording variables
+
+		real(rk),    allocatable, dimension(:,:)   :: O_a                           !! Log derivatives with respect to a
+		complex(rk), allocatable, dimension(:,:)   :: O_b                           !! Log derivatives with respect to b
+		complex(rk), allocatable, dimension(:,:,:) :: O_w                           !! Log derivatives with respect to w
+
+		real(rk),    allocatable, dimension(:)   :: F_a, S_a, x_a             !! Forces, SR matrix, solution array for a
+		complex(rk), allocatable, dimension(:)   :: F_b, S_b, x_b             !! Forces, SR matrix, solution array for b
+		complex(rk), allocatable, dimension(:,:) :: F_w, S_w, x_w             !! Forces, SR matrix, solution array for w
 
 		character(len=:), allocatable :: logfile, logmsg                                          !! Recording variables
 		character(len=10)             :: date, time                                                     !! Date and time
@@ -72,12 +81,12 @@ module nnqs
 		real(rk)       :: rate, wall_time                                                             !! Clock variables
 
 		if ( this_image() == 1 ) then                                     !! Check validity of Ising strength parameters
-			if ( size(ising_strengths) /= 2 ) then
-				error stop  LF//'FATAL: Invalid size for ising_strengths... size must be (2).'// &
-							LF//'USAGE: ising_strengths = [J,B] where J is the neighbor coupling strength and B '// &
+			if ( size(ising_params) /= 2 ) then
+				error stop  LF//'FATAL: Invalid size for ising_params... size must be (2).'// &
+							LF//'USAGE: ising_params=[J,B] where J is the neighbor coupling strength and B '// &
 								'is the transverse field strength.'//LF
 			end if
-			if ( abs(ising_strengths(2)) >= 1.0_rk ) then
+			if ( abs(ising_params(2)) >= 1.0_rk ) then
 				error stop LF//'FATAL: Invalid field strength parameter... try again with |B| < 1.'//LF
 			end if
 			sync images (*)                                                                   !! Respond to other images
@@ -85,9 +94,7 @@ module nnqs
 			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
-		call self%init()                                                                 !! Initialize Boltzmann machine
-
-		if ( ising_strengths(1) < 0.0_rk ) then                                       !! Check sign of coupling strength
+		if ( ising_params(1) < 0.0_rk ) then                                          !! Check sign of coupling strength
 			self%alignment = 'A'                                                          !! Anti-ferromagnetic if J < 0
 		else
 			self%alignment = 'F'                                                               !! Ferromagnetic if J > 0
@@ -96,20 +103,35 @@ module nnqs
 		n = self%v_units                                                                          !! Get number of spins
 		m = self%h_units                                                                   !! Get number of hidden units
 		max_epochs = 1000                                                                          !! Set maximum epochs
-		num_samples = 15                                                             !! Set number of samples to produce
-		stat = 0                                                                                       !! Set error stat
+		num_samples = 64 + m                                                         !! Set number of samples to produce
+		stat = 0                                                                                !! Initialize error stat
 
-		allocate( start_sample(n), samples(num_samples, n), source=0_ik, stat=stat, errmsg=errmsg ) !! Initialize arrays
-		if (stat /= 0) error stop LF//errmsg                                                    !! Check error condition
-		allocate( e_loc(num_samples), corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg )           !! Initialize arrays
-		if (stat /= 0) error stop LF//errmsg                                                    !! Check error condition
+		call self%init(stat=stat, errmsg=errmsg)                                         !! Initialize Boltzmann machine
+
+		!! Allocate work arrays across all images:
+		allocate(start_sample(n), samples(num_samples,n), source=0_ik, stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(e_loc(num_samples), corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(O_a(num_samples,n), F_a(n), S_a((n*(n+1))/2), x_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(O_b(num_samples,m), F_b(m), S_b((m*(m+1))/2), x_b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(O_w(num_samples,m,n), F_w(m,n), S_w((m*(m+1))/2,n), x_w(m,n), source=(0.0_rk,0.0_rk), &
+				 stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
 		call random_sample(start_sample)                                                !! Randomize the starting sample
 		theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
 		if ( this_image() == 1 ) then                                                       !! Do preparation on image 1
-			allocate( energies(max_epochs, 2), correlations(n, max_epochs), source=0.0_rk, stat=stat, errmsg=errmsg )
-			if (stat /= 0) error stop LF//errmsg                                                !! Check error condition
+			!! Allocate storage arrays on image 1:
+			allocate(energies(max_epochs,2), correlations(n,max_epochs), source=0.0_rk, stat=stat, errmsg=errmsg)
+			if (stat /= 0) error stop LF//errmsg                                                     !! Check allocation
 
 			logfile = 'optimization_results.log'                                                         !! Set log file
 			call date_and_time(date=date, time=time)                                                !! Get date and time
@@ -119,12 +141,16 @@ module nnqs
 			write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
 
 			call system_clock(t1)                                                                         !! Start timer
+			sync images (*)                                                                   !! Respond to other images
+		else
+			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
+		!$omp target data map(tofrom: self%b, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, x_a, x_b, x_w)
 		learning: do epoch = 1, max_epochs                                                             !! Begin learning
 			call co_sum(self%w); self%w = self%w/num_images()                           !! Average weights across images
 
-			call self%sample_distribution(epoch=epoch, ising_strengths=ising_strengths, &                      !! Inputs
+			call self%sample_distribution(epoch=epoch, ising_params=ising_params, &                            !! Inputs
 										  start_sample=start_sample, theta=theta, &                     !! Input/outputs
 										  samples=samples, e_loc=e_loc, corrs=corrs, &                  !! Array outputs
 										  energy=energy, sqerr=sqerr)                                  !! Scalar outputs
@@ -162,8 +188,13 @@ module nnqs
 
 			e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
 
-			call self%propagate(epoch=epoch, e_loc=e_loc, samples=samples)                          !! Update parameters
+			call self%propagate(epoch=epoch, e_loc=e_loc, samples=samples, &                        !! Update parameters
+								O_a=O_a, O_b=O_b, O_w=O_w, &
+								F_a=F_a, F_b=F_b, F_w=F_w, &
+								S_a=S_a, S_b=S_b, S_w=S_w, &
+								x_a=x_a, x_b=x_b, x_w=x_w)
 		end do learning
+		!$omp end target data
 
 		if ( this_image() == 1 ) then                                              !! Do finalization and I/O on image 1
 			call system_clock(t2, count_rate=rate); wall_time = real(t2-t1, kind=rk)/rate               !! Get time in s
@@ -172,8 +203,8 @@ module nnqs
 						 str(n)//' spins.'// &
 					 LF//'    Ground state energy: E[ψ(α(τ → ∞))] = '//str(energy, fmt='f', decimals=3)// &
 						 ' ± '//str(stderr, fmt='f', decimals=3)//' for J = '// &
-						 str(ising_strengths(1), fmt='f', decimals=1)//' and B = '// &
-						 str(ising_strengths(2), fmt='f', decimals=1)// &
+						 str(ising_params(1), fmt='f', decimals=1)//' and B = '// &
+						 str(ising_params(2), fmt='f', decimals=1)// &
 					 LF//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//LF// &
 					 LF//'    This program was built and run with compiler "'//compiler_version()//'" '// &
 						 'using compiler options "'//compiler_options()//'".'//LF
@@ -187,48 +218,62 @@ module nnqs
 		end if
 	end subroutine stochastic_optimization
 
-	impure recursive subroutine init(self)
+	impure recursive subroutine init(self, stat, errmsg)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Procedure for initialization
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
-		integer :: n, m, i, j                                                                !! Sizes and loop variables
+		integer,             intent(inout) :: stat                                                         !! Error stat
+		character(len=1000), intent(inout) :: errmsg                                                    !! Error message
+
+		integer :: n, m, i, j                                                                 !! Size and loop variables
 
 		n = self%v_units                                                                          !! Get number of spins
 		m = self%h_units                                                                   !! Get number of hidden units
 
 		if ( this_image() == 1 ) then
 			if ( (n < 1) .or. (m < 1) ) then
-				error stop LF//'FATAL: Structure has not been declared or has invalid number of units.'
+				error stop LF//'FATAL: Structure has not been instantiated or has invalid number of units.'
 			end if
 			sync images (*)                                                                   !! Respond to other images
 		else
 			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
-		if ( allocated(self%a) ) deallocate(self%a, self%p_a, self%r_a, &
-											self%b, self%p_b, self%r_b, &
-											self%w, self%p_w, self%r_w)                    !! Reset components if needed
+		if ( self%initialized ) then
+			deallocate(self%a, self%p_a, self%r_a, self%b, self%p_b, self%r_b, self%w, self%p_w, self%r_w, &
+					   stat=stat, errmsg=errmsg)
+			if (stat /= 0) error stop LF//errmsg                                                     !! Check allocation
+			self%initialized = .false.
+		end if
 
-		allocate( self%a(n),   self%p_a(n),   self%r_a(n),   source=0.0_rk )            !! Allocate visible layer arrays
-		allocate( self%b(m),   self%p_b(m),   self%r_b(m),   source=(0.0_rk,0.0_rk) )    !! Allocate hidden layer arrays
-		allocate( self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk,0.0_rk) )          !! Allocate weight arrays
+		!! Allocate class components:
+		allocate(self%a(n), self%p_a(n), self%r_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
 		do j = 1, n
 			do i = 1, m
 				self%w(i,j) = cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
 			end do
 		end do
+
+		self%initialized = .true.
 	end subroutine init
 
-	impure recursive subroutine sample_distribution(self, epoch, ising_strengths, start_sample, theta, samples, &
+	impure recursive subroutine sample_distribution(self, epoch, ising_params, start_sample, theta, samples, &
 													e_loc, corrs, energy, sqerr)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
 		integer, intent(in) :: epoch                                                                    !! Current epoch
-		real(rk),    contiguous, dimension(:),   intent(in)    :: ising_strengths                    !! Ising parameters
+		real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
 		integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample         !! Sample to begin thermalization
 		complex(rk), contiguous, dimension(:),   intent(inout) :: theta                   !! θ = b + ws for start sample
 		integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
@@ -293,7 +338,7 @@ module nnqs
 			end do metropolis_hastings
 
 			samples(k,:) = s                                                                !! Transfer sample to output
-			call self%ising_energy( s=s, theta=theta_loc, ising_strengths=ising_strengths, s_map=s_map, &  !! Loc energy
+			call self%ising_energy( s=s, theta=theta_loc, ising_params=ising_params, s_map=s_map, & !! Local energy of s
 									arg_theta=arg_theta, energy=e_loc(k) )
 		end do stationary_sampling
 		!! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -326,14 +371,14 @@ module nnqs
 		p = real(conjg(prob_amplitude_ratio)*prob_amplitude_ratio, kind=rk)                         !! |ψ(s_2)/ψ(s_1)|^2
 	end subroutine prob_ratio
 
-	pure recursive subroutine ising_energy(self, s, theta, ising_strengths, s_map, arg_theta, energy)
+	pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, arg_theta, energy)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Function for calculating local energy of configuration s in Ising model
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
 		integer(ik), contiguous, dimension(:), intent(in)    :: s                                 !! Configuration input
 		complex(rk), contiguous, dimension(:), intent(in)    :: theta                          !! Cached value of b + ws
-		real(rk),    contiguous, dimension(:), intent(in)    :: ising_strengths                      !! Ising parameters
+		real(rk),    contiguous, dimension(:), intent(in)    :: ising_params                         !! Ising parameters
 		real(rk),    contiguous, dimension(:), intent(inout) :: s_map                                         !! s -> ±1
 		complex(rk), contiguous, dimension(:), intent(inout) :: arg_theta                                  !! 1 + exp(θ)
 		real(rk), intent(out) :: energy                                                                  !! Ising energy
@@ -343,7 +388,7 @@ module nnqs
 
 		n = self%v_units                                                                          !! Get number of spins
 		m = self%h_units                                                                   !! Get number of hidden units
-		J_str = abs(ising_strengths(1)); B_str = abs(ising_strengths(2))     !! Set coupling strength and field strength
+		J_str = abs(ising_params(1)); B_str = abs(ising_params(2))           !! Set coupling strength and field strength
 		e_coupling = 0.0_rk; e_transverse = 0.0_rk                                                         !! Initialize
 
 		s_map = -2.0_rk*s + 1.0_rk                                                              !! Map {0,1} -> {1.,-1.}
@@ -360,22 +405,21 @@ module nnqs
 		energy = e_coupling + e_transverse              !! Local energy is sum of coupling and transverse field energies
 	end subroutine ising_energy
 
-	impure recursive subroutine propagate(self, epoch, e_loc, samples)
+	impure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
+										  x_a, x_b, x_w)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Procedure for updating parameters according to stochastic optimization update rule
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
 		integer, intent(in) :: epoch                                                                    !! Current epoch
-		real(rk),    contiguous, dimension(:),   intent(in) :: e_loc                                   !! Local energies
-		integer(ik), contiguous, dimension(:,:), intent(in) :: samples                                 !! Network inputs
-
-		real(rk),    allocatable, dimension(:,:)   :: O_a                           !! Log derivatives with respect to a
-		complex(rk), allocatable, dimension(:,:)   :: O_b                           !! Log derivatives with respect to b
-		complex(rk), allocatable, dimension(:,:,:) :: O_w                           !! Log derivatives with respect to w
-
-		real(rk),    allocatable, dimension(:)   :: F_a, S_a, x_a             !! Forces, SR matrix, solution array for a
-		complex(rk), allocatable, dimension(:)   :: F_b, S_b, x_b             !! Forces, SR matrix, solution array for b
-		complex(rk), allocatable, dimension(:,:) :: F_w, S_w, x_w             !! Forces, SR matrix, solution array for w
+		real(rk),    contiguous, dimension(:),     intent(in)    :: e_loc                              !! Local energies
+		integer(ik), contiguous, dimension(:,:),   intent(in)    :: samples                            !! Network inputs
+		real(rk),    contiguous, dimension(:,:),   intent(inout) :: O_a                         !! Log derivatives for a
+		complex(rk), contiguous, dimension(:,:),   intent(inout) :: O_b                         !! Log derivatives for b
+		complex(rk), contiguous, dimension(:,:,:), intent(inout) :: O_w                         !! Log derivatives for w
+		real(rk),    contiguous, dimension(:),     intent(inout) :: F_a, S_a, x_a    !! Forces, SR matrix, solutions arr
+		complex(rk), contiguous, dimension(:),     intent(inout) :: F_b, S_b, x_b    !! Forces, SR matrix, solutions arr
+		complex(rk), contiguous, dimension(:,:),   intent(inout) :: F_w, S_w, x_w    !! Forces, SR matrix, solutions arr
 
 		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dtau         !! Normalization, regularization, ADAM vars
 		integer  :: n, m, num_samples, i, ii, j, jj, ind                                      !! Size and loop variables
@@ -395,14 +439,10 @@ module nnqs
 			dtau = 10.0_rk/n
 		end if
 
-		allocate( O_a(num_samples, n),    F_a(n),    S_a((n*(n+1))/2),    x_a(n),    source=0.0_rk )
-		allocate( O_b(num_samples, m),    F_b(m),    S_b((m*(m+1))/2),    x_b(m),    source=(0.0_rk, 0.0_rk) )
-		allocate( O_w(num_samples, m, n), F_w(m, n), S_w((m*(m+1))/2, n), x_w(m, n), source=(0.0_rk, 0.0_rk) )
-
 		!! Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		O_a = real(samples, kind=rk)                                              !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
+		O_a(:,:) = real(samples, kind=rk)                                         !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
 
-		O_b = matmul(samples, transpose(self%w))                                               !! ws^k for all samples k
+		O_b(:,:) = matmul(O_a, transpose(self%w))                                              !! ws^k for all samples k
 		do concurrent (i = 1:m) shared(O_b, self)
 			O_b(:,i) = exp(conjg(self%b(i)) + O_b(:,i))      !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
 			O_b(:,i) = O_b(:,i)/(1.0_rk + O_b(:,i))         !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
@@ -427,10 +467,10 @@ module nnqs
 
 		call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
-		self%p_a = beta_1*self%p_a + (1.0_rk - beta_1)*x_a                               !! Biased first moment estimate
-		self%r_a = beta_2*self%r_a + (1.0_rk - beta_2)*(x_a**2)                     !! Biased second raw moment estimate
-		x_a = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )        !! ADAM
-		self%a = self%a - dtau*x_a                                                              !! Update visible biases
+		self%p_a(:) = beta_1*self%p_a + (1.0_rk - beta_1)*x_a                            !! Biased first moment estimate
+		self%r_a(:) = beta_2*self%r_a + (1.0_rk - beta_2)*(x_a**2)                  !! Biased second raw moment estimate
+		x_a(:) = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
+		self%a(:) = self%a - dtau*x_a                                                           !! Update visible biases
 		!! End Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -447,10 +487,10 @@ module nnqs
 
 		call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
-		self%p_b = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                               !! Biased first moment estimate
-		self%r_b = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                     !! Biased second raw moment estimate
-		x_b = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )        !! ADAM
-		self%b = self%b - dtau*x_b                                                               !! Update hidden biases
+		self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
+		self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                  !! Biased second raw moment estimate
+		x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
+		self%b(:) = self%b - dtau*x_b                                                            !! Update hidden biases
 		!! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -469,10 +509,10 @@ module nnqs
 			call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')       !! Stochastic reconfig x = S^{-1}F
 		end do
 
-		self%p_w = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                               !! Biased first moment estimate
-		self%r_w = beta_2*self%r_w + (1.0_rk - beta_2)*(x_w**2)                     !! Biased second raw moment estimate
-		x_w = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )        !! ADAM
-		self%w = self%w - dtau*x_w                                                                     !! Update weights
+		self%p_w(:,:) = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                          !! Biased first moment estimate
+		self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*(x_w**2)                !! Biased second raw moment estimate
+		x_w(:,:) = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )   !! ADAM
+		self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
 		!! End Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	end subroutine propagate
 
