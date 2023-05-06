@@ -152,6 +152,7 @@ type RestrictedBoltzmannMachine
     complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b  !! Hidden biases & ADAM arrays
     complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w        !! Weights & ADAM arrays
     character(len=1) :: alignment = 'N'                           !! For tracking spin alignment
+    logical          :: initialized = .false.                           !! Initialization status
     contains
         private
         procedure, pass(self), public :: stochastic_optimization      !! Public training routine
