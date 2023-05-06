@@ -146,21 +146,21 @@ We implement the stochastic optimization algorithm as a type-bound procedure of 
 ```fortran
 type RestrictedBoltzmannMachine
     private
-    integer :: v_units = 0                                            !! Number of visible units
-    integer :: h_units = 0                                             !! Number of hidden units
-    real(kind=rk),    allocatable, dimension(:)   :: a, p_a, r_a !! Visible biases & ADAM arrays
-    complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b  !! Hidden biases & ADAM arrays
-    complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w        !! Weights & ADAM arrays
-    character(len=1) :: alignment = 'N'                           !! For tracking spin alignment
-    logical          :: initialized = .false.                           !! Initialization status
+    integer :: v_units = 0                                                !! Number of visible units
+    integer :: h_units = 0                                                 !! Number of hidden units
+    real(kind=rk),    allocatable, dimension(:)   :: a, p_a, r_a     !! Visible biases & ADAM arrays
+    complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b      !! Hidden biases & ADAM arrays
+    complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w            !! Weights & ADAM arrays
+    character(len=1) :: alignment = 'N'                               !! For tracking spin alignment
+    logical          :: initialized = .false.                               !! Initialization status
     contains
         private
-        procedure, pass(self), public :: stochastic_optimization      !! Public training routine
-        procedure, pass(self) :: init                                  !! Initialization routine
-        procedure, pass(self) :: sample_distribution           !! MCMC routine for sampling p(s)
-        procedure, pass(self) :: prob_ratio                   !! Probability ratio p(s_2)/p(s_1)
-        procedure, pass(self) :: ising_energy                              !! Ising local energy
-        procedure, pass(self) :: propagate            !! Routine for updating weights and biases
+        procedure, pass(self), public :: stochastic_optimization          !! Public training routine
+        procedure, pass(self)         :: init                              !! Initialization routine
+        procedure, pass(self)         :: sample_distribution       !! MCMC routine for sampling p(s)
+        procedure, pass(self)         :: prob_ratio               !! Probability ratio p(s_2)/p(s_1)
+        procedure, pass(self)         :: ising_energy                          !! Ising local energy
+        procedure, pass(self)         :: propagate        !! Routine for updating weights and biases
 end type RestrictedBoltzmannMachine
 ```
 
