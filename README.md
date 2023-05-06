@@ -182,7 +182,7 @@ From a main program, we simply need to initialize the random number generator, i
 ```fortran
 call random_init(repeatable=.false., image_distinct=.true.)
 psi = RestrictedBoltzmannMachine(v_units, h_units)
-call psi%stochastic_optimization( ising_strengths=[J, B] )
+call psi%stochastic_optimization( ising_params=[J, B] )
 ```
 
 The output data consists of energies and spin correlations, which will be written to separate `csv` files in the `/data` folder upon successful execution.
