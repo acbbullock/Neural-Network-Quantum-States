@@ -103,7 +103,7 @@ module nnqs
 		n = self%v_units                                                                          !! Get number of spins
 		m = self%h_units                                                                   !! Get number of hidden units
 		max_epochs = 1000                                                                          !! Set maximum epochs
-		num_samples = 64 + m                                                         !! Set number of samples to produce
+		num_samples = 16                                                             !! Set number of samples to produce
 		stat = 0                                                                                !! Initialize error stat
 
 		call self%init(stat=stat, errmsg=errmsg)                                         !! Initialize Boltzmann machine
@@ -136,8 +136,10 @@ module nnqs
 			logfile = 'optimization_results.log'                                                         !! Set log file
 			call date_and_time(date=date, time=time)                                                !! Get date and time
 
-			logmsg = 'Stochastic Optimization - date: '//trim(adjustl(date))//' | time: '//time    !! Training log title
-			call echo(logmsg//LF//repeat('-', ncopies=len(logmsg))//LF, file_name=logfile)               !! Echo to file
+			logmsg = 'Stochastic Optimization - date: '//trim(adjustl(date))//' | time: '//time//& !! Training log title
+					 LF//repeat('-', ncopies=59)//LF
+
+			call echo(logmsg, file_name=logfile)                                                         !! Echo to file
 			write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
 
 			call system_clock(t1)                                                                         !! Start timer
@@ -146,14 +148,19 @@ module nnqs
 			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
-		!$omp target data map(tofrom: self%b, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, x_a, x_b, x_w)
 		learning: do epoch = 1, max_epochs                                                             !! Begin learning
 			call co_sum(self%w); self%w = self%w/num_images()                           !! Average weights across images
 
 			call self%sample_distribution(epoch=epoch, ising_params=ising_params, &                            !! Inputs
 										  start_sample=start_sample, theta=theta, &                     !! Input/outputs
 										  samples=samples, e_loc=e_loc, corrs=corrs, &                  !! Array outputs
-										  energy=energy, sqerr=sqerr)                                  !! Scalar outputs
+										  energy=energy, sqerr=sqerr, &                                !! Scalar outputs
+										  stat=stat, errmsg=errmsg)                  !! Error vars for local allocations
+
+			if ( (sqrt(sqerr) < 0.001_rk) .and. (mod(this_image(),2) == 1) ) then
+				!! Add Gaussian perturbation to weights on odd images when samples are sticky:
+				self%w = self%w + cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
+			end if
 
 			call co_sum(energy); energy = energy/num_images()                            !! Average energy across images
 			call co_sum(sqerr);  stderr = sqrt(sqerr)/num_images()                        !! Average error across images
@@ -164,11 +171,7 @@ module nnqs
 				correlations(:,epoch) = corrs                                          !! Record correlations to storage
 
 				!! Write progress report ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-				if ( n < 100 ) then                                                                !! Set imaginary time
-					tau = (epoch-1)*1.0_rk/n
-				else
-					tau = (epoch-1)*10.0_rk/n
-				end if
+				tau = (epoch-1)*0.01_rk                                                            !! Get imaginary time
 
 				logmsg = '    Epoch '//str(epoch)//': E[ψ(α(τ='//str(tau, fmt='f', decimals=3)//'))] = '// &
 						 str(energy, fmt='f', decimals=3)//' ± '//str(stderr, fmt='f', decimals=3)
@@ -194,7 +197,6 @@ module nnqs
 								S_a=S_a, S_b=S_b, S_w=S_w, &
 								x_a=x_a, x_b=x_b, x_w=x_w)
 		end do learning
-		!$omp end target data
 
 		if ( this_image() == 1 ) then                                              !! Do finalization and I/O on image 1
 			call system_clock(t2, count_rate=rate); wall_time = real(t2-t1, kind=rk)/rate               !! Get time in s
@@ -208,13 +210,13 @@ module nnqs
 					 LF//'    Ground state accuracy: '//str(acc, fmt='f', decimals=6)//LF// &
 					 LF//'    This program was built and run with compiler "'//compiler_version()//'" '// &
 						 'using compiler options "'//compiler_options()//'".'//LF
-			write(unit=*, fmt='(a)') logmsg                                                     !! Print log message
 
-			call echo(logmsg, logfile)
-			! call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.csv', header=['Energy', 'Error'] )
-			! call to_file(correlations(:,:epoch), './data/correlations_'//self%alignment//'.csv', header=['Epoch'] )
-			call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.dat')
-			call to_file(correlations(:,:epoch), './data/correlations_'//self%alignment//'.dat')
+			call echo(logmsg, logfile)                                                             !! Record log message
+			write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
+
+			!! Write data to files:
+			call to_file(energies(:epoch,:), './data/energies_'//self%alignment//'.csv', header=['Energy', 'Error '] )
+			call to_file(correlations(:,:epoch), './data/correlations_'//self%alignment//'.csv', header=['Epoch'] )
 		end if
 	end subroutine stochastic_optimization
 
@@ -267,18 +269,20 @@ module nnqs
 	end subroutine init
 
 	impure recursive subroutine sample_distribution(self, epoch, ising_params, start_sample, theta, samples, &
-													e_loc, corrs, energy, sqerr)
+													e_loc, corrs, energy, sqerr, stat, errmsg)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
-		integer, intent(in) :: epoch                                                                    !! Current epoch
+		integer,                           intent(in) :: epoch                                          !! Current epoch
 		real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
 		integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample         !! Sample to begin thermalization
 		complex(rk), contiguous, dimension(:),   intent(inout) :: theta                   !! θ = b + ws for start sample
 		integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
 		real(rk),    contiguous, dimension(:),   intent(out)   :: e_loc, corrs    !! Local energies, sample correlations
-		real(rk), intent(out) :: energy, sqerr                                           !! Energy average, square error
+		real(rk),            intent(out)   :: energy, sqerr                              !! Energy average, square error
+		integer,             intent(inout) :: stat                                                         !! Error stat
+		character(len=1000), intent(inout) :: errmsg                                                    !! Error message
 
 		real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
 		integer(ik), allocatable, dimension(:) :: s_prop, s                                     !! Sample storage arrays
@@ -292,9 +296,15 @@ module nnqs
 		m = self%h_units                                                                   !! Get number of hidden units
 		num_samples = size(samples, dim=1)                                               !! Number of samples to produce
 
-		allocate( s_map(n),                              source=0.0_rk )
-		allocate( s_prop(n), s(n),                       source=0_ik )
-		allocate( theta2(m), theta_loc(m), arg_theta(m), source=(0.0_rk, 0.0_rk) )
+		!! Allocate local work arrays:
+		allocate(s_map(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(s_prop(n), s(n), source=0_ik, stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+		allocate(theta2(m), theta_loc(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
 		!! Thermalization ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		max_thermal_time = 2001 - 2*epoch                                           !! Set time limit for thermalization
@@ -405,7 +415,7 @@ module nnqs
 		energy = e_coupling + e_transverse              !! Local energy is sum of coupling and transverse field energies
 	end subroutine ising_energy
 
-	impure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
+	pure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
 										  x_a, x_b, x_w)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Procedure for updating parameters according to stochastic optimization update rule
@@ -426,18 +436,15 @@ module nnqs
 
 		n = self%v_units                                                                          !! Get number of spins
 		m = self%h_units                                                                   !! Get number of hidden units
-		num_samples = size(samples, dim=1)                                                      !! Get number of samples
-		covar_norm = 1.0_rk/(num_samples - 1)                                     !! Set sample covariance normalization
-		delta = 1e-5_rk                                                                  !! Set regularization parameter
-		beta_1 = 0.99_rk                                                                  !! Decay rate for first moment
-		beta_2 = 0.999_rk                                                                !! Decay rate for second moment
-		epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
 
-		if ( n < 100 ) then                                                                             !! Set time step
-			dtau = 1.0_rk/n
-		else
-			dtau = 10.0_rk/n
-		end if
+		num_samples = size(samples, dim=1)                                                      !! Get number of samples
+		covar_norm  = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
+
+		delta   = 1e-3_rk                                                                !! Set regularization parameter
+		beta_1  = 0.99_rk                                                                 !! Decay rate for first moment
+		beta_2  = 0.999_rk                                                               !! Decay rate for second moment
+		epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
+		dtau    = 0.01_rk                                                                                   !! Time step
 
 		!! Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		O_a(:,:) = real(samples, kind=rk)                                         !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
@@ -454,12 +461,12 @@ module nnqs
 		!! End Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do concurrent (j = 1:n) shared(O_a, F_a, e_loc, num_samples, covar_norm)
+		do concurrent (j = 1:n) shared(O_a, F_a, e_loc)
 			O_a(:,j) = O_a(:,j) - sum(O_a(:,j))/num_samples                         !! Center each column about its mean
 			F_a(j) = sum(O_a(:,j)*e_loc)*covar_norm                                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
 		end do
 
-		do concurrent (jj = 1:n, j = 1:n, j >= jj) shared(S_a, O_a, covar_norm, delta) local(ind)
+		do concurrent (jj = 1:n, j = 1:n, j >= jj) shared(S_a, O_a) local(ind)
 			ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                      !! Packed index mapping
 			S_a(ind) = sum(O_a(:,j)*O_a(:,jj))*covar_norm                                                  !! Covariance
 			if (j == jj) S_a(ind) = S_a(ind) + delta                                  !! Add regularization to diagonals
@@ -474,12 +481,12 @@ module nnqs
 		!! End Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do concurrent (i = 1:m) shared(O_b, F_b, e_loc, num_samples, covar_norm)
+		do concurrent (i = 1:m) shared(O_b, F_b, e_loc)
 			O_b(:,i) = O_b(:,i) - sum(O_b(:,i))/num_samples                         !! Center each column about its mean
 			F_b(i) = sum(conjg(O_b(:,i))*e_loc)*covar_norm                                     !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
 		end do
 
-		do concurrent (ii = 1:m, i = 1:m, i >= ii) shared(S_b, O_b, covar_norm, delta) local(ind)
+		do concurrent (ii = 1:m, i = 1:m, i >= ii) shared(S_b, O_b) local(ind)
 			ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
 			S_b(ind) = sum(conjg(O_b(:,i))*O_b(:,ii))*covar_norm                                           !! Covariance
 			if (i == ii) S_b(ind) = S_b(ind)%re + delta                               !! Add regularization to diagonals
@@ -494,12 +501,12 @@ module nnqs
 		!! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		!! Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do concurrent (j = 1:n, i = 1:m) shared(O_w, F_w, e_loc, num_samples, covar_norm)
+		do concurrent (j = 1:n, i = 1:m) shared(O_w, F_w, e_loc)
 			O_w(:,i,j) = O_w(:,i,j) - sum(O_w(:,i,j))/num_samples                   !! Center each column about its mean
 			F_w(i,j) = sum(conjg(O_w(:,i,j))*e_loc)*covar_norm                            !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
 		end do
 
-		do concurrent (j = 1:n, ii = 1:m, i = 1:m, i >= ii) shared(S_w, O_w, covar_norm, delta) local(ind)
+		do concurrent (j = 1:n, ii = 1:m, i = 1:m, i >= ii) shared(S_w, O_w) local(ind)
 			ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
 			S_w(ind,j) = sum(conjg(O_w(:,i,j))*O_w(:,ii,j))*covar_norm                                     !! Covariance
 			if (i == ii) S_w(ind,j) = S_w(ind,j)%re + delta                           !! Add regularization to diagonals
