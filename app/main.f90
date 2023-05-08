@@ -10,14 +10,12 @@ program main
 	!! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type(RestrictedBoltzmannMachine) :: psi                                                            !! Neural network
 
-	integer, parameter :: spins = 1*1024, hidden_units = 1*64                        !! Number of spins and hidden units
+	integer, parameter :: spins = 1024, hidden_units = 64                            !! Number of spins and hidden units
 
 	!! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	call random_init(repeatable=.true., image_distinct=.true.)                     !! Initialize random number generator
+	call random_init(repeatable=.false., image_distinct=.true.)                    !! Initialize random number generator
 	call omp_set_default_device(1)                            !! Set OpenMP offload device (device id depends on system)
 
 	psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                             !! Create instance
-
-	call psi%stochastic_optimization(ising_params=[ -0.5_rk, 0.1_rk ])                                    !! Input [J,B]
-
+	call psi%stochastic_optimization(ising_params=[ -0.5_rk, 0.1_rk ])                  !! Input [J,B] and train network
 end program main
