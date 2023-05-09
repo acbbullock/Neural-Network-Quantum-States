@@ -20,7 +20,7 @@ heatmap_colors <- colorpanel(100, 'salmon2', 'white', 'skyblue2')               
 png('./data/correlations_F.png', res=600, width=10.67, height=6, units='in')              ## Open png device for saving
 heatmap.2(                                                                        ## Ferromagnetic correlations heatmap
 	corr_F, col=heatmap_colors, trace='none', margins = c(10.67, 6), 
-	main='Ferromagnetic Ising Chain Correlations ', ylab='Site', 
+	main='Ferromagnetic Ising Correlations ', ylab='Site', 
 	key.title='Correlation Strength', key.xlab='', key.ylab='', 
 	density.info='density', symkey=TRUE, dendrogram='both'
 )
@@ -29,7 +29,7 @@ dev.off()                                                                       
 png('./data/correlations_A.png', res=600, width=10.67, height=6, units='in')              ## Open png device for saving
 heatmap.2(                                                                    ## Antiferromagnetic correlations heatmap
 	corr_A, col=heatmap_colors, trace='none', margins = c(10.67, 6), 
-	main='Antiferromagnetic Ising Chain Correlations ', ylab='Site', 
+	main='Anti-ferromagnetic Ising Correlations ', ylab='Site', 
 	key.title='Correlation Strength', key.xlab='', key.ylab='', 
 	density.info='density', symkey=TRUE, dendrogram='both'  
 )
