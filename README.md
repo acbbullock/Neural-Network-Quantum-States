@@ -1,10 +1,10 @@
 # Learning Quantum States with Neural Networks
 
 ![Energies_A](data/energies_A.png)
-Figure 1: Statistical expectation of the energy and standard error of the mean over the course of learning for the antiferromagnetic Ising model with $J = -0.5$ and $B = 0.1$ for $n = 1000$ spins.
+Figure 1: Statistical expectation of the energy and standard error of the mean for the anti-ferromagnetic Ising chain of $n = 1024$ spins with $J = -0.5$ and $B = 0.1$.
 
 ![Correlations_A](data/correlations_A.png)
-Figure 2: Antiferromagnetic Ising model correlations over the course of learning for $n = 1000$ spins with $J = -0.5$ and $B = 0.1$.
+Figure 2: Correlations for the anti-ferromagnetic Ising chain of $n = 1024$ spins with $J = -0.5$ and $B = 0.1$.
 ## Contents
 
 1. [Introduction](#introduction)
