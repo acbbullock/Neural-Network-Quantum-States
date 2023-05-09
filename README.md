@@ -146,20 +146,21 @@ We implement the stochastic optimization algorithm as a type-bound procedure of 
 ```fortran
 type RestrictedBoltzmannMachine
     private
-    integer :: v_units = 0                                            !! Number of visible units
-    integer :: h_units = 0                                             !! Number of hidden units
-    real(kind=rk),    allocatable, dimension(:)   :: a, p_a, r_a !! Visible biases & ADAM arrays
-    complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b  !! Hidden biases & ADAM arrays
-    complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w        !! Weights & ADAM arrays
-    character(len=1) :: alignment = 'N'                           !! For tracking spin alignment
+    integer :: v_units = 0                                                !! Number of visible units
+    integer :: h_units = 0                                                 !! Number of hidden units
+    real(kind=rk),    allocatable, dimension(:)   :: a, p_a, r_a     !! Visible biases & ADAM arrays
+    complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b      !! Hidden biases & ADAM arrays
+    complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w            !! Weights & ADAM arrays
+    character(len=1) :: alignment = 'N'                               !! For tracking spin alignment
+    logical          :: initialized = .false.                               !! Initialization status
     contains
         private
-        procedure, pass(self), public :: stochastic_optimization      !! Public training routine
-        procedure, pass(self) :: init                                  !! Initialization routine
-        procedure, pass(self) :: sample_distribution           !! MCMC routine for sampling p(s)
-        procedure, pass(self) :: prob_ratio                   !! Probability ratio p(s_2)/p(s_1)
-        procedure, pass(self) :: ising_energy                              !! Ising local energy
-        procedure, pass(self) :: propagate            !! Routine for updating weights and biases
+        procedure, pass(self), public :: stochastic_optimization          !! Public training routine
+        procedure, pass(self)         :: init                              !! Initialization routine
+        procedure, pass(self)         :: sample_distribution       !! MCMC routine for sampling p(s)
+        procedure, pass(self)         :: prob_ratio               !! Probability ratio p(s_2)/p(s_1)
+        procedure, pass(self)         :: ising_energy                          !! Ising local energy
+        procedure, pass(self)         :: propagate        !! Routine for updating weights and biases
 end type RestrictedBoltzmannMachine
 ```
 
@@ -182,7 +183,7 @@ From a main program, we simply need to initialize the random number generator, i
 ```fortran
 call random_init(repeatable=.false., image_distinct=.true.)
 psi = RestrictedBoltzmannMachine(v_units, h_units)
-call psi%stochastic_optimization( ising_strengths=[J, B] )
+call psi%stochastic_optimization( ising_params=[J, B] )
 ```
 
 The output data consists of energies and spin correlations, which will be written to separate `csv` files in the `/data` folder upon successful execution.
@@ -193,18 +194,32 @@ Note: with `init`, the biases are initialized to zero prior to training, and the
 
 The only dependency of this project is the Intel MKL distribution of LAPACK. With a system installation of [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html) Base and HPC toolkits (including MKL), the project can be built and run on Windows 10/11 and Linux with [fpm](https://github.com/fortran-lang/fpm) from the project root using a single command, assuming the shell environment has sourced the oneAPI environment variables beforehand.
 
-To target a multi-core CPU with the AVX2 instruction set for best performance, the project may be built and run on Windows 10/11 using the command
+To target an $n$ core CPU with SIMD instructions, the project can be built and run on Windows 10/11 using the command
 
 ```powershell
-fpm run --compiler ifort --flag "/O3 /arch:CORE-AVX2 /Qcoarray /Qcoarray-num-images:n /heap-arrays:0 /Qparallel /Qmkl:parallel /Qopenmp /Qopenmp-simd /fp:precise" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
+fpm run --compiler ifort --flag "/Qcoarray /Qcoarray-num-images:n /Qopenmp /Qopenmp-simd" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
 ```
 
 and on Linux using the command
 
 ```bash
-fpm run --compiler ifort --flag "-O3 -march=core-avx2 -coarray -coarray-num-images=n -heap-arrays 0 -parallel -qmkl=parallel -qopenmp -qopenmp-simd -fp-model=precise" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lpthread -lm -ldl"
+fpm run --compiler ifort --flag "-coarray -coarray-num-images=n -qopenmp -qopenmp-simd" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lpthread -lm -ldl"
 ```
 
 with equivalent features.
 
-Here, the AVX2 instructions may be replaced with `-xHost` (`/QxHost`) or another instruction set, and `n` is the number of images to execute, which generally should equal the number of CPU cores available. The `heap-arrays` option may be omitted for smaller systems, but is necessary to avoid stack overflows for larger systems (unless `ulimit` is sufficiently raised on Linux). We then enable the generation of multi-threaded code with OpenMP and SIMD compilation. Finally, the link flag specifies the MKL and OpenMP runtime libraries for static linking, provided by the [Intel Link Line Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
+Here, `n` is the number of images to execute, which generally should equal the number of CPU cores available. We then enable the generation of multi-threaded code with OpenMP and SIMD compilation. Finally, the link flag specifies the MKL and OpenMP runtime libraries for static linking, provided by the [Intel Link Line Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
+
+To target an $n$ core CPU and an Intel GPU for acceleration, the project can be built and run on Windows 10/11 using the command
+
+```powershell
+fpm run --compiler ifx --flag "/Qcoarray /Qcoarray-num-images:n /Qiopenmp /Qopenmp-targets:spir64 /Qopenmp-target-do-concurrent" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib OpenCL.lib"
+```
+
+and on Linux using the command
+
+```bash
+fpm run --compiler ifx --flag "-coarray -coarray-num-images=n -fiopenmp -fopenmp-targets=spir64 -fopenmp-target-do-concurrent" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lOpenCL -lpthread -lm -ldl"
+```
+
+with equivalent features.
