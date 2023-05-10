@@ -148,6 +148,7 @@ module nnqs
 			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
+		!$omp target data map(to: O_a, O_b, O_w, e_loc, self%w, self%b, samples) map(from: F_a, F_b, F_w, S_a, S_b, S_w)
 		learning: do epoch = 1, max_epochs                                                             !! Begin learning
 			call co_sum(self%w); self%w = self%w/num_images()                           !! Average weights across images
 
@@ -197,6 +198,7 @@ module nnqs
 								S_a=S_a, S_b=S_b, S_w=S_w, &
 								x_a=x_a, x_b=x_b, x_w=x_w)
 		end do learning
+		!$omp end target data
 
 		if ( this_image() == 1 ) then                                              !! Do finalization and I/O on image 1
 			call system_clock(t2, count_rate=rate); wall_time = real(t2-t1, kind=rk)/rate               !! Get time in s
@@ -415,7 +417,7 @@ module nnqs
 		energy = e_coupling + e_transverse              !! Local energy is sum of coupling and transverse field energies
 	end subroutine ising_energy
 
-	pure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
+	impure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
 										  x_a, x_b, x_w)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Procedure for updating parameters according to stochastic optimization update rule
@@ -432,7 +434,10 @@ module nnqs
 		complex(rk), contiguous, dimension(:,:),   intent(inout) :: F_w, S_w, x_w    !! Forces, SR matrix, solutions arr
 
 		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dtau         !! Normalization, regularization, ADAM vars
-		integer  :: n, m, num_samples, i, ii, j, jj, ind                                      !! Size and loop variables
+		integer  :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
+
+		real(rk)    :: tmpr                                                                                 !! Temp real
+		complex(rk) :: tmpc                                                                              !! Temp complex
 
 		n = self%v_units                                                                          !! Get number of spins
 		m = self%h_units                                                                   !! Get number of hidden units
@@ -446,81 +451,199 @@ module nnqs
 		epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
 		dtau    = 0.01_rk                                                                                   !! Time step
 
-		!! Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		O_a(:,:) = real(samples, kind=rk)                                         !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
+		!$omp target update to(samples, e_loc, self%w, self%b)
 
-		O_b(:,:) = matmul(O_a, transpose(self%w))                                              !! ws^k for all samples k
-		do concurrent (i = 1:m) shared(O_b, self)
-			O_b(:,i) = exp(conjg(self%b(i)) + O_b(:,i))      !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
-			O_b(:,i) = O_b(:,i)/(1.0_rk + O_b(:,i))         !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
+		!$omp target teams distribute parallel do collapse(2)
+		do j = 1, n
+			do k = 1, num_samples
+				O_a(k,j) = real(samples(k,j), kind=rk)                            !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
+			end do
 		end do
+		!$omp end target teams distribute parallel do
 
-		do concurrent (j = 1:n, i = 1:m) shared(O_a, O_b, O_w)
-			O_w(:,i,j) = O_a(:,j)*O_b(:,i)         !! O_w(k,i,j) = 𝜕/𝜕w_ij ln ψ(s^k) = s_j^k exp(θ_i^k)/(1 + exp(θ_i^k))
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		do i = 1, m
+			!$omp parallel do reduction(+: tmpc)
+			do k = 1, num_samples
+				tmpc = (0.0_rk,0.0_rk)
+				do j = 1, n
+					tmpc = tmpc + O_a(k,j)*self%w(i,j)
+				end do
+				O_b(k,i) = tmpc                                                                !! ws^k for all samples k
+			end do
+			!$omp end parallel do
 		end do
-		!! End Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		!$omp end target teams distribute
 
-		!! Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do concurrent (j = 1:n) shared(O_a, F_a, e_loc)
-			O_a(:,j) = O_a(:,j) - sum(O_a(:,j))/num_samples                         !! Center each column about its mean
-			F_a(j) = sum(O_a(:,j)*e_loc)*covar_norm                                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
+		!$omp target teams distribute parallel do collapse(2)
+		do i = 1, m
+			do k = 1, num_samples
+				O_b(k,i) = exp(conjg(self%b(i)) + O_b(k,i))  !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
+				O_b(k,i) = O_b(k,i)/(1.0_rk + O_b(k,i))     !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
+			end do
 		end do
+		!$omp end target teams distribute parallel do
 
-		do concurrent (jj = 1:n, j = 1:n, j >= jj) shared(S_a, O_a) local(ind)
-			ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                      !! Packed index mapping
-			S_a(ind) = sum(O_a(:,j)*O_a(:,jj))*covar_norm                                                  !! Covariance
-			if (j == jj) S_a(ind) = S_a(ind) + delta                                  !! Add regularization to diagonals
+		!$omp target teams distribute parallel do collapse(3)
+		do j = 1, n
+			do i = 1, m
+				do k = 1, num_samples
+					O_w(k,i,j) = O_a(k,j)*O_b(k,i) !! O_w(k,i,j) = 𝜕/𝜕w_ij ln ψ(s^k) = s_j^k exp(θ_i^k)/(1 + exp(θ_i^k))
+				end do
+			end do
 		end do
+		!$omp end target teams distribute parallel do
 
-		call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
+		!$omp target teams distribute parallel do reduction(+: tmpr) collapse(1)
+		do j = 1, n
+			tmpr = 0.0_rk
+			do k = 1, num_samples
+				tmpr = tmpr + O_a(k,j)
+			end do
+			tmpr = tmpr/num_samples
+			do k = 1, num_samples
+				O_a(k,j) = O_a(k,j) - tmpr                                          !! Center each column about its mean
+			end do
+		end do
+		!$omp end target teams distribute parallel do
+
+		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(1)
+		do i = 1, m
+			tmpc = (0.0_rk,0.0_rk)
+			do k = 1, num_samples
+				tmpc = tmpc + O_b(k,i)
+			end do
+			tmpc = tmpc/num_samples
+			do k = 1, num_samples
+				O_b(k,i) = O_b(k,i) - tmpc                                           !! Center each column about its mean
+			end do
+		end do
+		!$omp end target teams distribute parallel do
+
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		do j = 1, n
+			!$omp parallel do reduction(+: tmpc)
+			do i = 1, m
+				tmpc = (0.0_rk,0.0_rk)
+				do k = 1, num_samples
+					tmpc = tmpc + O_w(k,i,j)
+				end do
+				tmpc = tmpc/num_samples
+				do k = 1, num_samples
+					O_w(k,i,j) = O_w(k,i,j) - tmpc                                  !! Center each column about its mean
+				end do
+			end do
+			!$omp end parallel do
+		end do
+		!$omp end target teams distribute
+
+		!$omp target teams distribute parallel do reduction(+: tmpr) collapse(1)
+		do j = 1, n
+			tmpr = 0.0_rk
+			do k = 1, num_samples
+				tmpr = tmpr + O_a(k,j)*e_loc(k)
+			end do
+			F_a(j) = tmpr*covar_norm                                                           !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
+		end do
+		!$omp end target teams distribute parallel do
+
+		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(1)
+		do i = 1, m
+			tmpc = (0.0_rk,0.0_rk)
+			do k = 1, num_samples
+				tmpc = tmpc + conjg(O_b(k,i))*e_loc(k)
+			end do
+			F_b(i) = tmpc*covar_norm                                                           !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
+		end do
+		!$omp end target teams distribute parallel do
+
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		do j = 1, n
+			!$omp parallel do reduction(+: tmpc)
+			do i = 1, m
+				tmpc = (0.0_rk,0.0_rk)
+				do k = 1, num_samples
+					tmpc = tmpc + conjg(O_w(k,i,j))*e_loc(k)
+				end do
+				F_w(i,j) = tmpc*covar_norm                                                !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
+			end do
+			!$omp end parallel do
+		end do
+		!$omp end target teams distribute
+
+		!$omp target teams distribute reduction(+: tmpr) map(tmpr)
+		do jj = 1, n
+			!$omp parallel do reduction(+: tmpr)
+			do j = 1, n
+				if (j < jj) cycle
+				tmpr = 0.0_rk
+				do k = 1, num_samples
+					tmpr = tmpr + O_a(k,j)*O_a(k,jj)
+				end do
+				ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                  !! Packed index mapping
+				S_a(ind) = tmpr*covar_norm                                                                 !! Covariance
+				if (j == jj) S_a(ind) = S_a(ind) + delta                              !! Add regularization to diagonals
+			end do
+			!$omp end parallel do
+		end do
+		!$omp end target teams distribute
+
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		do ii = 1, m
+			!$omp parallel do reduction(+: tmpc)
+			do i = 1, m
+				if (i < ii) cycle
+				tmpc = (0.0_rk,0.0_rk)
+				do k = 1, num_samples
+					tmpc = tmpc + conjg(O_b(k,i))*O_b(k,ii)
+				end do
+				ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                  !! Packed index mapping
+				S_b(ind) = tmpc*covar_norm                                                                 !! Covariance
+				if (i == ii) S_b(ind) = S_b(ind)%re + delta                           !! Add regularization to diagonals
+			end do
+			!$omp end parallel do
+		end do
+		!$omp end target teams distribute
+
+		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(3)
+		do j = 1, n
+			do ii = 1, m
+				do i = 1, m
+					if (i < ii) cycle
+					tmpc = (0.0_rk,0.0_rk)
+					do k = 1, num_samples
+						tmpc = tmpc + conjg(O_w(k,i,j))*O_w(k,ii,j)
+					end do
+					ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                              !! Packed index mapping
+					S_w(ind,j) = tmpc*covar_norm                                                           !! Covariance
+					if (i == ii) S_w(ind,j) = S_w(ind,j)%re + delta                   !! Add regularization to diagonals
+				end do
+			end do
+		end do
+		!$omp end target teams distribute parallel do
+
+		!$omp target update from(F_a, F_b, F_w, S_a, S_b, S_w)
+
+		call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                                        !! Solve x = S^{-1}F
+		call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                                        !! Solve x = S^{-1}F
+		do j = 1, n
+			call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')                     !! Solve x = S^{-1}F
+		end do
 
 		self%p_a(:) = beta_1*self%p_a + (1.0_rk - beta_1)*x_a                            !! Biased first moment estimate
 		self%r_a(:) = beta_2*self%r_a + (1.0_rk - beta_2)*(x_a**2)                  !! Biased second raw moment estimate
 		x_a(:) = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
 		self%a(:) = self%a - dtau*x_a                                                           !! Update visible biases
-		!! End Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		!! Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do concurrent (i = 1:m) shared(O_b, F_b, e_loc)
-			O_b(:,i) = O_b(:,i) - sum(O_b(:,i))/num_samples                         !! Center each column about its mean
-			F_b(i) = sum(conjg(O_b(:,i))*e_loc)*covar_norm                                     !! F(i) = ⟨Δ∂_{b_i}^† ΔH⟩
-		end do
-
-		do concurrent (ii = 1:m, i = 1:m, i >= ii) shared(S_b, O_b) local(ind)
-			ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
-			S_b(ind) = sum(conjg(O_b(:,i))*O_b(:,ii))*covar_norm                                           !! Covariance
-			if (i == ii) S_b(ind) = S_b(ind)%re + delta                               !! Add regularization to diagonals
-		end do
-
-		call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
 		self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
 		self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                  !! Biased second raw moment estimate
 		x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
 		self%b(:) = self%b - dtau*x_b                                                            !! Update hidden biases
-		!! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		!! Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		do concurrent (j = 1:n, i = 1:m) shared(O_w, F_w, e_loc)
-			O_w(:,i,j) = O_w(:,i,j) - sum(O_w(:,i,j))/num_samples                   !! Center each column about its mean
-			F_w(i,j) = sum(conjg(O_w(:,i,j))*e_loc)*covar_norm                            !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
-		end do
-
-		do concurrent (j = 1:n, ii = 1:m, i = 1:m, i >= ii) shared(S_w, O_w) local(ind)
-			ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                      !! Packed index mapping
-			S_w(ind,j) = sum(conjg(O_w(:,i,j))*O_w(:,ii,j))*covar_norm                                     !! Covariance
-			if (i == ii) S_w(ind,j) = S_w(ind,j)%re + delta                           !! Add regularization to diagonals
-		end do
-
-		do j = 1, n
-			call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')       !! Stochastic reconfig x = S^{-1}F
-		end do
 
 		self%p_w(:,:) = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                          !! Biased first moment estimate
 		self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*(x_w**2)                !! Biased second raw moment estimate
 		x_w(:,:) = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )   !! ADAM
 		self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
-		!! End Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	end subroutine propagate
 
 	impure recursive subroutine random_sample(s)
