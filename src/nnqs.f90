@@ -125,6 +125,8 @@ module nnqs
 				 stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
+		!$omp target data map(to: O_a, O_b, O_w, e_loc, self%w, self%b, samples) map(from: F_a, F_b, F_w, S_a, S_b, S_w)
+
 		call random_sample(start_sample)                                                !! Randomize the starting sample
 		theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
@@ -148,7 +150,6 @@ module nnqs
 			sync images (1)                                                            !! Wait for response from image 1
 		end if
 
-		!$omp target data map(to: O_a, O_b, O_w, e_loc, self%w, self%b, samples) map(from: F_a, F_b, F_w, S_a, S_b, S_w)
 		learning: do epoch = 1, max_epochs                                                             !! Begin learning
 			call co_sum(self%w); self%w = self%w/num_images()                           !! Average weights across images
 
@@ -158,14 +159,14 @@ module nnqs
 										  energy=energy, sqerr=sqerr, &                                !! Scalar outputs
 										  stat=stat, errmsg=errmsg)                  !! Error vars for local allocations
 
-			if ( (sqrt(sqerr) < 0.001_rk) .and. (mod(this_image(),2) == 1) ) then
-				!! Add Gaussian perturbation to weights on odd images when samples are sticky:
-				self%w = self%w + cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
-			end if
-
 			call co_sum(energy); energy = energy/num_images()                            !! Average energy across images
 			call co_sum(sqerr);  stderr = sqrt(sqerr)/num_images()                        !! Average error across images
 			call co_sum(corrs);  corrs = corrs/num_images()                        !! Average correlations across images
+
+			if ( stderr < 0.01_rk ) then
+				!! Add Gaussian perturbation:
+				self%w = self%w + cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
+			end if
 
 			if ( this_image() == 1 ) then                                                !! Do data recording on image 1
 				energies(epoch,:) = [energy, stderr]                               !! Record energy and error to storage
@@ -198,6 +199,7 @@ module nnqs
 								S_a=S_a, S_b=S_b, S_w=S_w, &
 								x_a=x_a, x_b=x_b, x_w=x_w)
 		end do learning
+
 		!$omp end target data
 
 		if ( this_image() == 1 ) then                                              !! Do finalization and I/O on image 1
@@ -287,8 +289,8 @@ module nnqs
 		character(len=1000), intent(inout) :: errmsg                                                    !! Error message
 
 		real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
-		integer(ik), allocatable, dimension(:) :: s_prop, s                                     !! Sample storage arrays
-		complex(rk), allocatable, dimension(:) :: theta2, theta_loc, arg_theta                         !! Storage arrays
+		integer(ik), allocatable, dimension(:) :: s_prop                                        !! Sample storage arrays
+		complex(rk), allocatable, dimension(:) :: theta2, arg_theta                                    !! Storage arrays
 
 		real(rk) :: acc_prob, r                                                            !! M-H acceptance probability
 		integer  :: n, m, passes, num_samples                          !! Number of spins, hidden units, passes, samples
@@ -302,10 +304,10 @@ module nnqs
 		allocate(s_map(n), source=0.0_rk, stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-		allocate(s_prop(n), s(n), source=0_ik, stat=stat, errmsg=errmsg)
+		allocate(s_prop(n), source=0_ik, stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-		allocate(theta2(m), theta_loc(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+		allocate(theta2(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
 		!! Thermalization ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -331,32 +333,27 @@ module nnqs
 
 		!! Stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		stationary_sampling: do k = 1, num_samples
-			s(:) = start_sample                                                             !! Copy start sample to temp
-			theta_loc(:) = theta                                                                   !! Copy theta to temp
-			s_prop(:) = s                                                                            !! Copy temp sample
+			s_prop(:) = start_sample                                                                 !! Copy temp sample
 
 			metropolis_hastings: do pass = 1, passes
 				call random_number(r); rind = floor(n*r) + 1                                    !! Generate random index
 				s_prop(rind) = 1_ik - s_prop(rind)                                          !! Flip spin at random index
-				call self%prob_ratio(ind=rind, s1=s, s2=s_prop, theta1=theta_loc, theta2=theta2, p=acc_prob)    !! Acc p
+				call self%prob_ratio(ind=rind,s1=start_sample,s2=s_prop,theta1=theta,theta2=theta2,p=acc_prob)  !! Acc p
 
 				call random_number(r)                                       !! Sample from uniform distribution on [0,1)
 				if ( r < acc_prob ) then                                                     !! M-H acceptance criterion
-					theta_loc(:) = theta_loc(:) + self%w(:,rind)*real(s_prop(rind) - s(rind), kind=rk)       !! Update θ
-					s(rind) = s_prop(rind)                                                              !! Update sample
+					theta(:) = theta(:) + self%w(:,rind)*real(s_prop(rind) - start_sample(rind), kind=rk)    !! Update θ
+					start_sample(rind) = s_prop(rind)                                                   !! Update sample
 				else
 					s_prop(rind) = 1_ik - s_prop(rind)                                                   !! Reverse flip
 				end if
 			end do metropolis_hastings
 
-			samples(k,:) = s                                                                !! Transfer sample to output
-			call self%ising_energy( s=s, theta=theta_loc, ising_params=ising_params, s_map=s_map, & !! Local energy of s
-									arg_theta=arg_theta, energy=e_loc(k) )
+			samples(k,:) = start_sample                                                     !! Transfer sample to output
+			call self%ising_energy( s=start_sample, theta=theta, ising_params=ising_params, &       !! Local energy of s
+									s_map=s_map, arg_theta=arg_theta, energy=e_loc(k) )
 		end do stationary_sampling
 		!! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		start_sample = s                                     !! Record stationary sample to begin next round of sampling
-		theta = theta_loc                                                    !! Record θ to begin next round of sampling
 
 		call get_correlations(samples, corrs=corrs, alignment=self%alignment)        !! Get spin correlations of samples
 		energy = sum(e_loc)/num_samples                                                           !! Average of energies
@@ -451,9 +448,9 @@ module nnqs
 		epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
 		dtau    = 0.01_rk                                                                                   !! Time step
 
-		!$omp target update to(samples, e_loc, self%w, self%b)
+		!$omp target update to(samples, e_loc, self%w, self%b) depend(in:samples, e_loc, self%w, self%b) nowait
 
-		!$omp target teams distribute parallel do collapse(2)
+		!$omp target teams distribute parallel do collapse(2) depend(in: samples) depend(out: O_a) nowait
 		do j = 1, n
 			do k = 1, num_samples
 				O_a(k,j) = real(samples(k,j), kind=rk)                            !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
@@ -461,9 +458,9 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(2) &
+		!$omp& depend(in: O_a, self%w) depend(out: O_b) nowait
 		do i = 1, m
-			!$omp parallel do reduction(+: tmpc)
 			do k = 1, num_samples
 				tmpc = (0.0_rk,0.0_rk)
 				do j = 1, n
@@ -471,11 +468,10 @@ module nnqs
 				end do
 				O_b(k,i) = tmpc                                                                !! ws^k for all samples k
 			end do
-			!$omp end parallel do
 		end do
-		!$omp end target teams distribute
+		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do collapse(2)
+		!$omp target teams distribute parallel do collapse(2) depend(in: self%b) depend(inout: O_b) nowait
 		do i = 1, m
 			do k = 1, num_samples
 				O_b(k,i) = exp(conjg(self%b(i)) + O_b(k,i))  !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
@@ -484,7 +480,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do collapse(3)
+		!$omp target teams distribute parallel do collapse(3) depend(in: O_a, O_b) depend(out: O_w) nowait
 		do j = 1, n
 			do i = 1, m
 				do k = 1, num_samples
@@ -494,7 +490,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpr) collapse(1)
+		!$omp target teams distribute parallel do reduction(+: tmpr) depend(inout: O_a) nowait
 		do j = 1, n
 			tmpr = 0.0_rk
 			do k = 1, num_samples
@@ -507,7 +503,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(1)
+		!$omp target teams distribute parallel do reduction(+: tmpc) depend(inout: O_b) nowait
 		do i = 1, m
 			tmpc = (0.0_rk,0.0_rk)
 			do k = 1, num_samples
@@ -520,9 +516,8 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(2) depend(inout: O_w) nowait
 		do j = 1, n
-			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
 				tmpc = (0.0_rk,0.0_rk)
 				do k = 1, num_samples
@@ -533,11 +528,10 @@ module nnqs
 					O_w(k,i,j) = O_w(k,i,j) - tmpc                                  !! Center each column about its mean
 				end do
 			end do
-			!$omp end parallel do
 		end do
-		!$omp end target teams distribute
+		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpr) collapse(1)
+		!$omp target teams distribute parallel do reduction(+: tmpr) depend(in: O_a, e_loc) depend(out: F_a) nowait
 		do j = 1, n
 			tmpr = 0.0_rk
 			do k = 1, num_samples
@@ -547,7 +541,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(1)
+		!$omp target teams distribute parallel do reduction(+: tmpc) depend(in: O_b, e_loc) depend(out: F_b) nowait
 		do i = 1, m
 			tmpc = (0.0_rk,0.0_rk)
 			do k = 1, num_samples
@@ -557,9 +551,9 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(2) &
+		!$omp& depend(in: O_w, e_loc) depend(out: F_w) nowait
 		do j = 1, n
-			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
 				tmpc = (0.0_rk,0.0_rk)
 				do k = 1, num_samples
@@ -567,13 +561,12 @@ module nnqs
 				end do
 				F_w(i,j) = tmpc*covar_norm                                                !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
 			end do
-			!$omp end parallel do
 		end do
-		!$omp end target teams distribute
+		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpr) map(tmpr)
+		!$omp target teams distribute parallel do private(ind) reduction(+: tmpr) collapse(2) &
+		!$omp& depend(in: O_a) depend(out: S_a) nowait
 		do jj = 1, n
-			!$omp parallel do reduction(+: tmpr)
 			do j = 1, n
 				if (j < jj) cycle
 				tmpr = 0.0_rk
@@ -584,13 +577,12 @@ module nnqs
 				S_a(ind) = tmpr*covar_norm                                                                 !! Covariance
 				if (j == jj) S_a(ind) = S_a(ind) + delta                              !! Add regularization to diagonals
 			end do
-			!$omp end parallel do
 		end do
-		!$omp end target teams distribute
+		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
+		!$omp target teams distribute parallel do private(ind) reduction(+: tmpc) collapse(2) &
+		!$omp& depend(in: O_b) depend(out: S_b) nowait
 		do ii = 1, m
-			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
 				if (i < ii) cycle
 				tmpc = (0.0_rk,0.0_rk)
@@ -601,11 +593,11 @@ module nnqs
 				S_b(ind) = tmpc*covar_norm                                                                 !! Covariance
 				if (i == ii) S_b(ind) = S_b(ind)%re + delta                           !! Add regularization to diagonals
 			end do
-			!$omp end parallel do
 		end do
-		!$omp end target teams distribute
+		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(3)
+		!$omp target teams distribute parallel do private(ind) reduction(+: tmpc) collapse(3) &
+		!$omp& depend(in: O_w) depend(out: S_w) nowait
 		do j = 1, n
 			do ii = 1, m
 				do i = 1, m
@@ -622,7 +614,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target update from(F_a, F_b, F_w, S_a, S_b, S_w)
+		!$omp target update from(F_a, F_b, F_w, S_a, S_b, S_w) depend(out:F_a, F_b, F_w, S_a, S_b, S_w) nowait
 
 		call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                                        !! Solve x = S^{-1}F
 		call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                                        !! Solve x = S^{-1}F
@@ -630,19 +622,21 @@ module nnqs
 			call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')                     !! Solve x = S^{-1}F
 		end do
 
+		tmpr = sqrt(1.0_rk - beta_2**epoch)/(1.0_rk - beta_1**epoch)
+
 		self%p_a(:) = beta_1*self%p_a + (1.0_rk - beta_1)*x_a                            !! Biased first moment estimate
 		self%r_a(:) = beta_2*self%r_a + (1.0_rk - beta_2)*(x_a**2)                  !! Biased second raw moment estimate
-		x_a(:) = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
+		x_a(:) = tmpr*self%p_a/(sqrt(self%r_a) + epsilon)                                                        !! ADAM
 		self%a(:) = self%a - dtau*x_a                                                           !! Update visible biases
 
 		self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
 		self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                  !! Biased second raw moment estimate
-		x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
+		x_b(:) = tmpr*self%p_b/(sqrt(self%r_b) + epsilon)                                                        !! ADAM
 		self%b(:) = self%b - dtau*x_b                                                            !! Update hidden biases
 
 		self%p_w(:,:) = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                          !! Biased first moment estimate
 		self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*(x_w**2)                !! Biased second raw moment estimate
-		x_w(:,:) = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )   !! ADAM
+		x_w(:,:) = tmpr*self%p_w/(sqrt(self%r_w) + epsilon)                                                      !! ADAM
 		self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
 	end subroutine propagate
 
