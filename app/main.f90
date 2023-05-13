@@ -2,20 +2,24 @@ program main
 	!-------------------------------------------------------------------------------------------------------------------
 	!!  This program demonstrates the use of the nnqs module.
 	!-------------------------------------------------------------------------------------------------------------------
-	use, intrinsic :: iso_fortran_env, only: rk=>real32
 	use nnqs, only: RestrictedBoltzmannMachine                                                    !! Neural network type
 	use omp_lib                                                                                         !! OpenMP module
 	implicit none (type,external)                                                     !! No implicit types or interfaces
 
 	!! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type(RestrictedBoltzmannMachine) :: psi                                                            !! Neural network
-
-	integer, parameter :: spins = 1024, hidden_units = 64                            !! Number of spins and hidden units
+	integer :: n, m                                                                  !! Number of spins and hidden units
+	real    :: J, B                                                                                  !! Ising parameters
 
 	!! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	call random_init(repeatable=.false., image_distinct=.true.)                    !! Initialize random number generator
+	call random_init(repeatable=.true., image_distinct=.true.)                    !! Initialize random number generator
 	call omp_set_default_device(1)                            !! Set OpenMP offload device (device id depends on system)
 
-	psi = RestrictedBoltzmannMachine(v_units=spins, h_units=hidden_units)                             !! Create instance
-	call psi%stochastic_optimization(ising_params=[ -0.5_rk, 0.1_rk ])                  !! Input [J,B] and train network
+	n = 1024                                                                                      !! Set number of spins
+	m = 64                                                                                 !! Set number of hidden units
+	J = -0.5                                                                  !! Set nearest neighbbor coupling strength
+	B = 0.1                                                                                        !! Set field strength
+
+	psi = RestrictedBoltzmannMachine(v_units=n, h_units=m)                                            !! Create instance
+	call psi%stochastic_optimization( ising_params=[J,B] )                              !! Input [J,B] and train network
 end program main
