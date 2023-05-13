@@ -450,17 +450,19 @@ module nnqs
 
 		!$omp target update to(samples, e_loc, self%w, self%b) depend(in:samples, e_loc, self%w, self%b) nowait
 
-		!$omp target teams distribute parallel do collapse(2) depend(in: samples) depend(out: O_a) nowait
+		!$omp target teams distribute depend(in: samples) depend(out: O_a) nowait
 		do j = 1, n
+			!$omp parallel do
 			do k = 1, num_samples
 				O_a(k,j) = real(samples(k,j), kind=rk)                            !! O_a(k,j) = 𝜕/𝜕a_j ln ψ(s^k) = s_j^k
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(2) &
-		!$omp& depend(in: O_a, self%w) depend(out: O_b) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_a, self%w) depend(out: O_b) nowait
 		do i = 1, m
+			!$omp parallel do reduction(+: tmpc)
 			do k = 1, num_samples
 				tmpc = (0.0_rk,0.0_rk)
 				do j = 1, n
@@ -468,27 +470,32 @@ module nnqs
 				end do
 				O_b(k,i) = tmpc                                                                !! ws^k for all samples k
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do collapse(2) depend(in: self%b) depend(inout: O_b) nowait
+		!$omp target teams distribute depend(in: self%b) depend(inout: O_b) nowait
 		do i = 1, m
+			!$omp parallel do private(tmpc)
 			do k = 1, num_samples
-				O_b(k,i) = exp(conjg(self%b(i)) + O_b(k,i))  !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
-				O_b(k,i) = O_b(k,i)/(1.0_rk + O_b(k,i))     !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
+				tmpc = exp(conjg(self%b(i)) + O_b(k,i))      !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
+				O_b(k,i) = tmpc/(1.0_rk + tmpc)             !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do collapse(3) depend(in: O_a, O_b) depend(out: O_w) nowait
+		!$omp target teams distribute depend(in: O_a, O_b) depend(out: O_w) nowait
 		do j = 1, n
+			!$omp parallel do collapse(2)
 			do i = 1, m
 				do k = 1, num_samples
 					O_w(k,i,j) = O_a(k,j)*O_b(k,i) !! O_w(k,i,j) = 𝜕/𝜕w_ij ln ψ(s^k) = s_j^k exp(θ_i^k)/(1 + exp(θ_i^k))
 				end do
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
 		!$omp target teams distribute parallel do reduction(+: tmpr) depend(inout: O_a) nowait
 		do j = 1, n
@@ -516,8 +523,9 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(2) depend(inout: O_w) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(inout: O_w) nowait
 		do j = 1, n
+			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
 				tmpc = (0.0_rk,0.0_rk)
 				do k = 1, num_samples
@@ -528,8 +536,9 @@ module nnqs
 					O_w(k,i,j) = O_w(k,i,j) - tmpc                                  !! Center each column about its mean
 				end do
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
 		!$omp target teams distribute parallel do reduction(+: tmpr) depend(in: O_a, e_loc) depend(out: F_a) nowait
 		do j = 1, n
@@ -551,9 +560,9 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) collapse(2) &
-		!$omp& depend(in: O_w, e_loc) depend(out: F_w) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_w, e_loc) depend(out: F_w) nowait
 		do j = 1, n
+			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
 				tmpc = (0.0_rk,0.0_rk)
 				do k = 1, num_samples
@@ -561,12 +570,13 @@ module nnqs
 				end do
 				F_w(i,j) = tmpc*covar_norm                                                !! F(i,j) = ⟨Δ∂_{w_{ij}}^† ΔH⟩
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do private(ind) reduction(+: tmpr) collapse(2) &
-		!$omp& depend(in: O_a) depend(out: S_a) nowait
+		!$omp target teams distribute reduction(+: tmpr) map(tmpr) depend(in: O_a) depend(out: S_a) nowait
 		do jj = 1, n
+			!$omp parallel do reduction(+: tmpr) private(ind)
 			do j = 1, n
 				if (j < jj) cycle
 				tmpr = 0.0_rk
@@ -577,12 +587,13 @@ module nnqs
 				S_a(ind) = tmpr*covar_norm                                                                 !! Covariance
 				if (j == jj) S_a(ind) = S_a(ind) + delta                              !! Add regularization to diagonals
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do private(ind) reduction(+: tmpc) collapse(2) &
-		!$omp& depend(in: O_b) depend(out: S_b) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_b) depend(out: S_b) nowait
 		do ii = 1, m
+			!$omp parallel do reduction(+: tmpc) private(ind)
 			do i = 1, m
 				if (i < ii) cycle
 				tmpc = (0.0_rk,0.0_rk)
@@ -593,12 +604,13 @@ module nnqs
 				S_b(ind) = tmpc*covar_norm                                                                 !! Covariance
 				if (i == ii) S_b(ind) = S_b(ind)%re + delta                           !! Add regularization to diagonals
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do private(ind) reduction(+: tmpc) collapse(3) &
-		!$omp& depend(in: O_w) depend(out: S_w) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_w) depend(out: S_w) nowait
 		do j = 1, n
+			!$omp parallel do reduction(+: tmpc) private(ind) collapse(2)
 			do ii = 1, m
 				do i = 1, m
 					if (i < ii) cycle
@@ -611,8 +623,9 @@ module nnqs
 					if (i == ii) S_w(ind,j) = S_w(ind,j)%re + delta                   !! Add regularization to diagonals
 				end do
 			end do
+			!$omp end parallel do
 		end do
-		!$omp end target teams distribute parallel do
+		!$omp end target teams distribute
 
 		!$omp target update from(F_a, F_b, F_w, S_a, S_b, S_w) depend(out:F_a, F_b, F_w, S_a, S_b, S_w) nowait
 
