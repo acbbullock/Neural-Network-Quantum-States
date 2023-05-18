@@ -6,7 +6,7 @@ module nnqs
 	use, intrinsic :: iso_fortran_env, only: rk=>real32, ik=>int8, int64, compiler_version, compiler_options
 	use, intrinsic :: ieee_arithmetic, only: ieee_is_nan
 	use io_fortran_lib, only: echo, LF, str, to_file                                     !! I/O procedures and constants
-	use lapack95, only: ppsvx                                  !! Routine for solving linear systems with packed storage
+	use lapack95, only: posvx
 	implicit none (type,external)                                                     !! No implicit types or interfaces
 	private                             !! All objects in scope are inaccessible outside of scope unless declared public
 
@@ -16,13 +16,13 @@ module nnqs
 	!! Definitions and Interfaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	type RestrictedBoltzmannMachine
 		private
-		integer :: v_units = 0                                                                !! Number of visible units
-		integer :: h_units = 0                                                                 !! Number of hidden units
+		integer   :: v_units     = 0                                                          !! Number of visible units
+		integer   :: h_units     = 0                                                           !! Number of hidden units
+		character :: alignment   = 'N'                                                    !! For tracking spin alignment
+		logical   :: initialized = .false.                                                      !! Initialization status
 		real(rk),    allocatable, dimension(:)   :: a, p_a, r_a                    !! Visible layer biases & ADAM arrays
 		complex(rk), allocatable, dimension(:)   :: b, p_b, r_b                     !! Hidden layer biases & ADAM arrays
 		complex(rk), allocatable, dimension(:,:) :: w, p_w, r_w                                 !! Weights & ADAM arrays
-		character(len=1) :: alignment = 'N'                                               !! For tracking spin alignment
-		logical          :: initialized = .false.                                               !! Initialization status
 		contains
 			private
 			procedure, pass(self), public :: stochastic_optimization                          !! Public training routine
@@ -57,28 +57,28 @@ module nnqs
 
 		integer(ik), allocatable, dimension(:)   :: start_sample                         !! Start sample for Monte Carlo
 		integer(ik), allocatable, dimension(:,:) :: samples                                      !! Sample storage array
-		integer :: epoch, max_epochs, num_samples, n, m           !! Loop variable, max epochs, number of samples, spins
 
 		real(rk),    allocatable, dimension(:)   :: e_loc, corrs                  !! Local energies, sample correlations
 		real(rk),    allocatable, dimension(:,:) :: energies, correlations             !! Energy and correlation storage
-		complex(rk), allocatable, dimension(:)   :: theta                                 !! θ = b + ws for start sample
-		real(rk) :: energy, sqerr, stderr, tau, acc                                               !! Recording variables
+		complex(rk), allocatable, dimension(:)   :: theta                                         !! Cache of θ = b + ws
 
-		real(rk),    allocatable, dimension(:,:)   :: O_a                           !! Log derivatives with respect to a
-		complex(rk), allocatable, dimension(:,:)   :: O_b                           !! Log derivatives with respect to b
-		complex(rk), allocatable, dimension(:,:,:) :: O_w                           !! Log derivatives with respect to w
+		real(rk),    allocatable, dimension(:,:)   :: O_a, S_a           !! Log derivatives with respect to a, SR matrix
+		complex(rk), allocatable, dimension(:,:)   :: O_b, S_b           !! Log derivatives with respect to b, SR matrix
+		complex(rk), allocatable, dimension(:,:,:) :: O_w, S_w           !! Log derivatives with respect to w, SR matrix
 
-		real(rk),    allocatable, dimension(:)   :: F_a, S_a, x_a             !! Forces, SR matrix, solution array for a
-		complex(rk), allocatable, dimension(:)   :: F_b, S_b, x_b             !! Forces, SR matrix, solution array for b
-		complex(rk), allocatable, dimension(:,:) :: F_w, S_w, x_w             !! Forces, SR matrix, solution array for w
+		real(rk),    allocatable, dimension(:)   :: F_a, x_a                                  !! Forces for a, solutions
+		complex(rk), allocatable, dimension(:)   :: F_b, x_b                                  !! Forces for b, solutions
+		complex(rk), allocatable, dimension(:,:) :: F_w, x_w                                  !! Forces for w, solutions
 
 		character(len=:), allocatable :: logfile, logmsg                                          !! Recording variables
 		character(len=10)             :: date, time                                                     !! Date and time
 		character(len=1000)           :: errmsg                                                         !! Error message
-		integer :: stat                                                                                    !! Error stat
 
 		integer(int64) :: t1, t2                                                                      !! Clock variables
 		real(rk)       :: rate, wall_time                                                             !! Clock variables
+
+		real(rk) :: energy, sqerr, stderr, tau, acc                                               !! Recording variables
+		integer  :: epoch, max_epochs, num_samples, n, m, stat                    !! Size and loop variables, error stat
 
 		if ( this_image() == 1 ) then                                     !! Check validity of Ising strength parameters
 			if ( size(ising_params) /= 2 ) then
@@ -86,6 +86,7 @@ module nnqs
 							LF//'USAGE: ising_params=[J,B] where J is the neighbor coupling strength and B '// &
 								'is the transverse field strength.'//LF
 			end if
+
 			if ( abs(ising_params(2)) >= 1.0_rk ) then
 				error stop LF//'FATAL: Invalid field strength parameter... try again with |B| < 1.'//LF
 			end if
@@ -104,9 +105,10 @@ module nnqs
 		m = self%h_units                                                                   !! Get number of hidden units
 		max_epochs = 1000                                                                          !! Set maximum epochs
 		num_samples = 16                                                             !! Set number of samples to produce
+		errmsg = ''                                                                          !! Initialize error message
 		stat = 0                                                                                !! Initialize error stat
 
-		call self%init(stat=stat, errmsg=errmsg)                                         !! Initialize Boltzmann machine
+		call self%init(n=n, m=m, stat=stat, errmsg=errmsg)                               !! Initialize Boltzmann machine
 
 		!! Allocate work arrays across all images:
 		allocate(start_sample(n), samples(num_samples,n), source=0_ik, stat=stat, errmsg=errmsg)
@@ -115,20 +117,19 @@ module nnqs
 		allocate(e_loc(num_samples), corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-		allocate(O_a(num_samples,n), F_a(n), S_a((n*(n+1))/2), x_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+		allocate(O_a(num_samples,n), S_a(n,n), F_a(n), x_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-		allocate(O_b(num_samples,m), F_b(m), S_b((m*(m+1))/2), x_b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+		allocate(O_b(num_samples,m), S_b(m,m), F_b(m), x_b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-		allocate(O_w(num_samples,m,n), F_w(m,n), S_w((m*(m+1))/2,n), x_w(m,n), source=(0.0_rk,0.0_rk), &
-				 stat=stat, errmsg=errmsg)
+		allocate(O_w(num_samples,m,n), S_w(m,m,n), F_w(m,n), x_w(m,n), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
 		if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-		!$omp target data map(to: O_a, O_b, O_w, e_loc, self%w, self%b, samples) map(from: F_a, F_b, F_w, S_a, S_b, S_w)
-
-		call random_sample(start_sample)                                                !! Randomize the starting sample
+		call random_sample(n, start_sample)                                             !! Randomize the starting sample
 		theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
+
+		!$omp target data map(to:samples,e_loc,self%w,self%b) map(from:F_a,F_b,F_w,S_a,S_b,S_w) map(alloc:O_a,O_b,O_w)
 
 		if ( this_image() == 1 ) then                                                       !! Do preparation on image 1
 			!! Allocate storage arrays on image 1:
@@ -153,7 +154,7 @@ module nnqs
 		learning: do epoch = 1, max_epochs                                                             !! Begin learning
 			call co_sum(self%w); self%w = self%w/num_images()                           !! Average weights across images
 
-			call self%sample_distribution(epoch=epoch, ising_params=ising_params, &                            !! Inputs
+			call self%sample_distribution(n=n, m=m, epoch=epoch, ising_params=ising_params, &                  !! Inputs
 										  start_sample=start_sample, theta=theta, &                     !! Input/outputs
 										  samples=samples, e_loc=e_loc, corrs=corrs, &                  !! Array outputs
 										  energy=energy, sqerr=sqerr, &                                !! Scalar outputs
@@ -193,10 +194,10 @@ module nnqs
 
 			e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
 
-			call self%propagate(epoch=epoch, e_loc=e_loc, samples=samples, &                        !! Update parameters
+			call self%propagate(n=n, m=m, epoch=epoch, e_loc=e_loc, samples=samples, &              !! Update parameters
 								O_a=O_a, O_b=O_b, O_w=O_w, &
-								F_a=F_a, F_b=F_b, F_w=F_w, &
 								S_a=S_a, S_b=S_b, S_w=S_w, &
+								F_a=F_a, F_b=F_b, F_w=F_w, &
 								x_a=x_a, x_b=x_b, x_w=x_w)
 		end do learning
 
@@ -224,18 +225,16 @@ module nnqs
 		end if
 	end subroutine stochastic_optimization
 
-	impure recursive subroutine init(self, stat, errmsg)
+	impure recursive subroutine init(self, n, m, stat, errmsg)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Procedure for initialization
 		!---------------------------------------------------------------------------------------------------------------
 		class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
-		integer,             intent(inout) :: stat                                                         !! Error stat
-		character(len=1000), intent(inout) :: errmsg                                                    !! Error message
+		integer,                           intent(in)    :: n, m                               !! Spins and hidden units
+		integer,                           intent(inout) :: stat                                           !! Error stat
+		character(len=1000),               intent(inout) :: errmsg                                      !! Error message
 
-		integer :: n, m, i, j                                                                 !! Size and loop variables
-
-		n = self%v_units                                                                          !! Get number of spins
-		m = self%h_units                                                                   !! Get number of hidden units
+		integer :: i, j                                                                                !! Loop variables
 
 		if ( this_image() == 1 ) then
 			if ( (n < 1) .or. (m < 1) ) then
@@ -272,32 +271,29 @@ module nnqs
 		self%initialized = .true.
 	end subroutine init
 
-	impure recursive subroutine sample_distribution(self, epoch, ising_params, start_sample, theta, samples, &
+	impure recursive subroutine sample_distribution(self, n, m, epoch, ising_params, start_sample, theta, samples, &
 													e_loc, corrs, energy, sqerr, stat, errmsg)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
 		!---------------------------------------------------------------------------------------------------------------
-		class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
-		integer,                           intent(in) :: epoch                                          !! Current epoch
+		class(RestrictedBoltzmannMachine),       intent(in)    :: self                     !! Distribution to be sampled
+		integer,                                 intent(in)    :: n, m, epoch      !! Spins, hidden units, current epoch
 		real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
 		integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample         !! Sample to begin thermalization
 		complex(rk), contiguous, dimension(:),   intent(inout) :: theta                   !! θ = b + ws for start sample
 		integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
 		real(rk),    contiguous, dimension(:),   intent(out)   :: e_loc, corrs    !! Local energies, sample correlations
-		real(rk),            intent(out)   :: energy, sqerr                              !! Energy average, square error
-		integer,             intent(inout) :: stat                                                         !! Error stat
-		character(len=1000), intent(inout) :: errmsg                                                    !! Error message
+		real(rk),                                intent(out)   :: energy, sqerr          !! Energy average, square error
+		integer,                                 intent(inout) :: stat                                     !! Error stat
+		character(len=1000),                     intent(inout) :: errmsg                                !! Error message
 
 		real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
 		integer(ik), allocatable, dimension(:) :: s_prop                                        !! Sample storage arrays
 		complex(rk), allocatable, dimension(:) :: theta2, arg_theta                                    !! Storage arrays
 
 		real(rk) :: acc_prob, r                                                            !! M-H acceptance probability
-		integer  :: n, m, passes, num_samples                          !! Number of spins, hidden units, passes, samples
-		integer  :: k, max_thermal_time, pass, rind                                      !! Loop variables, random index
+		integer  :: num_samples, max_thermal_time, passes, k, pass, rind        !! Size and loop variables, random index
 
-		n = self%v_units                                                                          !! Get number of spins
-		m = self%h_units                                                                   !! Get number of hidden units
 		num_samples = size(samples, dim=1)                                               !! Number of samples to produce
 
 		!! Allocate local work arrays:
@@ -350,12 +346,12 @@ module nnqs
 			end do metropolis_hastings
 
 			samples(k,:) = start_sample                                                     !! Transfer sample to output
-			call self%ising_energy( s=start_sample, theta=theta, ising_params=ising_params, &       !! Local energy of s
+			call self%ising_energy( n=n, s=start_sample, theta=theta, ising_params=ising_params, &  !! Local energy of s
 									s_map=s_map, arg_theta=arg_theta, energy=e_loc(k) )
 		end do stationary_sampling
 		!! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-		call get_correlations(samples, corrs=corrs, alignment=self%alignment)        !! Get spin correlations of samples
+		call get_correlations(n, samples, corrs, self%alignment)                     !! Get spin correlations of samples
 		energy = sum(e_loc)/num_samples                                                           !! Average of energies
 		sqerr = var(e_loc)/num_samples                                                       !! Square error of energies
 	end subroutine sample_distribution
@@ -364,12 +360,12 @@ module nnqs
 		!---------------------------------------------------------------------------------------------------------------
 		!! Function for computing the ratio of probabilities |ψ(s_2)/ψ(s_1)|^2 for two given configurations
 		!---------------------------------------------------------------------------------------------------------------
-		class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
-		integer, intent(in) :: ind
+		class(RestrictedBoltzmannMachine),     intent(in)    :: self                                !! Boltzmann machine
+		integer,                               intent(in)    :: ind                                   !! Spin flip index
 		integer(ik), contiguous, dimension(:), intent(in)    :: s1, s2                                 !! Configurations
 		complex(rk), contiguous, dimension(:), intent(in)    :: theta1                       !! Cached value of b + ws_1
 		complex(rk), contiguous, dimension(:), intent(inout) :: theta2                              !! Value of b + ws_2
-		real(rk), intent(out) :: p
+		real(rk),                              intent(out)   :: p                                  !! Probability ration
 
 		complex(rk) :: prob_amplitude_ratio                                                             !! ψ(s_2)/ψ(s_1)
 		real(rk)    :: s                                                                                           !! ±1
@@ -380,23 +376,22 @@ module nnqs
 		p = real(conjg(prob_amplitude_ratio)*prob_amplitude_ratio, kind=rk)                         !! |ψ(s_2)/ψ(s_1)|^2
 	end subroutine prob_ratio
 
-	pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, arg_theta, energy)
+	pure recursive subroutine ising_energy(self, n, s, theta, ising_params, s_map, arg_theta, energy)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Function for calculating local energy of configuration s in Ising model
 		!---------------------------------------------------------------------------------------------------------------
-		class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
+		class(RestrictedBoltzmannMachine),     intent(in)    :: self                                !! Boltzmann machine
+		integer,                               intent(in)    :: n                                     !! Number of spins
 		integer(ik), contiguous, dimension(:), intent(in)    :: s                                 !! Configuration input
 		complex(rk), contiguous, dimension(:), intent(in)    :: theta                          !! Cached value of b + ws
 		real(rk),    contiguous, dimension(:), intent(in)    :: ising_params                         !! Ising parameters
 		real(rk),    contiguous, dimension(:), intent(inout) :: s_map                                         !! s -> ±1
 		complex(rk), contiguous, dimension(:), intent(inout) :: arg_theta                                  !! 1 + exp(θ)
-		real(rk), intent(out) :: energy                                                                  !! Ising energy
+		real(rk),                              intent(out)   :: energy                                   !! Ising energy
 
 		real(rk) :: J_str, B_str, field_couplings, e_coupling, e_transverse   !! Ising params, field couplings, energies
-		integer  :: j, n, m                                              !! Loop variable, number of spins, hidden units
+		integer  :: j                                                                                   !! Loop variable
 
-		n = self%v_units                                                                          !! Get number of spins
-		m = self%h_units                                                                   !! Get number of hidden units
 		J_str = abs(ising_params(1)); B_str = abs(ising_params(2))           !! Set coupling strength and field strength
 		e_coupling = 0.0_rk; e_transverse = 0.0_rk                                                         !! Initialize
 
@@ -414,30 +409,27 @@ module nnqs
 		energy = e_coupling + e_transverse              !! Local energy is sum of coupling and transverse field energies
 	end subroutine ising_energy
 
-	impure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
-										  x_a, x_b, x_w)
+	impure recursive subroutine propagate(self, n, m, epoch, e_loc, samples, O_a, O_b, O_w, S_a, S_b, S_w, &
+										  F_a, F_b, F_w, x_a, x_b, x_w)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Procedure for updating parameters according to stochastic optimization update rule
 		!---------------------------------------------------------------------------------------------------------------
-		class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
-		integer, intent(in) :: epoch                                                                    !! Current epoch
+		class(RestrictedBoltzmannMachine),         intent(inout) :: self                            !! Boltzmann machine
+		integer,                                   intent(in)    :: n, m, epoch    !! Spins, hidden units, current epoch
 		real(rk),    contiguous, dimension(:),     intent(in)    :: e_loc                              !! Local energies
 		integer(ik), contiguous, dimension(:,:),   intent(in)    :: samples                            !! Network inputs
-		real(rk),    contiguous, dimension(:,:),   intent(inout) :: O_a                         !! Log derivatives for a
-		complex(rk), contiguous, dimension(:,:),   intent(inout) :: O_b                         !! Log derivatives for b
-		complex(rk), contiguous, dimension(:,:,:), intent(inout) :: O_w                         !! Log derivatives for w
-		real(rk),    contiguous, dimension(:),     intent(inout) :: F_a, S_a, x_a    !! Forces, SR matrix, solutions arr
-		complex(rk), contiguous, dimension(:),     intent(inout) :: F_b, S_b, x_b    !! Forces, SR matrix, solutions arr
-		complex(rk), contiguous, dimension(:,:),   intent(inout) :: F_w, S_w, x_w    !! Forces, SR matrix, solutions arr
+		real(rk),    contiguous, dimension(:,:),   intent(inout) :: O_a, S_a         !! Log derivatives for a, SR matrix
+		complex(rk), contiguous, dimension(:,:),   intent(inout) :: O_b, S_b         !! Log derivatives for b, SR matrix
+		complex(rk), contiguous, dimension(:,:,:), intent(inout) :: O_w, S_w         !! Log derivatives for w, SR matrix
+		real(rk),    contiguous, dimension(:),     intent(inout) :: F_a, x_a                  !! Forces for a, solutions
+		complex(rk), contiguous, dimension(:),     intent(inout) :: F_b, x_b                  !! Forces for b, solutions
+		complex(rk), contiguous, dimension(:,:),   intent(inout) :: F_w, x_w                  !! Forces for w, solutions
 
 		real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dtau         !! Normalization, regularization, ADAM vars
-		integer  :: n, m, num_samples, i, ii, j, jj, k, ind                                   !! Size and loop variables
+		integer  :: num_samples, i, ii, j, jj, k                                        !! Size and loop variables
 
 		real(rk)    :: tmpr                                                                                 !! Temp real
 		complex(rk) :: tmpc                                                                              !! Temp complex
-
-		n = self%v_units                                                                          !! Get number of spins
-		m = self%h_units                                                                   !! Get number of hidden units
 
 		num_samples = size(samples, dim=1)                                                      !! Get number of samples
 		covar_norm  = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
@@ -448,9 +440,9 @@ module nnqs
 		epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
 		dtau    = 0.01_rk                                                                                   !! Time step
 
-		!$omp target update to(samples, e_loc, self%w, self%b) depend(in:samples, e_loc, self%w, self%b) nowait
+		!$omp target update to(samples, e_loc, self%w, self%b)
 
-		!$omp target teams distribute depend(in: samples) depend(out: O_a) nowait
+		!$omp target teams distribute
 		do j = 1, n
 			!$omp parallel do
 			do k = 1, num_samples
@@ -460,7 +452,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_a, self%w) depend(out: O_b) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
 		do i = 1, m
 			!$omp parallel do reduction(+: tmpc)
 			do k = 1, num_samples
@@ -474,7 +466,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute depend(in: self%b) depend(inout: O_b) nowait
+		!$omp target teams distribute
 		do i = 1, m
 			!$omp parallel do private(tmpc)
 			do k = 1, num_samples
@@ -485,7 +477,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute depend(in: O_a, O_b) depend(out: O_w) nowait
+		!$omp target teams distribute
 		do j = 1, n
 			!$omp parallel do collapse(2)
 			do i = 1, m
@@ -497,7 +489,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do reduction(+: tmpr) depend(inout: O_a) nowait
+		!$omp target teams distribute parallel do reduction(+: tmpr)
 		do j = 1, n
 			tmpr = 0.0_rk
 			do k = 1, num_samples
@@ -510,7 +502,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) depend(inout: O_b) nowait
+		!$omp target teams distribute parallel do reduction(+: tmpc)
 		do i = 1, m
 			tmpc = (0.0_rk,0.0_rk)
 			do k = 1, num_samples
@@ -523,7 +515,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(inout: O_w) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
 		do j = 1, n
 			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
@@ -540,7 +532,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute parallel do reduction(+: tmpr) depend(in: O_a, e_loc) depend(out: F_a) nowait
+		!$omp target teams distribute parallel do reduction(+: tmpr)
 		do j = 1, n
 			tmpr = 0.0_rk
 			do k = 1, num_samples
@@ -550,7 +542,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute parallel do reduction(+: tmpc) depend(in: O_b, e_loc) depend(out: F_b) nowait
+		!$omp target teams distribute parallel do reduction(+: tmpc)
 		do i = 1, m
 			tmpc = (0.0_rk,0.0_rk)
 			do k = 1, num_samples
@@ -560,7 +552,7 @@ module nnqs
 		end do
 		!$omp end target teams distribute parallel do
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_w, e_loc) depend(out: F_w) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
 		do j = 1, n
 			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
@@ -574,43 +566,41 @@ module nnqs
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute reduction(+: tmpr) map(tmpr) depend(in: O_a) depend(out: S_a) nowait
+		!$omp target teams distribute reduction(+: tmpr) map(tmpr)
 		do jj = 1, n
-			!$omp parallel do reduction(+: tmpr) private(ind)
+			!$omp parallel do reduction(+: tmpr)
 			do j = 1, n
 				if (j < jj) cycle
 				tmpr = 0.0_rk
 				do k = 1, num_samples
 					tmpr = tmpr + O_a(k,j)*O_a(k,jj)
 				end do
-				ind = n*(jj-1) - ((jj-2)*(jj-1))/2 + (j-jj) + 1                                  !! Packed index mapping
-				S_a(ind) = tmpr*covar_norm                                                                 !! Covariance
-				if (j == jj) S_a(ind) = S_a(ind) + delta                              !! Add regularization to diagonals
+				S_a(j,jj) = tmpr*covar_norm                                                               !! Covariance
+				if (j == jj) S_a(j,jj) = S_a(j,jj) + delta                           !! Add regularization to diagonals
 			end do
 			!$omp end parallel do
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_b) depend(out: S_b) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
 		do ii = 1, m
-			!$omp parallel do reduction(+: tmpc) private(ind)
+			!$omp parallel do reduction(+: tmpc)
 			do i = 1, m
 				if (i < ii) cycle
 				tmpc = (0.0_rk,0.0_rk)
 				do k = 1, num_samples
 					tmpc = tmpc + conjg(O_b(k,i))*O_b(k,ii)
 				end do
-				ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                                  !! Packed index mapping
-				S_b(ind) = tmpc*covar_norm                                                                 !! Covariance
-				if (i == ii) S_b(ind) = S_b(ind)%re + delta                           !! Add regularization to diagonals
+				S_b(i,ii) = tmpc*covar_norm                                                               !! Covariance
+				if (i == ii) S_b(i,ii) = S_b(i,ii)%re + delta                        !! Add regularization to diagonals
 			end do
 			!$omp end parallel do
 		end do
 		!$omp end target teams distribute
 
-		!$omp target teams distribute reduction(+: tmpc) map(tmpc) depend(in: O_w) depend(out: S_w) nowait
+		!$omp target teams distribute reduction(+: tmpc) map(tmpc)
 		do j = 1, n
-			!$omp parallel do reduction(+: tmpc) private(ind) collapse(2)
+			!$omp parallel do reduction(+: tmpc) collapse(2)
 			do ii = 1, m
 				do i = 1, m
 					if (i < ii) cycle
@@ -618,21 +608,20 @@ module nnqs
 					do k = 1, num_samples
 						tmpc = tmpc + conjg(O_w(k,i,j))*O_w(k,ii,j)
 					end do
-					ind = m*(ii-1) - ((ii-2)*(ii-1))/2 + (i-ii) + 1                              !! Packed index mapping
-					S_w(ind,j) = tmpc*covar_norm                                                           !! Covariance
-					if (i == ii) S_w(ind,j) = S_w(ind,j)%re + delta                   !! Add regularization to diagonals
+					S_w(i,ii,j) = tmpc*covar_norm                                                           !! Covariance
+					if (i == ii) S_w(i,ii,j) = S_w(i,ii,j)%re + delta                  !! Add regularization to diagonals
 				end do
 			end do
 			!$omp end parallel do
 		end do
 		!$omp end target teams distribute
 
-		!$omp target update from(F_a, F_b, F_w, S_a, S_b, S_w) depend(out:F_a, F_b, F_w, S_a, S_b, S_w) nowait
+		!$omp target update from(S_a, S_b, S_w, F_a, F_b, F_w)
 
-		call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                                        !! Solve x = S^{-1}F
-		call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                                        !! Solve x = S^{-1}F
+		call posvx(A=S_a, b=F_a, x=x_a, uplo='L', fact='E')
+		call posvx(A=S_b, b=F_b, x=x_b, uplo='L', fact='E')
 		do j = 1, n
-			call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')                     !! Solve x = S^{-1}F
+			call posvx(A=S_w(:,:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')
 		end do
 
 		tmpr = sqrt(1.0_rk - beta_2**epoch)/(1.0_rk - beta_1**epoch)
@@ -653,16 +642,20 @@ module nnqs
 		self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
 	end subroutine propagate
 
-	impure recursive subroutine random_sample(s)
+	impure recursive subroutine random_sample(n, s)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Subroutine for generating a random sample
 		!---------------------------------------------------------------------------------------------------------------
-		integer(ik), contiguous, dimension(:), intent(inout) :: s
+		integer,                   intent(in)    :: n
+		integer(ik), dimension(n), intent(inout) :: s
 
-		real, dimension(size(s)) :: r
+		real    :: r
+		integer :: j
 
-		call random_number(r)
-		s = nint(r, kind=ik)
+		do j = 1, n
+			call random_number(r)
+			s(j) = nint(r, kind=ik)
+		end do
 	end subroutine random_sample
 
 	pure recursive real(rk) function var(x) result(variance)
@@ -670,22 +663,23 @@ module nnqs
 		!! Function for calculating sample variance of a real vector using canonical two-pass algorithm
 		!---------------------------------------------------------------------------------------------------------------
 		real(rk), contiguous, dimension(:), intent(in) :: x
+
 		variance = sum( (x - sum(x)/size(x))**2 )/(size(x)-1)
 	end function var
 
-	pure recursive subroutine get_correlations(samples, corrs, alignment)
+	pure recursive subroutine get_correlations(n, samples, corrs, alignment)
 		!---------------------------------------------------------------------------------------------------------------
 		!! Function for calculating spin-spin correlations of sampled configurations given alignment 'F' or 'A'
 		!---------------------------------------------------------------------------------------------------------------
-		integer(ik), contiguous, dimension(:,:), intent(inout), target :: samples                       !! Input samples
-		real(rk),    contiguous, dimension(:),   intent(out)           :: corrs                   !! Output correlations
-		character(len=1), intent(in) :: alignment                                                      !! Spin alignment
+		integer,                                         intent(in)    :: n                           !! Number of spins
+		integer(ik), contiguous, dimension(:,:), target, intent(inout) :: samples                       !! Input samples
+		real(rk),    contiguous, dimension(:),           intent(out)   :: corrs                   !! Output correlations
+		character(len=1),                                intent(in)    :: alignment                    !! Spin alignment
 
 		integer(ik), pointer, dimension(:) :: ref_spin, current_spin                              !! Sample row pointers
-		integer :: j, n, num_samples, agrees, disagrees                               !! Loop, size, and count variables
+		integer :: j, num_samples, agrees, disagrees                                  !! Loop, size, and count variables
 
 		nullify(ref_spin); nullify(current_spin)                                                  !! Initialize pointers
-		n = size(samples, dim=2)                                                                  !! Get number of spins
 		num_samples = size(samples, dim=1)                                                      !! Get number of samples
 		ref_spin => samples(:,n/2+1)                                                        !! Set an odd reference spin
 		corrs(n/2+1) = 1.0_rk                                      !! Reference spin is perfectly correlated with itself

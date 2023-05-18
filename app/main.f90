@@ -3,7 +3,7 @@ program main
 	!!  This program demonstrates the use of the nnqs module.
 	!-------------------------------------------------------------------------------------------------------------------
 	use nnqs, only: RestrictedBoltzmannMachine                                                    !! Neural network type
-	use omp_lib                                                                                         !! OpenMP module
+	use omp_lib, only: omp_set_default_device                                                           !! OpenMP module
 	implicit none (type,external)                                                     !! No implicit types or interfaces
 
 	!! Variable Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,8 +12,8 @@ program main
 	real    :: J, B                                                                                  !! Ising parameters
 
 	!! Begin Executable Code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	call random_init(repeatable=.true., image_distinct=.true.)                    !! Initialize random number generator
-	call omp_set_default_device(1)                            !! Set OpenMP offload device (device id depends on system)
+	call random_init(repeatable=.false., image_distinct=.true.)                    !! Initialize random number generator
+	call omp_set_default_device(1)          !! OpenMP offload device (device id depends on system), comment for CPU only
 
 	n = 1024                                                                                      !! Set number of spins
 	m = 64                                                                                 !! Set number of hidden units
