@@ -139,7 +139,7 @@ module nnqs
       logmsg = 'Stochastic Optimization - date: '//trim(adjustl(date))//' | time: '//time//& !! Training log title
            LF//repeat('-', ncopies=59)//LF
 
-      call echo(logmsg, file_name=logfile)                                                         !! Echo to file
+      call echo(logmsg, file=logfile)                                                              !! Echo to file
       write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
 
       call system_clock(t1)                                                                         !! Start timer
