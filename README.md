@@ -1,10 +1,12 @@
 # Learning Quantum States with Neural Networks
 
-![Energies_A](data/energies_A.png) Figure 1: Statistical expectation of
+![Energies_A](https://github.com/acbbullock/Neural-Network-Quantum-States/blob/main/data/energies_A.png)
+Figure 1: Statistical expectation of
 the energy and standard error of the mean for the anti-ferromagnetic
 Ising chain of $n = 1024$ spins with $J = -0.5$ and $B = 0.1$.
 
-![Correlations_A](data/correlations_A.png) Figure 2: Correlations for
+![Correlations_A](https://github.com/acbbullock/Neural-Network-Quantum-States/blob/main/data/correlations_A.png)
+Figure 2: Correlations for
 the anti-ferromagnetic Ising chain of $n = 1024$ spins with $J = -0.5$
 and $B = 0.1$. ## Contents
 
