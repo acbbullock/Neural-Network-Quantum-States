@@ -8,7 +8,9 @@ Ising chain of $n = 1024$ spins with $J = -0.5$ and $B = 0.1$.
 ![Correlations_A](https://github.com/acbbullock/Neural-Network-Quantum-States/blob/main/data/correlations_A.png)
 Figure 2: Correlations for
 the anti-ferromagnetic Ising chain of $n = 1024$ spins with $J = -0.5$
-and $B = 0.1$. ## Contents
+and $B = 0.1$.
+
+## Contents
 
 1. [Introduction](#introduction)
 2. [Restricted Boltzmann Machines](#restricted-boltzmann-machines)
