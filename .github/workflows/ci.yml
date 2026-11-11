@@ -84,14 +84,20 @@ jobs:
       - name: Build OpenCoarrays from source
         if: matrix.fpm == 'caf'
         # Ubuntu's OpenCoarrays is built for its default gfortran 13, which is too old for this code, so OpenCoarrays
-        # is built with gfortran 15 and Open MPI. The release's tag is checked against the commit it names.
+        # is built with gfortran 15. It needs MPICH: from gfortran 15 on, OpenCoarrays refuses Open MPI, which
+        # identifies one-sided memory windows differently on each image. MPICH's wrappers are pointed at gfortran 15
+        # and its gcc, not Ubuntu's default compilers. The release's tag is checked against the commit it names.
         run: |
-          sudo apt-get install -y -q libopenmpi-dev openmpi-bin cmake
+          sudo apt-get install -y -q libmpich-dev mpich cmake
+          echo "MPICH_CC=$CC" >> "$GITHUB_ENV"; echo "MPICH_FC=$FC" >> "$GITHUB_ENV"
+          export MPICH_CC="$CC" MPICH_FC="$FC"
           src="$RUNNER_TEMP/opencoarrays-src"; build="$RUNNER_TEMP/opencoarrays-build"
           git clone -q --depth 1 --branch "$NNQS_OPENCOARRAYS_VERSION" https://github.com/sourceryinstitute/OpenCoarrays.git "$src"
           test "$(git -C "$src" rev-parse HEAD)" = "$NNQS_OPENCOARRAYS_COMMIT"
           cmake -S "$src" -B "$build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/opencoarrays" \
-                -DCMAKE_Fortran_COMPILER="$FC" -DCMAKE_C_COMPILER="$CC"
+                -DCMAKE_Fortran_COMPILER="$FC" -DCMAKE_C_COMPILER="$CC" \
+                -DMPI_C_COMPILER=mpicc.mpich -DMPI_Fortran_COMPILER=mpif90.mpich \
+                -DMPIEXEC_EXECUTABLE=/usr/bin/mpiexec.mpich
           cmake --build "$build" -j 4
           cmake --install "$build"
           echo "$HOME/opencoarrays/bin" >> "$GITHUB_PATH"
