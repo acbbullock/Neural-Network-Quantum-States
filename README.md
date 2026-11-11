@@ -588,9 +588,11 @@ from
 ## Building with fpm
 
 The project builds with [fpm](https://github.com/fortran-lang/fpm) and
-any Fortran 2018 compiler. CI tests gfortran 13 to 16, Intel ifx and
-LLVM flang on Linux, gfortran on macOS and Windows, and runs on four
-images with ifx and with gfortran and OpenCoarrays. fpm fetches the one
+any Fortran 2018 compiler that supports locality specifiers on `do
+concurrent`, which for gfortran means version 15 or later. CI tests
+gfortran 15 and 16, Intel ifx and LLVM flang on Linux, gfortran on
+macOS and Windows, and runs on four images with ifx and with gfortran
+and OpenCoarrays. fpm fetches the one
 Fortran dependency,
 [IO-Fortran-Library](https://github.com/acbbullock/IO-Fortran-Library).
 The project also needs LAPACK, installed as `liblapack` and `libblas`:

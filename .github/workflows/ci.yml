@@ -12,6 +12,9 @@ permissions:
 env:
   NNQS_FPM_VERSION: "0.13.0"
   NNQS_FPM_SHA256: 001cff6cf1145f215baa0888ba27acc06cea30a89b79d1a8be97db3fffbc8cd2
+  # The OpenCoarrays release that the gfortran coarray job builds, and the commit its tag names.
+  NNQS_OPENCOARRAYS_VERSION: "2.10.3"
+  NNQS_OPENCOARRAYS_COMMIT: 3d0fa68dc95f05f9c17bd3e7dd0d34e6f530e429
 
 jobs:
   test:
@@ -20,10 +23,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Single-image builds, which need no coarray support. Each links Ubuntu's reference LAPACK.
+        # Single-image builds, which need no coarray support. Each links Ubuntu's reference LAPACK. gfortran needs version
+        # 15 or later for the locality specifiers (shared, local) on do concurrent.
         toolchain:
-          - { compiler: gcc, version: "13", fpm: gfortran, flags: "-std=f2018 -O2 -g -fbacktrace" }
-          - { compiler: gcc, version: "14", fpm: gfortran, flags: "-std=f2018 -O2 -g -fbacktrace" }
           - { compiler: gcc, version: "15", fpm: gfortran, flags: "-std=f2018 -O2 -g -fbacktrace" }
           - { compiler: gcc, version: "16", fpm: gfortran, flags: "-std=f2018 -O2 -g -fbacktrace" }
           - { compiler: intel, version: "2025.3", fpm: ifx, flags: "-stand f18 -O2" }
@@ -69,21 +71,30 @@ jobs:
           # ifx has its own coarray runtime. gfortran uses OpenCoarrays, through its caf and cafrun wrappers.
           - { name: ifx 2026.1, compiler: intel, version: "2026.1", fpm: ifx, runner: "",
               flags: "-DNNQS_COARRAY -coarray=shared -coarray-num-images=4 -O2" }
-          - { name: gfortran and OpenCoarrays, compiler: gcc, version: "14", fpm: caf, runner: "cafrun -n 4",
+          - { name: gfortran 15 and OpenCoarrays, compiler: gcc, version: "15", fpm: caf, runner: "cafrun -n 4",
               flags: "-DNNQS_COARRAY -O2" }
     steps:
       - uses: actions/checkout@v7
       - name: Install LAPACK
         run: sudo apt-get update -q && sudo apt-get install -y -q liblapack-dev
-      - name: Install OpenCoarrays
-        if: matrix.fpm == 'caf'
-        # Ubuntu's OpenCoarrays is built with Ubuntu's default gfortran, so this job uses that compiler.
-        run: sudo apt-get install -y -q gfortran libcoarrays-openmpi-dev open-coarrays-bin
       - uses: fortran-lang/setup-fortran@v1
-        if: matrix.fpm != 'caf'
         with:
           compiler: ${{ matrix.compiler }}
           version: ${{ matrix.version }}
+      - name: Build OpenCoarrays from source
+        if: matrix.fpm == 'caf'
+        # Ubuntu's OpenCoarrays is built for its default gfortran 13, which is too old for this code, so OpenCoarrays
+        # is built with gfortran 15 and Open MPI. The release's tag is checked against the commit it names.
+        run: |
+          sudo apt-get install -y -q libopenmpi-dev openmpi-bin cmake
+          src="$RUNNER_TEMP/opencoarrays-src"; build="$RUNNER_TEMP/opencoarrays-build"
+          git clone -q --depth 1 --branch "$NNQS_OPENCOARRAYS_VERSION" https://github.com/sourceryinstitute/OpenCoarrays.git "$src"
+          test "$(git -C "$src" rev-parse HEAD)" = "$NNQS_OPENCOARRAYS_COMMIT"
+          cmake -S "$src" -B "$build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/opencoarrays" \
+                -DCMAKE_Fortran_COMPILER="$FC" -DCMAKE_C_COMPILER="$CC"
+          cmake --build "$build" -j 4
+          cmake --install "$build"
+          echo "$HOME/opencoarrays/bin" >> "$GITHUB_PATH"
       - uses: fortran-lang/setup-fpm@v10
         with:
           fpm-version: v${{ env.NNQS_FPM_VERSION }}
