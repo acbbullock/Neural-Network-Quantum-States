@@ -68,10 +68,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ifx has its own coarray runtime. gfortran uses OpenCoarrays, through its caf and cafrun wrappers.
+          # ifx has its own coarray runtime. gfortran uses OpenCoarrays, through its caf and cafrun wrappers. fpm calls
+          # caf through ci/fpm-caf, which keeps caf from leaving out its libraries when fpm links.
           - { name: ifx 2026.1, compiler: intel, version: "2026.1", fpm: ifx, runner: "",
               flags: "-DNNQS_COARRAY -coarray=shared -coarray-num-images=4 -O2" }
-          - { name: gfortran 15 and OpenCoarrays, compiler: gcc, version: "15", fpm: caf, runner: "cafrun -n 4",
+          - { name: gfortran 15 and OpenCoarrays, compiler: gcc, version: "15", fpm: ci/fpm-caf, runner: "cafrun -n 4",
               flags: "-DNNQS_COARRAY -O2" }
     steps:
       - uses: actions/checkout@v7
@@ -82,7 +83,7 @@ jobs:
           compiler: ${{ matrix.compiler }}
           version: ${{ matrix.version }}
       - name: Build OpenCoarrays from source
-        if: matrix.fpm == 'caf'
+        if: matrix.fpm == 'ci/fpm-caf'
         # Ubuntu's OpenCoarrays is built for its default gfortran 13, which is too old for this code, so OpenCoarrays
         # is built with gfortran 15. It needs MPICH: from gfortran 15 on, OpenCoarrays refuses Open MPI, which
         # identifies one-sided memory windows differently on each image. MPICH's wrappers are pointed at gfortran 15

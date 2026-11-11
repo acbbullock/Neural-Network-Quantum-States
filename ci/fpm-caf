@@ -1,0 +1,17 @@
+#!/bin/bash
+# Runs OpenCoarrays' caf for fpm: fpm build --compiler ci/fpm-caf ...
+#
+# caf takes -cpp, like -c, to mean it is only compiling, and then leaves out the coarray and MPI libraries. fpm passes
+# -cpp when it links, whenever the flags define a macro such as NNQS_COARRAY, so the link fails with undefined
+# references to _gfortran_caf_*. This removes -cpp from commands without -c, which are the ones that link. A link has
+# nothing to preprocess, so -cpp does nothing there. fpm takes any compiler whose name contains "caf" to be caf.
+set -euo pipefail
+
+args=("$@")
+if [[ " $* " != *" -c "* ]]; then
+  args=()
+  for arg in "$@"; do
+    [[ "$arg" == "-cpp" ]] || args+=("$arg")
+  done
+fi
+exec caf "${args[@]}"

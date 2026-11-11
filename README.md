@@ -621,8 +621,14 @@ fpm run --compiler ifx --flag "-DNNQS_COARRAY -coarray=shared -coarray-num-image
 With gfortran and [OpenCoarrays](http://www.opencoarrays.org), use
 
 ```bash
-fpm run --compiler caf --flag "-DNNQS_COARRAY -O2" --runner "cafrun -n n"
+fpm run --compiler ci/fpm-caf --flag "-DNNQS_COARRAY -O2" --runner "cafrun -n n"
 ```
+
+where `ci/fpm-caf` runs OpenCoarrays' `caf` wrapper for fpm. fpm passes
+`-cpp` when it links, and `caf` takes `-cpp` to mean it is only compiling,
+so it would leave out its libraries. With gfortran 15 or later,
+OpenCoarrays 2.10.3 or later is needed, built with MPICH rather than
+Open MPI.
 
 Here, `n` is the number of images to run, which generally should equal
 the number of CPU cores available. LLVM flang can build only the
