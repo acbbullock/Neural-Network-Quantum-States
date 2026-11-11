@@ -587,48 +587,46 @@ from
 
 ## Building with fpm
 
-The only dependency of this project is the Intel MKL distribution of
-LAPACK. With a system installation of [Intel
-oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html)
-Base and HPC toolkits (including MKL), the project can be built and run
-on Windows 10/11 and Linux with
-[fpm](https://github.com/fortran-lang/fpm) from the project root using a
-single command, assuming the shell environment has sourced the oneAPI
-environment variables beforehand.
+The project builds with [fpm](https://github.com/fortran-lang/fpm) and
+any Fortran 2018 compiler. CI tests gfortran 13 to 16, Intel ifx and
+LLVM flang on Linux, gfortran on macOS and Windows, and runs on four
+images with ifx and with gfortran and OpenCoarrays. fpm fetches the one
+Fortran dependency,
+[IO-Fortran-Library](https://github.com/acbbullock/IO-Fortran-Library).
+The project also needs LAPACK, installed as `liblapack` and `libblas`:
 
-To target an $n$ core CPU with SIMD instructions, the project can be
-built and run on Windows 10/11 using the command
+* Linux: reference LAPACK or OpenBLAS, such as Ubuntu's `liblapack-dev`
+  or Fedora's `lapack-devel`.
+* macOS: nothing to install, as Apple's Accelerate framework provides
+  both.
+* Windows: `mingw-w64-ucrt-x86_64-lapack` in MSYS2.
 
-```powershell
-fpm run --compiler ifort --flag "/Qcoarray /Qcoarray-num-images:n /Qopenmp /Qopenmp-simd" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"
-```
-
-and on Linux using the command
+From the project root, run the tests and then the program with
 
 ```bash
-fpm run --compiler ifort --flag "-coarray -coarray-num-images=n -qopenmp -qopenmp-simd" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lpthread -lm -ldl"
+fpm test
+fpm run --profile release
 ```
 
-with equivalent features.
-
-Here, `n` is the number of images to execute, which generally should
-equal the number of CPU cores available. We then enable the generation
-of multi-threaded code with OpenMP and SIMD compilation. Finally, the
-link flag specifies the MKL and OpenMP runtime libraries for static
-linking, provided by the [Intel Link Line
-Advisor](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html).
-
-To target an $n$ core CPU and an Intel GPU for acceleration, the project
-can be built and run on Windows 10/11 using the command
-
-```powershell
-fpm run --compiler ifx --flag "/Qcoarray /Qcoarray-num-images:n /Qiopenmp /Qopenmp-targets:spir64 /Qopenmp-target-do-concurrent" --link-flag "mkl_lapack95_lp64.lib mkl_intel_lp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib OpenCL.lib"
-```
-
-and on Linux using the command
+Built this way, the program runs as a single image and needs no coarray
+support. To run $n$ images in parallel, define `NNQS_COARRAY` and turn on
+the compiler's coarray features. With ifx, use
 
 ```bash
-fpm run --compiler ifx --flag "-coarray -coarray-num-images=n -fiopenmp -fopenmp-targets=spir64 -fopenmp-target-do-concurrent" --link-flag "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lOpenCL -lpthread -lm -ldl"
+fpm run --compiler ifx --flag "-DNNQS_COARRAY -coarray=shared -coarray-num-images=n -O2"
 ```
 
-with equivalent features.
+With gfortran and [OpenCoarrays](http://www.opencoarrays.org), use
+
+```bash
+fpm run --compiler caf --flag "-DNNQS_COARRAY -O2" --runner "cafrun -n n"
+```
+
+Here, `n` is the number of images to run, which generally should equal
+the number of CPU cores available. LLVM flang can build only the
+single-image program, because it doesn't yet ship a coarray runtime.
+
+With ifx, the `do concurrent` loops can also be offloaded to an Intel
+GPU by adding `-fiopenmp -fopenmp-targets=spir64
+-fopenmp-target-do-concurrent` to the flags. Choose the device with the
+`OMP_DEFAULT_DEVICE` environment variable.
