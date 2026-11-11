@@ -108,6 +108,11 @@ jobs:
       - name: Build
         run: fpm build --compiler ${{ matrix.fpm }} --flag "${{ matrix.flags }}"
       - name: Run tests on every image
+        # MPICH uses UCX, which probes the network hardware. Some runners have an InfiniBand-style device that UCX
+        # can't use (ibv_create_srq fails), and every image then aborts in MPI_Init. The images all run on one machine,
+        # so UCX is limited to shared memory and loopback, with TCP to fall back on. ifx ignores the setting.
+        env:
+          UCX_TLS: self,sm,tcp
         run: >-
           fpm test --compiler ${{ matrix.fpm }} --flag "${{ matrix.flags }}"
           ${{ matrix.runner && format('--runner "{0}"', matrix.runner) || '' }}

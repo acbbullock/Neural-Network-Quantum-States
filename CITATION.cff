@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software in published work, please cite it as below."
+title: "Neural-Network-Quantum-States"
+abstract: >-
+  Learning the ground state of the one-dimensional transverse-field Ising chain with a complex-valued
+  restricted Boltzmann machine, trained by stochastic reconfiguration and run in parallel with Fortran
+  coarrays, in standard Fortran 2018.
+type: software
+authors:
+  - given-names: "Austin Chase"
+    family-names: "Bullock"
+    orcid: "https://orcid.org/0009-0009-5129-5260"
+  - given-names: "Andrew"
+    family-names: "Wasserbeck"
+version: "1.0.5"
+date-released: "2026-11-11"
+license: MIT
+repository-code: "https://github.com/acbbullock/Neural-Network-Quantum-States"
+keywords:
+  - fortran
+  - fortran2018
+  - coarrays
+  - quantum-many-body
+  - neural-network-quantum-states
+  - restricted-boltzmann-machine
+  - variational-monte-carlo
+  - ising-model
