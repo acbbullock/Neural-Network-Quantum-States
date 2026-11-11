@@ -1,5 +1,10 @@
 # Learning Quantum States with Neural Networks
 
+[![CI](https://github.com/acbbullock/Neural-Network-Quantum-States/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/acbbullock/Neural-Network-Quantum-States/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/acbbullock/Neural-Network-Quantum-States)](https://github.com/acbbullock/Neural-Network-Quantum-States/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/acbbullock/Neural-Network-Quantum-States)](LICENCE)
+[![Fortran 2018](https://img.shields.io/badge/Fortran-2018-734f96)](https://fortran-lang.org)
+
 ![Energies_A](https://github.com/acbbullock/Neural-Network-Quantum-States/blob/main/data/energies_A.png)
 Figure 1: Statistical expectation of
 the energy and standard error of the mean for the anti-ferromagnetic
