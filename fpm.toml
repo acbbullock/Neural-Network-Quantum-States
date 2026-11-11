@@ -9,9 +9,12 @@ copyright = "© 2022-2023, Austin Bullock & Andrew Wasserbeck"
 auto-executables = true
 auto-tests = true
 auto-examples = true
+# LAPACK's Fortran 77 interface, from any LAPACK installed as liblapack and libblas: reference LAPACK, OpenBLAS, or
+# Apple's Accelerate on macOS.
+link = ["lapack", "blas"]
 
 [install]
 library = false
 
 [dependencies]
-IO-Fortran-Library = { git="https://github.com/acbbullock/IO-Fortran-Library", branch="main" }
+IO-Fortran-Library = { git = "https://github.com/acbbullock/IO-Fortran-Library", tag = "v2.3.0" }

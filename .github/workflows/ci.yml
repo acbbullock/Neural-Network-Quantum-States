@@ -1,0 +1,191 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# The fpm release used by every job. The macOS jobs build it from source, checked against this digest.
+env:
+  NNQS_FPM_VERSION: "0.13.0"
+  NNQS_FPM_SHA256: 001cff6cf1145f215baa0888ba27acc06cea30a89b79d1a8be97db3fffbc8cd2
+  # The OpenCoarrays release that the gfortran coarray job builds, and the commit its tag names.
+  NNQS_OPENCOARRAYS_VERSION: "2.10.3"
+  NNQS_OPENCOARRAYS_COMMIT: 3d0fa68dc95f05f9c17bd3e7dd0d34e6f530e429
+
+jobs:
+  test:
+    name: ${{ matrix.toolchain.compiler }} ${{ matrix.toolchain.version }} ${{ matrix.toolchain.label }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Single-image builds, which need no coarray support. Each links Ubuntu's reference LAPACK. gfortran needs version
+        # 15 or later for the locality specifiers (shared, local) on do concurrent.
+        toolchain:
+          - { compiler: gcc, version: "15", fpm: gfortran, flags: "-std=f2018 -O2 -g -fbacktrace" }
+          - { compiler: gcc, version: "16", fpm: gfortran, flags: "-std=f2018 -O2 -g -fbacktrace" }
+          - { compiler: intel, version: "2025.3", fpm: ifx, flags: "-stand f18 -O2" }
+          - { compiler: intel, version: "2026.1", fpm: ifx, flags: "-stand f18 -O2" }
+          - { compiler: intel, version: "2026.1", fpm: ifx, label: "runtime checks",
+              flags: "-stand f18 -check all -check nouninit -O0 -g -traceback" }
+          - { compiler: flang, version: "23", fpm: flang, flags: "-O2" }
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install LAPACK
+        run: sudo apt-get update -q && sudo apt-get install -y -q liblapack-dev
+      - uses: fortran-lang/setup-fortran@v1
+        if: matrix.toolchain.compiler != 'flang'
+        with:
+          compiler: ${{ matrix.toolchain.compiler }}
+          version: ${{ matrix.toolchain.version }}
+      # setup-fortran checks for the release by grepping apt.llvm.org's dists listing, which is now
+      # served compressed, so the check fails although the packages exist. Install them directly.
+      - name: Install LLVM Flang from apt.llvm.org
+        if: matrix.toolchain.compiler == 'flang'
+        run: |
+          v=${{ matrix.toolchain.version }}
+          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
+          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-$v main" | sudo tee /etc/apt/sources.list.d/llvm-toolchain-$v.list
+          sudo apt-get update -q
+          sudo apt-get install -y -q flang-$v clang-$v libomp-$v-dev libclang-rt-$v-dev
+          echo "/usr/lib/llvm-$v/bin" >> "$GITHUB_PATH"
+      - uses: fortran-lang/setup-fpm@v10
+        with:
+          fpm-version: v${{ env.NNQS_FPM_VERSION }}
+      - name: Build
+        run: fpm build --compiler ${{ matrix.toolchain.fpm }} --flag "${{ matrix.toolchain.flags }}"
+      - name: Run tests
+        run: fpm test --compiler ${{ matrix.toolchain.fpm }} --flag "${{ matrix.toolchain.flags }}"
+
+  coarrays:
+    name: coarrays, ${{ matrix.name }}, 4 images
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ifx has its own coarray runtime. gfortran uses OpenCoarrays, through its caf and cafrun wrappers. fpm calls
+          # caf through ci/fpm-caf, which keeps caf from leaving out its libraries when fpm links.
+          - { name: ifx 2026.1, compiler: intel, version: "2026.1", fpm: ifx, runner: "",
+              flags: "-DNNQS_COARRAY -coarray=shared -coarray-num-images=4 -O2" }
+          - { name: gfortran 15 and OpenCoarrays, compiler: gcc, version: "15", fpm: ci/fpm-caf, runner: "cafrun -n 4",
+              flags: "-DNNQS_COARRAY -O2" }
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install LAPACK
+        run: sudo apt-get update -q && sudo apt-get install -y -q liblapack-dev
+      - uses: fortran-lang/setup-fortran@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          version: ${{ matrix.version }}
+      - name: Build OpenCoarrays from source
+        if: matrix.fpm == 'ci/fpm-caf'
+        # Ubuntu's OpenCoarrays is built for its default gfortran 13, which is too old for this code, so OpenCoarrays
+        # is built with gfortran 15. It needs MPICH: from gfortran 15 on, OpenCoarrays refuses Open MPI, which
+        # identifies one-sided memory windows differently on each image. MPICH's wrappers are pointed at gfortran 15
+        # and its gcc, not Ubuntu's default compilers. The release's tag is checked against the commit it names.
+        run: |
+          sudo apt-get install -y -q libmpich-dev mpich cmake
+          echo "MPICH_CC=$CC" >> "$GITHUB_ENV"; echo "MPICH_FC=$FC" >> "$GITHUB_ENV"
+          export MPICH_CC="$CC" MPICH_FC="$FC"
+          src="$RUNNER_TEMP/opencoarrays-src"; build="$RUNNER_TEMP/opencoarrays-build"
+          git clone -q --depth 1 --branch "$NNQS_OPENCOARRAYS_VERSION" https://github.com/sourceryinstitute/OpenCoarrays.git "$src"
+          test "$(git -C "$src" rev-parse HEAD)" = "$NNQS_OPENCOARRAYS_COMMIT"
+          cmake -S "$src" -B "$build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/opencoarrays" \
+                -DCMAKE_Fortran_COMPILER="$FC" -DCMAKE_C_COMPILER="$CC" \
+                -DMPI_C_COMPILER=mpicc.mpich -DMPI_Fortran_COMPILER=mpif90.mpich \
+                -DMPIEXEC_EXECUTABLE=/usr/bin/mpiexec.mpich
+          cmake --build "$build" -j 4
+          cmake --install "$build"
+          echo "$HOME/opencoarrays/bin" >> "$GITHUB_PATH"
+      - uses: fortran-lang/setup-fpm@v10
+        with:
+          fpm-version: v${{ env.NNQS_FPM_VERSION }}
+      - name: Build
+        run: fpm build --compiler ${{ matrix.fpm }} --flag "${{ matrix.flags }}"
+      - name: Run tests on every image
+        run: >-
+          fpm test --compiler ${{ matrix.fpm }} --flag "${{ matrix.flags }}"
+          ${{ matrix.runner && format('--runner "{0}"', matrix.runner) || '' }}
+
+  platforms:
+    name: ${{ matrix.os }} ${{ matrix.compiler }} ${{ matrix.version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # setup-fpm's macOS binaries need Homebrew's gcc@12 runtime, which the runners don't have, so fpm is built
+          # from source. LAPACK comes from Apple's Accelerate, which macOS installs as liblapack and libblas.
+          - { os: macos-15, compiler: gcc, version: "16", flags: "-std=f2018 -O2 -g -fbacktrace" }
+          - { os: macos-15-intel, compiler: gcc, version: "15", flags: "-std=f2018 -O2 -g -fbacktrace" }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: ${{ matrix.compiler }}
+          version: ${{ matrix.version }}
+      - name: Build fpm from its single-file source
+        run: |
+          mkdir -p "$HOME/fpm-bin" && cd "$HOME/fpm-bin"
+          src="fpm-$NNQS_FPM_VERSION.F90"
+          curl -fsSLO "https://github.com/fortran-lang/fpm/releases/download/v$NNQS_FPM_VERSION/$src"
+          echo "$NNQS_FPM_SHA256  $src" | shasum -a 256 -c -
+          "${{ steps.setup-fortran.outputs.fc }}" -O2 -J . "$src" -o fpm
+          echo "$HOME/fpm-bin" >> "$GITHUB_PATH"
+      - name: Build
+        run: fpm build --compiler ${{ steps.setup-fortran.outputs.fc }} --flag "${{ matrix.flags }}"
+      - name: Run tests
+        run: fpm test --compiler ${{ steps.setup-fortran.outputs.fc }} --flag "${{ matrix.flags }}"
+
+  windows:
+    name: windows-2025 gfortran (MSYS2 UCRT64)
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      # MSYS2 packages gfortran, reference LAPACK and fpm together.
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            mingw-w64-ucrt-x86_64-gcc-fortran
+            mingw-w64-ucrt-x86_64-lapack
+            mingw-w64-ucrt-x86_64-fpm
+      - name: Build
+        run: fpm build --compiler gfortran --flag "-std=f2018 -O2 -g -fbacktrace"
+      - name: Run tests
+        run: fpm test --compiler gfortran --flag "-std=f2018 -O2 -g -fbacktrace"
+
+  checks:
+    name: gfortran 16 runtime checks and sanitizers
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install LAPACK
+        run: sudo apt-get update -q && sudo apt-get install -y -q liblapack-dev
+      - uses: fortran-lang/setup-fortran@v1
+        with:
+          compiler: gcc
+          version: "16"
+      - uses: fortran-lang/setup-fpm@v10
+        with:
+          fpm-version: v${{ env.NNQS_FPM_VERSION }}
+      - name: Runtime checks
+        run: fpm test --compiler gfortran --flag "-std=f2018 -g -fcheck=all -fbacktrace"
+      - name: Address and undefined behavior sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1:exitcode=99
+        run: >-
+          fpm test --compiler gfortran
+          --flag "-std=f2018 -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer"
+          --link-flag "-fsanitize=address,undefined"

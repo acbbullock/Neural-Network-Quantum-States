@@ -6,7 +6,8 @@ module nnqs
   use, intrinsic :: iso_fortran_env, only: rk=>real32, ik=>int8, int64, compiler_version, compiler_options
   use, intrinsic :: ieee_arithmetic, only: ieee_is_nan
   use io_fortran_lib, only: echo, LF, str, to_file                                     !! I/O procedures and constants
-  use lapack95, only: ppsvx                                  !! Routine for solving linear systems with packed storage
+  use nnqs_lapack, only: ppsvx                               !! Routine for solving linear systems with packed storage
+  use nnqs_images, only: my_image, image_count, sum_images, sync_with_first                  !! Operations over images
   implicit none (type,external)                                                     !! No implicit types or interfaces
   private                             !! All objects in scope are inaccessible outside of scope unless declared public
 
@@ -26,10 +27,11 @@ module nnqs
     contains
       private
       procedure, pass(self), public :: stochastic_optimization                          !! Public training routine
+      procedure, pass(self), public :: log_amplitude                                          !! ln ψ(s) for one s
+      procedure, pass(self), public :: prob_ratio                           !! Probability ratio |ψ(s_2)/ψ(s_1)|^2
+      procedure, pass(self), public :: ising_energy                                          !! Ising local energy
       procedure, pass(self)         :: init                                              !! Initialization routine
       procedure, pass(self)         :: sample_distribution                      !! MCMC routine for sampling |ψ|^2
-      procedure, pass(self)         :: prob_ratio                           !! Probability ratio |ψ(s_2)/ψ(s_1)|^2
-      procedure, pass(self)         :: ising_energy                                          !! Ising local energy
       procedure, pass(self)         :: propagate                        !! Routine for updating weights and biases
   end type RestrictedBoltzmannMachine
 
@@ -39,14 +41,46 @@ module nnqs
 
   contains !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  pure recursive type(RestrictedBoltzmannMachine) function new_rbm(v_units, h_units) result(new)
+  pure recursive type(RestrictedBoltzmannMachine) function new_rbm(v_units, h_units, a, b, w) result(new)
     !---------------------------------------------------------------------------------------------------------------
     !! Function for constructing a RestrictedBoltzmannMachine
+    !!
+    !! With a, b and w, the machine holds those parameters, so that log_amplitude, prob_ratio and ising_energy can
+    !! evaluate it. stochastic_optimization always starts from its own initial parameters.
     !---------------------------------------------------------------------------------------------------------------
     integer, intent(in) :: v_units, h_units                       ! Number of visible and hidden units to initialize
+    real(rk),    optional, intent(in) :: a(:)                                                 !! Visible layer biases
+    complex(rk), optional, intent(in) :: b(:), w(:,:)                               !! Hidden layer biases, weights
+
     new%v_units = v_units                       !! Set number of visible units (always equal to the number of spins)
     new%h_units = h_units                    !! Set number of hidden units (chosen arbitrarily to optimize learning)
+
+    if ( .not. (present(a) .or. present(b) .or. present(w)) ) return
+
+    if ( .not. (present(a) .and. present(b) .and. present(w)) ) then
+      error stop LF//'FATAL: Give all of a, b and w, or none of them.'
+    end if
+    if ( (size(a) /= v_units) .or. (size(b) /= h_units) .or. any(shape(w) /= [h_units, v_units]) ) then
+      error stop LF//'FATAL: a, b and w must have shapes (v_units), (h_units) and (h_units, v_units).'
+    end if
+
+    new%a = a; new%b = b; new%w = w
+    allocate(new%p_a(v_units), new%r_a(v_units), source=0.0_rk)
+    allocate(new%p_b(h_units), new%r_b(h_units), new%p_w(h_units,v_units), new%r_w(h_units,v_units), &
+         source=(0.0_rk,0.0_rk))
+    new%initialized = .true.
   end function new_rbm
+
+  pure recursive complex(rk) function log_amplitude(self, s) result(log_psi)
+    !---------------------------------------------------------------------------------------------------------------
+    !! The logarithm of the unnormalized amplitude ψ(s) = exp(a·s) Π_i (1 + exp(θ_i)), with θ = conjg(b) + ws as in
+    !! the sampler and the local energy. Its imaginary part is defined up to a multiple of 2π.
+    !---------------------------------------------------------------------------------------------------------------
+    class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
+    integer(ik), contiguous, dimension(:), intent(in) :: s                                   !! Configuration of 0s and 1s
+
+    log_psi = sum(self%a*real(s, kind=rk)) + sum(log(1.0_rk + exp(conjg(self%b) + matmul(self%w, real(s, kind=rk)))))
+  end function log_amplitude
 
   impure recursive subroutine stochastic_optimization(self, ising_params)
     !---------------------------------------------------------------------------------------------------------------
@@ -80,7 +114,7 @@ module nnqs
     integer(int64) :: t1, t2                                                                      !! Clock variables
     real(rk)       :: rate, wall_time                                                             !! Clock variables
 
-    if ( this_image() == 1 ) then                                     !! Check validity of Ising strength parameters
+    if ( my_image() == 1 ) then                                       !! Check validity of Ising strength parameters
       if ( size(ising_params) /= 2 ) then
         error stop  LF//'FATAL: Invalid size for ising_params... size must be (2).'// &
               LF//'USAGE: ising_params=[J,B] where J is the neighbor coupling strength and B '// &
@@ -89,10 +123,8 @@ module nnqs
       if ( abs(ising_params(2)) >= 1.0_rk ) then
         error stop LF//'FATAL: Invalid field strength parameter... try again with |B| < 1.'//LF
       end if
-      sync images (*)                                                                   !! Respond to other images
-    else
-      sync images (1)                                                            !! Wait for response from image 1
     end if
+    call sync_with_first()                                                    !! Other images wait for image 1
 
     if ( ising_params(1) < 0.0_rk ) then                                          !! Check sign of coupling strength
       self%alignment = 'A'                                                          !! Anti-ferromagnetic if J < 0
@@ -128,7 +160,7 @@ module nnqs
     call random_sample(start_sample)                                                !! Randomize the starting sample
     theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
-    if ( this_image() == 1 ) then                                                       !! Do preparation on image 1
+    if ( my_image() == 1 ) then                                                         !! Do preparation on image 1
       !! Allocate storage arrays on image 1:
       allocate(energies(max_epochs,2), correlations(n,max_epochs), source=0.0_rk, stat=stat, errmsg=errmsg)
       if (stat /= 0) error stop LF//errmsg                                                     !! Check allocation
@@ -143,13 +175,11 @@ module nnqs
       write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
 
       call system_clock(t1)                                                                         !! Start timer
-      sync images (*)                                                                   !! Respond to other images
-    else
-      sync images (1)                                                            !! Wait for response from image 1
     end if
+    call sync_with_first()                                                    !! Other images wait for image 1
 
     learning: do epoch = 1, max_epochs                                                             !! Begin learning
-      call co_sum(self%w); self%w = self%w/num_images()                           !! Average weights across images
+      call sum_images(self%w); self%w = self%w/image_count()                      !! Average weights across images
 
       call self%sample_distribution(epoch=epoch, ising_params=ising_params, &                            !! Inputs
                       start_sample=start_sample, theta=theta, &                     !! Input/outputs
@@ -157,16 +187,16 @@ module nnqs
                       energy=energy, sqerr=sqerr, &                                !! Scalar outputs
                       stat=stat, errmsg=errmsg)                  !! Error vars for local allocations
 
-      if ( (sqrt(sqerr) < 0.001_rk) .and. (mod(this_image(),2) == 1) ) then
+      if ( (sqrt(sqerr) < 0.001_rk) .and. (mod(my_image(),2) == 1) ) then
         !! Add Gaussian perturbation to weights on odd images when samples are sticky:
         self%w = self%w + cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
       end if
 
-      call co_sum(energy); energy = energy/num_images()                            !! Average energy across images
-      call co_sum(sqerr);  stderr = sqrt(sqerr)/num_images()                        !! Average error across images
-      call co_sum(corrs);  corrs = corrs/num_images()                        !! Average correlations across images
+      call sum_images(energy); energy = energy/image_count()                       !! Average energy across images
+      call sum_images(sqerr);  stderr = sqrt(sqerr)/image_count()                   !! Average error across images
+      call sum_images(corrs);  corrs = corrs/image_count()                   !! Average correlations across images
 
-      if ( this_image() == 1 ) then                                                !! Do data recording on image 1
+      if ( my_image() == 1 ) then                                                  !! Do data recording on image 1
         energies(epoch,:) = [energy, stderr]                               !! Record energy and error to storage
         correlations(:,epoch) = corrs                                          !! Record correlations to storage
 
@@ -180,13 +210,11 @@ module nnqs
         write(unit=*, fmt='(a)') logmsg                                                     !! Print log message
 
         if ( ieee_is_nan(energy) ) error stop LF//'FATAL: Numerical instability.'           !! Error termination
-        sync images (*)                                                               !! Respond to other images
-      else
-        sync images (1)                                                        !! Wait for response from image 1
       end if
+      call sync_with_first()                                                  !! Other images wait for image 1
 
       acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)              !! Get ground state accuracy
-      call co_sum(acc); acc = acc/num_images()                                   !! Average accuracy across images
+      call sum_images(acc); acc = acc/image_count()                              !! Average accuracy across images
       if ( (acc > 0.9999_rk) .or. (epoch == max_epochs) ) exit learning                         !! Exit conditions
 
       e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
@@ -198,7 +226,7 @@ module nnqs
                 x_a=x_a, x_b=x_b, x_w=x_w)
     end do learning
 
-    if ( this_image() == 1 ) then                                              !! Do finalization and I/O on image 1
+    if ( my_image() == 1 ) then                                                !! Do finalization and I/O on image 1
       call system_clock(t2, count_rate=rate); wall_time = real(t2-t1, kind=rk)/rate               !! Get time in s
 
       logmsg = LF//'    Optimization time: '//str(wall_time, fmt='f', decimals=3)//' seconds for n = '// &
@@ -233,14 +261,12 @@ module nnqs
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
 
-    if ( this_image() == 1 ) then
+    if ( my_image() == 1 ) then
       if ( (n < 1) .or. (m < 1) ) then
         error stop LF//'FATAL: Structure has not been instantiated or has invalid number of units.'
       end if
-      sync images (*)                                                                   !! Respond to other images
-    else
-      sync images (1)                                                            !! Wait for response from image 1
     end if
+    call sync_with_first()                                                    !! Other images wait for image 1
 
     if ( self%initialized ) then
       deallocate(self%a, self%p_a, self%r_a, self%b, self%p_b, self%r_b, self%w, self%p_w, self%r_w, &
