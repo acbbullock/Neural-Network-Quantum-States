@@ -209,7 +209,7 @@ module nnqs
 
       acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)              !! Get ground state accuracy
       call sum_images(acc); acc = acc/image_count()                              !! Average accuracy across images
-      if ( (acc > 0.9999_rk) .or. (epoch == max_epochs) ) exit learning                         !! Exit conditions
+      if ( epoch == max_epochs ) exit learning                                                     !! Exit condition
 
       e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
 
