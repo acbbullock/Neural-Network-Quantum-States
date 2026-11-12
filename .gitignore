@@ -1,3 +1,5 @@
 build
 *.pdf
 *.gif
+# Raw correlations written by the program; the committed copies are gzipped by data/generate.sh
+data/correlations_*.csv
