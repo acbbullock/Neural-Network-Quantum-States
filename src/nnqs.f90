@@ -181,7 +181,7 @@ module nnqs
     learning: do epoch = 1, max_epochs                                                             !! Begin learning
       call sum_images(self%w); self%w = self%w/image_count()                      !! Average weights across images
 
-      call self%sample_distribution(epoch=epoch, ising_params=ising_params, &                            !! Inputs
+      call self%sample_distribution(ising_params=ising_params, &                                         !! Inputs
                       start_sample=start_sample, theta=theta, &                     !! Input/outputs
                       samples=samples, e_loc=e_loc, corrs=corrs, &                  !! Array outputs
                       energy=energy, sqerr=sqerr, &                                !! Scalar outputs
@@ -294,16 +294,19 @@ module nnqs
     self%initialized = .true.
   end subroutine init
 
-  impure recursive subroutine sample_distribution(self, epoch, ising_params, start_sample, theta, samples, &
+  impure recursive subroutine sample_distribution(self, ising_params, start_sample, theta, samples, &
                           e_loc, corrs, energy, sqerr, stat, errmsg)
     !---------------------------------------------------------------------------------------------------------------
     !! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
+    !!
+    !! One chain runs through the whole of training. Each call continues it from start_sample, takes 5n steps to
+    !! re-equilibrate after the last parameter update, then records a sample after every sweep of n steps, and
+    !! leaves the chain's last configuration in start_sample, and its θ in theta, for the next call.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
-    integer,                           intent(in) :: epoch                                          !! Current epoch
     real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
-    integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample         !! Sample to begin thermalization
-    complex(rk), contiguous, dimension(:),   intent(inout) :: theta                   !! θ = b + ws for start sample
+    integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample           !! Where the chain continues from
+    complex(rk), contiguous, dimension(:),   intent(inout) :: theta                    !! θ = conjg(b) + ws for it
     integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
     real(rk),    contiguous, dimension(:),   intent(out)   :: e_loc, corrs    !! Local energies, sample correlations
     real(rk),            intent(out)   :: energy, sqerr                              !! Energy average, square error
@@ -312,11 +315,11 @@ module nnqs
 
     real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
     integer(ik), allocatable, dimension(:) :: s_prop, s                                     !! Sample storage arrays
-    complex(rk), allocatable, dimension(:) :: theta2, theta_loc, arg_theta                         !! Storage arrays
+    complex(rk), allocatable, dimension(:) :: theta2, arg_theta                                    !! Storage arrays
 
     real(rk) :: acc_prob, r                                                            !! M-H acceptance probability
-    integer  :: n, m, passes, num_samples                          !! Number of spins, hidden units, passes, samples
-    integer  :: k, max_thermal_time, pass, rind                                      !! Loop variables, random index
+    integer  :: n, m, num_samples                                           !! Number of spins, hidden units, samples
+    integer  :: k, step, rind                                                        !! Loop variables, random index
 
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
@@ -329,62 +332,52 @@ module nnqs
     allocate(s_prop(n), s(n), source=0_ik, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(theta2(m), theta_loc(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(theta2(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
+    s(:) = start_sample                                                         !! Continue the chain where it ended
+    s_prop(:) = s                                                                          !! Copy for the proposals
+
     !! Thermalization ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    max_thermal_time = 2001 - 2*epoch                                           !! Set time limit for thermalization
-    s_prop(:) = start_sample                                                                    !! Copy start sample
-
-    thermalize: do k = 1, max_thermal_time
-      call random_number(r); rind = floor(n*r) + 1                                        !! Generate random index
-      s_prop(rind) = 1_ik - s_prop(rind)                                              !! Flip spin at random index
-      call self%prob_ratio(ind=rind, s1=start_sample, s2=s_prop, theta1=theta, theta2=theta2, p=acc_prob) !! Acc p
-
-      call random_number(r)                                           !! Sample from uniform distribution on [0,1)
-      if ( r < acc_prob ) then                                                         !! M-H acceptance criterion
-        theta = theta + self%w(:,rind)*real(s_prop(rind) - start_sample(rind), kind=rk)              !! Update θ
-        start_sample(rind) = s_prop(rind)                                                       !! Update sample
-      else
-        s_prop(rind) = 1_ik - s_prop(rind)                                                       !! Reverse flip
-      end if
+    thermalize: do step = 1, 5*n
+      call metropolis_step()
     end do thermalize
     !! End thermalization
 
-    passes = 2*n - min(2*epoch, 2*n-1)                               !! Number of passes to make on the start sample
-
     !! Stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     stationary_sampling: do k = 1, num_samples
-      s(:) = start_sample                                                             !! Copy start sample to temp
-      theta_loc(:) = theta                                                                   !! Copy theta to temp
-      s_prop(:) = s                                                                            !! Copy temp sample
-
-      metropolis_hastings: do pass = 1, passes
-        call random_number(r); rind = floor(n*r) + 1                                    !! Generate random index
-        s_prop(rind) = 1_ik - s_prop(rind)                                          !! Flip spin at random index
-        call self%prob_ratio(ind=rind, s1=s, s2=s_prop, theta1=theta_loc, theta2=theta2, p=acc_prob)    !! Acc p
-
-        call random_number(r)                                       !! Sample from uniform distribution on [0,1)
-        if ( r < acc_prob ) then                                                     !! M-H acceptance criterion
-          theta_loc(:) = theta_loc(:) + self%w(:,rind)*real(s_prop(rind) - s(rind), kind=rk)       !! Update θ
-          s(rind) = s_prop(rind)                                                              !! Update sample
-        else
-          s_prop(rind) = 1_ik - s_prop(rind)                                                   !! Reverse flip
-        end if
-      end do metropolis_hastings
+      sweep: do step = 1, n                                                       !! One sweep between samples
+        call metropolis_step()
+      end do sweep
 
       samples(k,:) = s                                                                !! Transfer sample to output
-      call self%ising_energy( s=s, theta=theta_loc, ising_params=ising_params, s_map=s_map, & !! Local energy of s
+      call self%ising_energy( s=s, theta=theta, ising_params=ising_params, s_map=s_map, &    !! Local energy of s
                   arg_theta=arg_theta, energy=e_loc(k) )
     end do stationary_sampling
     !! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    start_sample = s                                     !! Record stationary sample to begin next round of sampling
-    theta = theta_loc                                                    !! Record θ to begin next round of sampling
+    start_sample = s                                                            !! Where the next call continues from
 
     call get_correlations(samples, corrs=corrs, alignment=self%alignment)        !! Get spin correlations of samples
     energy = sum(e_loc)/num_samples                                                           !! Average of energies
     sqerr = var(e_loc)/num_samples                                                       !! Square error of energies
+
+    contains
+
+      impure subroutine metropolis_step()
+        !! Propose flipping one spin at random, and accept with probability min(1, |ψ(s_prop)/ψ(s)|^2)
+        call random_number(r); rind = floor(n*r) + 1                                    !! Generate random index
+        s_prop(rind) = 1_ik - s_prop(rind)                                          !! Flip spin at random index
+        call self%prob_ratio(ind=rind, s1=s, s2=s_prop, theta1=theta, theta2=theta2, p=acc_prob)        !! Acc p
+
+        call random_number(r)                                       !! Sample from uniform distribution on [0,1)
+        if ( r < acc_prob ) then                                                     !! M-H acceptance criterion
+          theta(:) = theta2                                                           !! θ for the flipped sample
+          s(rind) = s_prop(rind)                                                              !! Update sample
+        else
+          s_prop(rind) = 1_ik - s_prop(rind)                                                   !! Reverse flip
+        end if
+      end subroutine metropolis_step
   end subroutine sample_distribution
 
   pure recursive subroutine prob_ratio(self, ind, s1, s2, theta1, theta2, p)
