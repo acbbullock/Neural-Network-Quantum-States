@@ -5,15 +5,18 @@
 [![License: MIT](https://img.shields.io/github/license/acbbullock/Neural-Network-Quantum-States)](LICENCE)
 [![Fortran 2018](https://img.shields.io/badge/Fortran-2018-734f96)](https://fortran-lang.org)
 
-![Energies_A](https://github.com/acbbullock/Neural-Network-Quantum-States/blob/main/data/energies_A.png)
-Figure 1: Statistical expectation of
-the energy and standard error of the mean for the anti-ferromagnetic
-Ising chain of $n = 1024$ spins with $J = -0.5$ and $B = 0.1$.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="data/training_dark.svg">
+  <img alt="Error of the energy during training: both chains end about 0.003% above the exact ground-state energy" src="data/training_light.svg">
+</picture>
 
-![Correlations_A](https://github.com/acbbullock/Neural-Network-Quantum-States/blob/main/data/correlations_A.png)
-Figure 2: Correlations for
-the anti-ferromagnetic Ising chain of $n = 1024$ spins with $J = -0.5$
-and $B = 0.1$.
+Figure 1: Training the network on two chains in a weak transverse field
+$B = 0.1$: 1024 spins with $J = -0.5$ and 1000 spins with $J = 0.5$,
+each with 64 hidden units and 256 samples per epoch on each of four
+images. The chain maps to free fermions, so its exact ground-state
+energy is known, and both networks end within 0.003% of it. The
+antiferromagnet stays near 0.7% for its first 200 epochs before it
+converges.
 
 ## Contents
 
@@ -562,10 +565,11 @@ RestrictedBoltzmannMachine
 The `stochastic_optimization` routine takes advantage of the coarray
 features of Fortran 2008 and, in particular, the collective subroutine
 extensions of Fortran 2018, allowing for many images of the program to
-run concurrently with collective communication. This allows us to
-average the weights across images in each epoch of learning, which
-dramatically improves stability and time to convergence in a stochastic
-framework.
+run concurrently with collective communication. Each image runs its own
+Markov chain, and at the start of every epoch the biases and weights are
+averaged across images, so every image samples the same wave-function
+and the average of their steps acts like one step from all their
+samples together.
 
 From a main program, we simply need to initialize the random number
 generator, instantiate a `RestrictedBoltzmannMachine`, and call the
@@ -636,6 +640,12 @@ Open MPI.
 Here, `n` is the number of images to run, which generally should equal
 the number of CPU cores available. LLVM flang can build only the
 single-image program, because it doesn't yet ship a coarray runtime.
+
+The program trains the chain of Figure 1 by default, and any other
+chain with `fpm run -- spins hidden_units J B`. It writes its energies
+and correlations to `./data`, which must exist. `data/generate.sh`
+regenerates the data, and `Rscript data_visualization.R` redraws the
+figures with base R alone.
 
 With ifx, the `do concurrent` loops can also be offloaded to an Intel
 GPU by adding `-fiopenmp -fopenmp-targets=spir64

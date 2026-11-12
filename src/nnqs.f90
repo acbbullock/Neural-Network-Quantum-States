@@ -108,8 +108,8 @@ module nnqs
     character(len=1000)           :: errmsg                                                         !! Error message
     integer :: stat                                                                                    !! Error stat
 
-    integer(int64) :: t1, t2                                                                      !! Clock variables
-    real(rk)       :: rate, wall_time                                                             !! Clock variables
+    integer(int64) :: t1, t2, rate                                                                !! Clock variables
+    real(rk)       :: wall_time                                                                   !! Clock variables
 
     if ( my_image() == 1 ) then                                       !! Check validity of Ising strength parameters
       if ( size(ising_params) /= 2 ) then
@@ -132,7 +132,7 @@ module nnqs
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
     max_epochs = 1000                                                                          !! Set maximum epochs
-    num_samples = 16                                                             !! Set number of samples to produce
+    num_samples = 256                                                            !! Set number of samples to produce
     stat = 0                                                                                !! Initialize error stat
 
     call self%init(stat=stat, errmsg=errmsg)                                         !! Initialize Boltzmann machine
@@ -173,11 +173,15 @@ module nnqs
       call echo(logmsg, file=logfile)                                                              !! Echo to file
       write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
 
-      call system_clock(t1)                                                                         !! Start timer
+      call system_clock(t1, count_rate=rate)                                                        !! Start timer
     end if
     call sync_with_first()                                                    !! Other images wait for image 1
 
     learning: do epoch = 1, max_epochs                                                             !! Begin learning
+      !! Average the parameters across images, so that every image samples the same ψ. Each image then takes
+      !! its own step from its own samples, and the next average combines those steps.
+      call sum_images(self%a); self%a = self%a/image_count()                 !! Average visible biases across images
+      call sum_images(self%b); self%b = self%b/image_count()                  !! Average hidden biases across images
       call sum_images(self%w); self%w = self%w/image_count()                      !! Average weights across images
 
       call self%sample_distribution(ising_params=ising_params, &                                         !! Inputs
@@ -221,7 +225,7 @@ module nnqs
     end do learning
 
     if ( my_image() == 1 ) then                                                !! Do finalization and I/O on image 1
-      call system_clock(t2, count_rate=rate); wall_time = real(t2-t1, kind=rk)/rate               !! Get time in s
+      call system_clock(t2); wall_time = real(t2-t1, kind=rk)/real(rate, kind=rk)                 !! Get time in s
 
       logmsg = LF//'    Optimization time: '//str(wall_time, fmt='f', decimals=3)//' seconds for n = '// &
              str(n)//' spins.'// &
@@ -415,6 +419,9 @@ module nnqs
 
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
+    !! Flipping every other spin maps the chain with J < 0 onto the chain with |J|, so the network always learns
+    !! the ferromagnetic ground state, which its initial weights favour, and get_correlations staggers the
+    !! correlations back for J < 0. Rotating every spin about z likewise changes the sign of B.
     J_str = abs(ising_params(1)); B_str = abs(ising_params(2))           !! Set coupling strength and field strength
     e_coupling = 0.0_rk; e_transverse = (0.0_rk,0.0_rk)                                                !! Initialize
 
