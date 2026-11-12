@@ -186,11 +186,6 @@ module nnqs
                       energy=energy, sqerr=sqerr, &                                !! Scalar outputs
                       stat=stat, errmsg=errmsg)                  !! Error vars for local allocations
 
-      if ( (sqrt(sqerr) < 0.001_rk) .and. (mod(my_image(),2) == 1) ) then
-        !! Add Gaussian perturbation to weights on odd images when samples are sticky:
-        self%w = self%w + cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
-      end if
-
       call sum_images(energy); energy = energy/image_count()                       !! Average energy across images
       call sum_images(sqerr);  stderr = sqrt(sqerr)/image_count()                   !! Average error across images
       call sum_images(corrs);  corrs = corrs/image_count()                   !! Average correlations across images
