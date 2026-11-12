@@ -5,6 +5,14 @@
 [![License: MIT](https://img.shields.io/github/license/acbbullock/Neural-Network-Quantum-States)](LICENCE)
 [![Fortran 2018](https://img.shields.io/badge/Fortran-2018-734f96)](https://fortran-lang.org)
 
+A restricted Boltzmann machine with complex parameters, used as a
+variational wavefunction, learns the ground state of the
+one-dimensional transverse-field Ising model. It is trained by
+variational Monte Carlo with stochastic reconfiguration, written in
+standard Fortran 2018, and runs in parallel on any number of coarray
+images. The model can be solved exactly, so every result here is
+measured against the exact ground-state energy.
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/training_dark.svg">
   <img alt="Error of the energy during training: both chains end about 0.003% above the exact ground-state energy" src="data/training_light.svg">
@@ -18,6 +26,25 @@ energy is known, and both networks end within 0.003% of it. The
 antiferromagnet stays near 0.7% for its first 200 epochs before it
 converges.
 
+## Quick start
+
+With [fpm](https://github.com/fortran-lang/fpm), a Fortran compiler
+(gfortran 15 or later, ifx or flang) and LAPACK:
+
+```bash
+git clone https://github.com/acbbullock/Neural-Network-Quantum-States
+cd Neural-Network-Quantum-States
+fpm test
+fpm run --profile release -- 64 16 0.5 0.1
+```
+
+The last line trains a chain of 64 spins with 16 hidden units, $J =
+0.5$ and $B = 0.1$ in about a minute on one core. It ends within 0.01%
+of the exact energy, $-31.831$, and writes its energies to `data/energies_F.csv`,
+replacing the committed file (`git restore data` puts it back).
+[Building with fpm](#building-with-fpm) explains how to run on many
+images.
+
 ## Contents
 
 1. [Introduction](#introduction)
@@ -29,6 +56,7 @@ converges.
    Algorithm](#derivation-of-optimization-algorithm)
 7. [Fortran Implementation](#fortran-implementation)
 8. [Building with fpm](#building-with-fpm)
+9. [Citing](#citing)
 
 ## Introduction
 
@@ -651,3 +679,9 @@ With ifx, the `do concurrent` loops can also be offloaded to an Intel
 GPU by adding `-fiopenmp -fopenmp-targets=spir64
 -fopenmp-target-do-concurrent` to the flags. Choose the device with the
 `OMP_DEFAULT_DEVICE` environment variable.
+
+## Citing
+
+If you use this code in published work, please cite it with the
+details in [CITATION.cff](CITATION.cff), or with "Cite this
+repository" on GitHub.
