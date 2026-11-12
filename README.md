@@ -4,6 +4,7 @@
 [![Latest release](https://img.shields.io/github/v/release/acbbullock/Neural-Network-Quantum-States)](https://github.com/acbbullock/Neural-Network-Quantum-States/releases/latest)
 [![License: MIT](https://img.shields.io/github/license/acbbullock/Neural-Network-Quantum-States)](LICENCE)
 [![Fortran 2018](https://img.shields.io/badge/Fortran-2018-734f96)](https://fortran-lang.org)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24154188.svg)](https://doi.org/10.5281/zenodo.24154188)
 
 A restricted Boltzmann machine with complex parameters, used as a
 variational wavefunction, learns the ground state of the
@@ -682,6 +683,10 @@ GPU by adding `-fiopenmp -fopenmp-targets=spir64
 
 ## Citing
 
-If you use this code in published work, please cite it with the
-details in [CITATION.cff](CITATION.cff), or with "Cite this
-repository" on GitHub.
+If you use this code in published work, please cite it. Each release
+is archived on Zenodo, and
+[10.5281/zenodo.24154188](https://doi.org/10.5281/zenodo.24154188)
+always refers to the latest version; Zenodo lists a DOI for each
+version too. GitHub's "Cite this repository" button, from
+[CITATION.cff](CITATION.cff), gives the reference in APA and BibTeX
+form.

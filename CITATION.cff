@@ -13,6 +13,7 @@ authors:
   - given-names: "Andrew"
     family-names: "Wasserbeck"
 version: "2.0.0"
+doi: 10.5281/zenodo.24154188
 date-released: "2026-11-12"
 license: MIT
 repository-code: "https://github.com/acbbullock/Neural-Network-Quantum-States"
