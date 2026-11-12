@@ -132,7 +132,7 @@ module nnqs
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
     max_epochs = 1000                                                                          !! Set maximum epochs
-    num_samples = 16                                                             !! Set number of samples to produce
+    num_samples = 256                                                            !! Set number of samples to produce
     stat = 0                                                                                !! Initialize error stat
 
     call self%init(stat=stat, errmsg=errmsg)                                         !! Initialize Boltzmann machine
