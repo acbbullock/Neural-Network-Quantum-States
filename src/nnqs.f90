@@ -512,7 +512,7 @@ module nnqs
     call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
     self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
-    self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                  !! Biased second raw moment estimate
+    self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*abs(x_b)**2               !! Biased second raw moment estimate
     x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
     self%b(:) = self%b - dtau*conjg(x_b)                       !! Update hidden biases; ψ depends on conjg(b), not b
     !! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -534,7 +534,7 @@ module nnqs
     end do
 
     self%p_w(:,:) = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                          !! Biased first moment estimate
-    self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*(x_w**2)                !! Biased second raw moment estimate
+    self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*abs(x_w)**2             !! Biased second raw moment estimate
     x_w(:,:) = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )   !! ADAM
     self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
     !! End Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
