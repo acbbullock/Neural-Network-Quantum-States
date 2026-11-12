@@ -7,6 +7,7 @@ program test_nnqs
   use, intrinsic :: iso_fortran_env, only: rk=>real32, ik=>int8, output_unit
   use nnqs, only: RestrictedBoltzmannMachine
   use nnqs_lapack, only: ppsvx
+  use, intrinsic :: ieee_arithmetic, only: ieee_is_finite
   implicit none (type,external)
 
   real(rk), parameter :: tol = 1e-4_rk                                     !! Relative tolerance in single precision
@@ -19,6 +20,7 @@ program test_nnqs
   call test_ppsvx_complex()
   call test_prob_ratio()
   call test_ising_energy()
+  call test_large_parameters()
 
   if ( failures > 0 ) then
     write(output_unit, '(i0,a)') failures, ' check(s) failed.'
@@ -136,7 +138,7 @@ program test_nnqs
     real(rk), parameter :: J = 0.7_rk, B = 0.3_rk
     type(RestrictedBoltzmannMachine) :: psi
     real(rk)    :: a(n), sigma(n), s_map(n), err, worst
-    complex(rk) :: bias(m), w(m,n), theta(m), arg_theta(m), field, energy, e_direct
+    complex(rk) :: bias(m), w(m,n), theta(m), softplus_theta(m), field, energy, e_direct
     integer(ik) :: s(n), s_flip(n)
     integer     :: trial, k
 
@@ -145,7 +147,8 @@ program test_nnqs
     do trial = 1, trials
       call random_configuration(s)
       theta = conjg(bias) + matmul(w, real(s, kind=rk))
-      call psi%ising_energy(s=s, theta=theta, ising_params=[J, B], s_map=s_map, arg_theta=arg_theta, energy=energy)
+      call psi%ising_energy(s=s, theta=theta, ising_params=[J, B], s_map=s_map, softplus_theta=softplus_theta, &
+                           energy=energy)
 
       sigma = 1.0_rk - 2.0_rk*real(s, kind=rk)
       field = (0.0_rk, 0.0_rk)
@@ -159,5 +162,36 @@ program test_nnqs
     err = worst
     call check(err < tol, 'ising_energy equals the local energy of the transverse-field Ising chain', err)
   end subroutine test_ising_energy
+
+  subroutine test_large_parameters()
+    !! Hidden units with |Re θ| far beyond the range of exp in single precision (about 88) must still give finite
+    !! amplitudes, ratios and local energies. Each hidden unit then contributes about θ_i or about 0 to ln ψ.
+    integer, parameter :: n = 6, m = 4
+    real(rk), parameter :: J = 0.7_rk, B = 0.3_rk
+    type(RestrictedBoltzmannMachine) :: psi
+    real(rk)    :: a(n), s_map(n), p, err
+    complex(rk) :: bias(m), w(m,n), theta(m), theta2(m), softplus_theta(m), energy, log_psi, expected
+    integer(ik) :: s(n), s2(n)
+    logical     :: ok
+
+    a = 0.1_rk
+    bias = [(-200.0_rk, 0.3_rk), (200.0_rk, 0.6_rk), (-200.0_rk, 0.9_rk), (200.0_rk, 1.2_rk)]   !! |Re θ| ≈ 200
+    w = (0.01_rk, 0.02_rk)
+    psi = RestrictedBoltzmannMachine(v_units=n, h_units=m, a=a, b=bias, w=w)
+
+    s = [1_ik, 0_ik, 1_ik, 1_ik, 0_ik, 0_ik]
+    theta = conjg(bias) + matmul(w, real(s, kind=rk))
+    log_psi = psi%log_amplitude(s)
+    expected = sum(a*real(s, kind=rk)) + sum(merge(theta, (0.0_rk,0.0_rk), theta%re > 0.0_rk))
+    err = abs(exp(log_psi - expected) - 1.0_rk)                       !! Equal up to a multiple of 2πi in the phase
+
+    s2 = s; s2(2) = 1_ik
+    call psi%prob_ratio(ind=2, s1=s, s2=s2, theta1=theta, theta2=theta2, p=p)
+    call psi%ising_energy(s=s, theta=theta, ising_params=[J, B], s_map=s_map, softplus_theta=softplus_theta, &
+                          energy=energy)
+
+    ok = (err < tol) .and. ieee_is_finite(p) .and. ieee_is_finite(energy%re) .and. ieee_is_finite(energy%im)
+    call check(ok, 'large parameters give finite amplitudes, ratios and local energies', err)
+  end subroutine test_large_parameters
 
 end program test_nnqs

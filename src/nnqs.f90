@@ -79,7 +79,7 @@ module nnqs
     class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
     integer(ik), contiguous, dimension(:), intent(in) :: s                                   !! Configuration of 0s and 1s
 
-    log_psi = sum(self%a*real(s, kind=rk)) + sum(log(1.0_rk + exp(conjg(self%b) + matmul(self%w, real(s, kind=rk)))))
+    log_psi = sum(self%a*real(s, kind=rk)) + sum(softplus(conjg(self%b) + matmul(self%w, real(s, kind=rk))))
   end function log_amplitude
 
   impure recursive subroutine stochastic_optimization(self, ising_params)
@@ -317,7 +317,7 @@ module nnqs
 
     real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
     integer(ik), allocatable, dimension(:) :: s_prop, s                                     !! Sample storage arrays
-    complex(rk), allocatable, dimension(:) :: theta, theta2, arg_theta                             !! Storage arrays
+    complex(rk), allocatable, dimension(:) :: theta, theta2, softplus_theta                        !! Storage arrays
 
     real(rk) :: acc_prob, r                                                            !! M-H acceptance probability
     integer  :: n, m, num_samples                                           !! Number of spins, hidden units, samples
@@ -334,7 +334,7 @@ module nnqs
     allocate(s_prop(n), s(n), source=0_ik, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(theta(m), theta2(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(theta(m), theta2(m), softplus_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     s(:) = start_sample                                                         !! Continue the chain where it ended
@@ -355,7 +355,7 @@ module nnqs
 
       samples(k,:) = s                                                                !! Transfer sample to output
       call self%ising_energy( s=s, theta=theta, ising_params=ising_params, s_map=s_map, &    !! Local energy of s
-                  arg_theta=arg_theta, energy=e_loc(k) )
+                  softplus_theta=softplus_theta, energy=e_loc(k) )
     end do stationary_sampling
     !! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -399,11 +399,11 @@ module nnqs
 
     s = real(s2(ind) - s1(ind), kind=rk)
     theta2 = theta1 + self%w(:,ind)*s                                                                !! Get b + ws_2
-    prob_amplitude_ratio = exp(self%a(ind)*s + sum(log(1.0_rk+exp(theta2)) - log(1.0_rk+exp(theta1))))    !! ψ ratio
+    prob_amplitude_ratio = exp(self%a(ind)*s + sum(softplus(theta2) - softplus(theta1)))                !! ψ ratio
     p = real(conjg(prob_amplitude_ratio)*prob_amplitude_ratio, kind=rk)                         !! |ψ(s_2)/ψ(s_1)|^2
   end subroutine prob_ratio
 
-  pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, arg_theta, energy)
+  pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, softplus_theta, energy)
     !---------------------------------------------------------------------------------------------------------------
     !! Function for calculating local energy of configuration s in Ising model
     !!
@@ -415,7 +415,7 @@ module nnqs
     complex(rk), contiguous, dimension(:), intent(in)    :: theta                          !! Cached value of b + ws
     real(rk),    contiguous, dimension(:), intent(in)    :: ising_params                         !! Ising parameters
     real(rk),    contiguous, dimension(:), intent(inout) :: s_map                                         !! s -> ±1
-    complex(rk), contiguous, dimension(:), intent(inout) :: arg_theta                                  !! 1 + exp(θ)
+    complex(rk), contiguous, dimension(:), intent(inout) :: softplus_theta                         !! ln(1 + exp(θ))
     complex(rk), intent(out) :: energy                                                               !! Ising energy
 
     real(rk)    :: J_str, B_str, e_coupling                                   !! Ising params, energy of couplings
@@ -428,12 +428,12 @@ module nnqs
     e_coupling = 0.0_rk; e_transverse = (0.0_rk,0.0_rk)                                                !! Initialize
 
     s_map = -2.0_rk*s + 1.0_rk                                                              !! Map {0,1} -> {1.,-1.}
-    arg_theta = 1.0_rk + exp(theta)                                                        !! 1 + exp(θ) for input s
+    softplus_theta = softplus(theta)                                                   !! ln(1 + exp(θ)) for input s
 
     field_couplings = (0.0_rk,0.0_rk)
     do j = 1, n
       field_couplings = field_couplings + exp( self%a(j)*s_map(j) + &                     !! ψ(s')/ψ(s) for all s'
-      sum(log(1.0_rk + exp(theta + self%w(:,j)*s_map(j))) - log(arg_theta)) )
+      sum(softplus(theta + self%w(:,j)*s_map(j)) - softplus_theta) )
     end do
 
     e_coupling = -J_str*sum(s_map(1:n-1)*s_map(2:n))                    !! Local energy due to neighbor interactions
@@ -477,8 +477,7 @@ module nnqs
 
     O_b(:,:) = matmul(O_a, transpose(self%w))                                              !! ws^k for all samples k
     do concurrent (i = 1:m) shared(O_b, self)
-      O_b(:,i) = exp(conjg(self%b(i)) + O_b(:,i))      !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
-      O_b(:,i) = O_b(:,i)/(1.0_rk + O_b(:,i))         !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
+      O_b(:,i) = sigmoid(conjg(self%b(i)) + O_b(:,i))   !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
     end do
 
     do concurrent (j = 1:n, i = 1:m) shared(O_a, O_b, O_w)
@@ -560,6 +559,33 @@ module nnqs
     call random_number(r)
     s = nint(r, kind=ik)
   end subroutine random_sample
+
+  pure elemental complex(rk) function softplus(z)
+    !---------------------------------------------------------------------------------------------------------------
+    !! ln(1 + exp(z)) without overflow: for Re(z) > 0 it is computed as z + ln(1 + exp(-z)). The two forms can
+    !! differ by a multiple of 2πi, which leaves ψ unchanged.
+    !---------------------------------------------------------------------------------------------------------------
+    complex(rk), intent(in) :: z
+
+    if ( z%re > 0.0_rk ) then
+      softplus = z + log(1.0_rk + exp(-z))
+    else
+      softplus = log(1.0_rk + exp(z))
+    end if
+  end function softplus
+
+  pure elemental complex(rk) function sigmoid(z)
+    !---------------------------------------------------------------------------------------------------------------
+    !! exp(z)/(1 + exp(z)) without overflow: for Re(z) > 0 it is computed as 1/(1 + exp(-z)).
+    !---------------------------------------------------------------------------------------------------------------
+    complex(rk), intent(in) :: z
+
+    if ( z%re > 0.0_rk ) then
+      sigmoid = 1.0_rk/(1.0_rk + exp(-z))
+    else
+      sigmoid = exp(z)/(1.0_rk + exp(z))
+    end if
+  end function sigmoid
 
   pure recursive real(rk) function var(x) result(variance)
     !---------------------------------------------------------------------------------------------------------------
