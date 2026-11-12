@@ -514,7 +514,7 @@ module nnqs
     self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
     self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                  !! Biased second raw moment estimate
     x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
-    self%b(:) = self%b - dtau*x_b                                                            !! Update hidden biases
+    self%b(:) = self%b - dtau*conjg(x_b)                       !! Update hidden biases; ψ depends on conjg(b), not b
     !! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     !! Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
