@@ -93,7 +93,8 @@ module nnqs
     integer(ik), allocatable, dimension(:,:) :: samples                                      !! Sample storage array
     integer :: epoch, max_epochs, num_samples, n, m           !! Loop variable, max epochs, number of samples, spins
 
-    real(rk),    allocatable, dimension(:)   :: e_loc, corrs                  !! Local energies, sample correlations
+    complex(rk), allocatable, dimension(:)   :: e_loc                                              !! Local energies
+    real(rk),    allocatable, dimension(:)   :: corrs                                        !! Sample correlations
     real(rk),    allocatable, dimension(:,:) :: energies, correlations             !! Energy and correlation storage
     real(rk) :: energy, sqerr, stderr, tau, acc                                               !! Recording variables
 
@@ -143,7 +144,10 @@ module nnqs
     allocate(start_sample(n), samples(num_samples,n), source=0_ik, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(e_loc(num_samples), corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+    allocate(e_loc(num_samples), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+    allocate(corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     allocate(O_a(num_samples,n), F_a(n), S_a((n*(n+1))/2), x_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
@@ -305,7 +309,8 @@ module nnqs
     real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
     integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample           !! Where the chain continues from
     integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
-    real(rk),    contiguous, dimension(:),   intent(out)   :: e_loc, corrs    !! Local energies, sample correlations
+    complex(rk), contiguous, dimension(:),   intent(out)   :: e_loc                                !! Local energies
+    real(rk),    contiguous, dimension(:),   intent(out)   :: corrs                           !! Sample correlations
     real(rk),            intent(out)   :: energy, sqerr                              !! Energy average, square error
     integer,             intent(inout) :: stat                                                         !! Error stat
     character(len=1000), intent(inout) :: errmsg                                                    !! Error message
@@ -357,8 +362,8 @@ module nnqs
     start_sample = s                                                            !! Where the next call continues from
 
     call get_correlations(samples, corrs=corrs, alignment=self%alignment)        !! Get spin correlations of samples
-    energy = sum(e_loc)/num_samples                                                           !! Average of energies
-    sqerr = var(e_loc)/num_samples                                                       !! Square error of energies
+    energy = sum(e_loc%re)/num_samples                                                        !! Average of energies
+    sqerr = var(e_loc%re)/num_samples                                                    !! Square error of energies
 
     contains
 
@@ -401,6 +406,9 @@ module nnqs
   pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, arg_theta, energy)
     !---------------------------------------------------------------------------------------------------------------
     !! Function for calculating local energy of configuration s in Ising model
+    !!
+    !! The local energy is complex for a complex ψ. Its real part averages to the energy, and the whole of it enters
+    !! the forces.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
     integer(ik), contiguous, dimension(:), intent(in)    :: s                                 !! Configuration input
@@ -408,23 +416,24 @@ module nnqs
     real(rk),    contiguous, dimension(:), intent(in)    :: ising_params                         !! Ising parameters
     real(rk),    contiguous, dimension(:), intent(inout) :: s_map                                         !! s -> ±1
     complex(rk), contiguous, dimension(:), intent(inout) :: arg_theta                                  !! 1 + exp(θ)
-    real(rk), intent(out) :: energy                                                                  !! Ising energy
+    complex(rk), intent(out) :: energy                                                               !! Ising energy
 
-    real(rk) :: J_str, B_str, field_couplings, e_coupling, e_transverse   !! Ising params, field couplings, energies
-    integer  :: j, n, m                                              !! Loop variable, number of spins, hidden units
+    real(rk)    :: J_str, B_str, e_coupling                                   !! Ising params, energy of couplings
+    complex(rk) :: field_couplings, e_transverse                                 !! Field couplings, energy of field
+    integer     :: j, n, m                                           !! Loop variable, number of spins, hidden units
 
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
     J_str = abs(ising_params(1)); B_str = abs(ising_params(2))           !! Set coupling strength and field strength
-    e_coupling = 0.0_rk; e_transverse = 0.0_rk                                                         !! Initialize
+    e_coupling = 0.0_rk; e_transverse = (0.0_rk,0.0_rk)                                                !! Initialize
 
     s_map = -2.0_rk*s + 1.0_rk                                                              !! Map {0,1} -> {1.,-1.}
     arg_theta = 1.0_rk + exp(theta)                                                        !! 1 + exp(θ) for input s
 
-    field_couplings = 0.0_rk
+    field_couplings = (0.0_rk,0.0_rk)
     do j = 1, n
       field_couplings = field_couplings + exp( self%a(j)*s_map(j) + &                     !! ψ(s')/ψ(s) for all s'
-      sum(log(1.0_rk + exp(theta + self%w(:,j)*s_map(j))) - log(arg_theta)) )             !! Forget imaginary part
+      sum(log(1.0_rk + exp(theta + self%w(:,j)*s_map(j))) - log(arg_theta)) )
     end do
 
     e_coupling = -J_str*sum(s_map(1:n-1)*s_map(2:n))                    !! Local energy due to neighbor interactions
@@ -439,7 +448,7 @@ module nnqs
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
     integer, intent(in) :: epoch                                                                    !! Current epoch
-    real(rk),    contiguous, dimension(:),     intent(in)    :: e_loc                              !! Local energies
+    complex(rk), contiguous, dimension(:),     intent(in)    :: e_loc                     !! Centered local energies
     integer(ik), contiguous, dimension(:,:),   intent(in)    :: samples                            !! Network inputs
     real(rk),    contiguous, dimension(:,:),   intent(inout) :: O_a                         !! Log derivatives for a
     complex(rk), contiguous, dimension(:,:),   intent(inout) :: O_b                         !! Log derivatives for b
@@ -480,7 +489,7 @@ module nnqs
     !! Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     do concurrent (j = 1:n) shared(O_a, F_a, e_loc)
       O_a(:,j) = O_a(:,j) - sum(O_a(:,j))/num_samples                         !! Center each column about its mean
-      F_a(j) = sum(O_a(:,j)*e_loc)*covar_norm                                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
+      F_a(j) = sum(O_a(:,j)*e_loc%re)*covar_norm                       !! F(j) = Re⟨Δ∂_{a_j}^† ΔH⟩ for real a
     end do
 
     do concurrent (jj = 1:n, j = 1:n, j >= jj) shared(S_a, O_a) local(ind)

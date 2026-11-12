@@ -131,12 +131,12 @@ program test_nnqs
   subroutine test_ising_energy()
     !! For H = -J Σ σz_j σz_{j+1} - B Σ σx_j with open ends, the local energy of s is
     !! E(s) = -J Σ σ_j σ_{j+1} - B Σ_j ψ(s^j)/ψ(s), where σ_j = 1 - 2 s_j and s^j is s with spin j flipped.
-    !! ising_energy keeps the real part.
+    !! The local energy is complex, and both parts are checked.
     integer, parameter :: n = 8, m = 5, trials = 20
     real(rk), parameter :: J = 0.7_rk, B = 0.3_rk
     type(RestrictedBoltzmannMachine) :: psi
-    real(rk)    :: a(n), sigma(n), s_map(n), energy, e_direct, err, worst
-    complex(rk) :: bias(m), w(m,n), theta(m), arg_theta(m), field
+    real(rk)    :: a(n), sigma(n), s_map(n), err, worst
+    complex(rk) :: bias(m), w(m,n), theta(m), arg_theta(m), field, energy, e_direct
     integer(ik) :: s(n), s_flip(n)
     integer     :: trial, k
 
@@ -153,7 +153,7 @@ program test_nnqs
         s_flip = s; s_flip(k) = 1_ik - s_flip(k)
         field = field + exp(psi%log_amplitude(s_flip) - psi%log_amplitude(s))
       end do
-      e_direct = -J*sum(sigma(1:n-1)*sigma(2:n)) - B*real(field, kind=rk)
+      e_direct = -J*sum(sigma(1:n-1)*sigma(2:n)) - B*field
       worst = max(worst, abs(energy - e_direct)/max(abs(e_direct), 1.0_rk))
     end do
     err = worst
