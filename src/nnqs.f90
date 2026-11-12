@@ -19,9 +19,9 @@ module nnqs
     private
     integer :: v_units = 0                                                                !! Number of visible units
     integer :: h_units = 0                                                                 !! Number of hidden units
-    real(rk),    allocatable, dimension(:)   :: a, p_a, r_a                    !! Visible layer biases & ADAM arrays
-    complex(rk), allocatable, dimension(:)   :: b, p_b, r_b                     !! Hidden layer biases & ADAM arrays
-    complex(rk), allocatable, dimension(:,:) :: w, p_w, r_w                                 !! Weights & ADAM arrays
+    real(rk),    allocatable, dimension(:)   :: a                                               !! Visible layer biases
+    complex(rk), allocatable, dimension(:)   :: b                                                !! Hidden layer biases
+    complex(rk), allocatable, dimension(:,:) :: w                                                            !! Weights
     character(len=1) :: alignment = 'N'                                               !! For tracking spin alignment
     logical          :: initialized = .false.                                               !! Initialization status
     contains
@@ -65,9 +65,6 @@ module nnqs
     end if
 
     new%a = a; new%b = b; new%w = w
-    allocate(new%p_a(v_units), new%r_a(v_units), source=0.0_rk)
-    allocate(new%p_b(h_units), new%r_b(h_units), new%p_w(h_units,v_units), new%r_w(h_units,v_units), &
-         source=(0.0_rk,0.0_rk))
     new%initialized = .true.
   end function new_rbm
 
@@ -79,7 +76,7 @@ module nnqs
     class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
     integer(ik), contiguous, dimension(:), intent(in) :: s                                   !! Configuration of 0s and 1s
 
-    log_psi = sum(self%a*real(s, kind=rk)) + sum(log(1.0_rk + exp(conjg(self%b) + matmul(self%w, real(s, kind=rk)))))
+    log_psi = sum(self%a*real(s, kind=rk)) + sum(softplus(conjg(self%b) + matmul(self%w, real(s, kind=rk))))
   end function log_amplitude
 
   impure recursive subroutine stochastic_optimization(self, ising_params)
@@ -93,9 +90,9 @@ module nnqs
     integer(ik), allocatable, dimension(:,:) :: samples                                      !! Sample storage array
     integer :: epoch, max_epochs, num_samples, n, m           !! Loop variable, max epochs, number of samples, spins
 
-    real(rk),    allocatable, dimension(:)   :: e_loc, corrs                  !! Local energies, sample correlations
+    complex(rk), allocatable, dimension(:)   :: e_loc                                              !! Local energies
+    real(rk),    allocatable, dimension(:)   :: corrs                                        !! Sample correlations
     real(rk),    allocatable, dimension(:,:) :: energies, correlations             !! Energy and correlation storage
-    complex(rk), allocatable, dimension(:)   :: theta                                 !! θ = b + ws for start sample
     real(rk) :: energy, sqerr, stderr, tau, acc                                               !! Recording variables
 
     real(rk),    allocatable, dimension(:,:)   :: O_a                           !! Log derivatives with respect to a
@@ -144,7 +141,10 @@ module nnqs
     allocate(start_sample(n), samples(num_samples,n), source=0_ik, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(e_loc(num_samples), corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+    allocate(e_loc(num_samples), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
+
+    allocate(corrs(n), source=0.0_rk, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     allocate(O_a(num_samples,n), F_a(n), S_a((n*(n+1))/2), x_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
@@ -158,7 +158,6 @@ module nnqs
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     call random_sample(start_sample)                                                !! Randomize the starting sample
-    theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
     if ( my_image() == 1 ) then                                                         !! Do preparation on image 1
       !! Allocate storage arrays on image 1:
@@ -181,16 +180,11 @@ module nnqs
     learning: do epoch = 1, max_epochs                                                             !! Begin learning
       call sum_images(self%w); self%w = self%w/image_count()                      !! Average weights across images
 
-      call self%sample_distribution(epoch=epoch, ising_params=ising_params, &                            !! Inputs
-                      start_sample=start_sample, theta=theta, &                     !! Input/outputs
+      call self%sample_distribution(ising_params=ising_params, &                                         !! Inputs
+                      start_sample=start_sample, &                                  !! Input/outputs
                       samples=samples, e_loc=e_loc, corrs=corrs, &                  !! Array outputs
                       energy=energy, sqerr=sqerr, &                                !! Scalar outputs
                       stat=stat, errmsg=errmsg)                  !! Error vars for local allocations
-
-      if ( (sqrt(sqerr) < 0.001_rk) .and. (mod(my_image(),2) == 1) ) then
-        !! Add Gaussian perturbation to weights on odd images when samples are sticky:
-        self%w = self%w + cmplx( gauss(mu=0.01_rk, sig=1e-4_rk), gauss(mu=-0.005_rk, sig=1e-5_rk), kind=rk )
-      end if
 
       call sum_images(energy); energy = energy/image_count()                       !! Average energy across images
       call sum_images(sqerr);  stderr = sqrt(sqerr)/image_count()                   !! Average error across images
@@ -215,11 +209,11 @@ module nnqs
 
       acc = 1.0_rk - real(count(samples == 0_ik), kind=rk)/size(samples)              !! Get ground state accuracy
       call sum_images(acc); acc = acc/image_count()                              !! Average accuracy across images
-      if ( (acc > 0.9999_rk) .or. (epoch == max_epochs) ) exit learning                         !! Exit conditions
+      if ( epoch == max_epochs ) exit learning                                                     !! Exit condition
 
       e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
 
-      call self%propagate(epoch=epoch, e_loc=e_loc, samples=samples, &                        !! Update parameters
+      call self%propagate(e_loc=e_loc, samples=samples, &                                     !! Update parameters
                 O_a=O_a, O_b=O_b, O_w=O_w, &
                 F_a=F_a, F_b=F_b, F_w=F_w, &
                 S_a=S_a, S_b=S_b, S_w=S_w, &
@@ -269,20 +263,19 @@ module nnqs
     call sync_with_first()                                                    !! Other images wait for image 1
 
     if ( self%initialized ) then
-      deallocate(self%a, self%p_a, self%r_a, self%b, self%p_b, self%r_b, self%w, self%p_w, self%r_w, &
-             stat=stat, errmsg=errmsg)
+      deallocate(self%a, self%b, self%w, stat=stat, errmsg=errmsg)
       if (stat /= 0) error stop LF//errmsg                                                     !! Check allocation
       self%initialized = .false.
     end if
 
     !! Allocate class components:
-    allocate(self%a(n), self%p_a(n), self%r_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+    allocate(self%a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(self%b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(self%w(m,n), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     do j = 1, n
@@ -294,29 +287,32 @@ module nnqs
     self%initialized = .true.
   end subroutine init
 
-  impure recursive subroutine sample_distribution(self, epoch, ising_params, start_sample, theta, samples, &
+  impure recursive subroutine sample_distribution(self, ising_params, start_sample, samples, &
                           e_loc, corrs, energy, sqerr, stat, errmsg)
     !---------------------------------------------------------------------------------------------------------------
     !! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
+    !!
+    !! One chain runs through the whole of training. Each call continues it from start_sample, takes 5n steps to
+    !! re-equilibrate after the last parameter update, then records a sample after every sweep of n steps, and
+    !! leaves the chain's last configuration in start_sample for the next call.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
-    integer,                           intent(in) :: epoch                                          !! Current epoch
     real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
-    integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample         !! Sample to begin thermalization
-    complex(rk), contiguous, dimension(:),   intent(inout) :: theta                   !! θ = b + ws for start sample
+    integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample           !! Where the chain continues from
     integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
-    real(rk),    contiguous, dimension(:),   intent(out)   :: e_loc, corrs    !! Local energies, sample correlations
+    complex(rk), contiguous, dimension(:),   intent(out)   :: e_loc                                !! Local energies
+    real(rk),    contiguous, dimension(:),   intent(out)   :: corrs                           !! Sample correlations
     real(rk),            intent(out)   :: energy, sqerr                              !! Energy average, square error
     integer,             intent(inout) :: stat                                                         !! Error stat
     character(len=1000), intent(inout) :: errmsg                                                    !! Error message
 
     real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
     integer(ik), allocatable, dimension(:) :: s_prop, s                                     !! Sample storage arrays
-    complex(rk), allocatable, dimension(:) :: theta2, theta_loc, arg_theta                         !! Storage arrays
+    complex(rk), allocatable, dimension(:) :: theta, theta2, softplus_theta                        !! Storage arrays
 
     real(rk) :: acc_prob, r                                                            !! M-H acceptance probability
-    integer  :: n, m, passes, num_samples                          !! Number of spins, hidden units, passes, samples
-    integer  :: k, max_thermal_time, pass, rind                                      !! Loop variables, random index
+    integer  :: n, m, num_samples                                           !! Number of spins, hidden units, samples
+    integer  :: k, step, rind                                                        !! Loop variables, random index
 
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
@@ -329,62 +325,53 @@ module nnqs
     allocate(s_prop(n), s(n), source=0_ik, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(theta2(m), theta_loc(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(theta(m), theta2(m), softplus_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
+    s(:) = start_sample                                                         !! Continue the chain where it ended
+    s_prop(:) = s                                                                          !! Copy for the proposals
+    theta(:) = conjg(self%b) + matmul(self%w, real(s, kind=rk))              !! θ for the current parameters and s
+
     !! Thermalization ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    max_thermal_time = 2001 - 2*epoch                                           !! Set time limit for thermalization
-    s_prop(:) = start_sample                                                                    !! Copy start sample
-
-    thermalize: do k = 1, max_thermal_time
-      call random_number(r); rind = floor(n*r) + 1                                        !! Generate random index
-      s_prop(rind) = 1_ik - s_prop(rind)                                              !! Flip spin at random index
-      call self%prob_ratio(ind=rind, s1=start_sample, s2=s_prop, theta1=theta, theta2=theta2, p=acc_prob) !! Acc p
-
-      call random_number(r)                                           !! Sample from uniform distribution on [0,1)
-      if ( r < acc_prob ) then                                                         !! M-H acceptance criterion
-        theta = theta + self%w(:,rind)*real(s_prop(rind) - start_sample(rind), kind=rk)              !! Update θ
-        start_sample(rind) = s_prop(rind)                                                       !! Update sample
-      else
-        s_prop(rind) = 1_ik - s_prop(rind)                                                       !! Reverse flip
-      end if
+    thermalize: do step = 1, 5*n
+      call metropolis_step()
     end do thermalize
     !! End thermalization
 
-    passes = 2*n - min(2*epoch, 2*n-1)                               !! Number of passes to make on the start sample
-
     !! Stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     stationary_sampling: do k = 1, num_samples
-      s(:) = start_sample                                                             !! Copy start sample to temp
-      theta_loc(:) = theta                                                                   !! Copy theta to temp
-      s_prop(:) = s                                                                            !! Copy temp sample
+      sweep: do step = 1, n                                                       !! One sweep between samples
+        call metropolis_step()
+      end do sweep
 
-      metropolis_hastings: do pass = 1, passes
+      samples(k,:) = s                                                                !! Transfer sample to output
+      call self%ising_energy( s=s, theta=theta, ising_params=ising_params, s_map=s_map, &    !! Local energy of s
+                  softplus_theta=softplus_theta, energy=e_loc(k) )
+    end do stationary_sampling
+    !! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    start_sample = s                                                            !! Where the next call continues from
+
+    call get_correlations(samples, corrs=corrs, alignment=self%alignment)        !! Get spin correlations of samples
+    energy = sum(e_loc%re)/num_samples                                                        !! Average of energies
+    sqerr = var(e_loc%re)/num_samples                                                    !! Square error of energies
+
+    contains
+
+      impure subroutine metropolis_step()
+        !! Propose flipping one spin at random, and accept with probability min(1, |ψ(s_prop)/ψ(s)|^2)
         call random_number(r); rind = floor(n*r) + 1                                    !! Generate random index
         s_prop(rind) = 1_ik - s_prop(rind)                                          !! Flip spin at random index
-        call self%prob_ratio(ind=rind, s1=s, s2=s_prop, theta1=theta_loc, theta2=theta2, p=acc_prob)    !! Acc p
+        call self%prob_ratio(ind=rind, s1=s, s2=s_prop, theta1=theta, theta2=theta2, p=acc_prob)        !! Acc p
 
         call random_number(r)                                       !! Sample from uniform distribution on [0,1)
         if ( r < acc_prob ) then                                                     !! M-H acceptance criterion
-          theta_loc(:) = theta_loc(:) + self%w(:,rind)*real(s_prop(rind) - s(rind), kind=rk)       !! Update θ
+          theta(:) = theta2                                                           !! θ for the flipped sample
           s(rind) = s_prop(rind)                                                              !! Update sample
         else
           s_prop(rind) = 1_ik - s_prop(rind)                                                   !! Reverse flip
         end if
-      end do metropolis_hastings
-
-      samples(k,:) = s                                                                !! Transfer sample to output
-      call self%ising_energy( s=s, theta=theta_loc, ising_params=ising_params, s_map=s_map, & !! Local energy of s
-                  arg_theta=arg_theta, energy=e_loc(k) )
-    end do stationary_sampling
-    !! End stationary sampling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    start_sample = s                                     !! Record stationary sample to begin next round of sampling
-    theta = theta_loc                                                    !! Record θ to begin next round of sampling
-
-    call get_correlations(samples, corrs=corrs, alignment=self%alignment)        !! Get spin correlations of samples
-    energy = sum(e_loc)/num_samples                                                           !! Average of energies
-    sqerr = var(e_loc)/num_samples                                                       !! Square error of energies
+      end subroutine metropolis_step
   end subroutine sample_distribution
 
   pure recursive subroutine prob_ratio(self, ind, s1, s2, theta1, theta2, p)
@@ -403,37 +390,41 @@ module nnqs
 
     s = real(s2(ind) - s1(ind), kind=rk)
     theta2 = theta1 + self%w(:,ind)*s                                                                !! Get b + ws_2
-    prob_amplitude_ratio = exp(self%a(ind)*s + sum(log(1.0_rk+exp(theta2)) - log(1.0_rk+exp(theta1))))    !! ψ ratio
+    prob_amplitude_ratio = exp(self%a(ind)*s + sum(softplus(theta2) - softplus(theta1)))                !! ψ ratio
     p = real(conjg(prob_amplitude_ratio)*prob_amplitude_ratio, kind=rk)                         !! |ψ(s_2)/ψ(s_1)|^2
   end subroutine prob_ratio
 
-  pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, arg_theta, energy)
+  pure recursive subroutine ising_energy(self, s, theta, ising_params, s_map, softplus_theta, energy)
     !---------------------------------------------------------------------------------------------------------------
     !! Function for calculating local energy of configuration s in Ising model
+    !!
+    !! The local energy is complex for a complex ψ. Its real part averages to the energy, and the whole of it enters
+    !! the forces.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(in) :: self                                       !! Boltzmann machine
     integer(ik), contiguous, dimension(:), intent(in)    :: s                                 !! Configuration input
     complex(rk), contiguous, dimension(:), intent(in)    :: theta                          !! Cached value of b + ws
     real(rk),    contiguous, dimension(:), intent(in)    :: ising_params                         !! Ising parameters
     real(rk),    contiguous, dimension(:), intent(inout) :: s_map                                         !! s -> ±1
-    complex(rk), contiguous, dimension(:), intent(inout) :: arg_theta                                  !! 1 + exp(θ)
-    real(rk), intent(out) :: energy                                                                  !! Ising energy
+    complex(rk), contiguous, dimension(:), intent(inout) :: softplus_theta                         !! ln(1 + exp(θ))
+    complex(rk), intent(out) :: energy                                                               !! Ising energy
 
-    real(rk) :: J_str, B_str, field_couplings, e_coupling, e_transverse   !! Ising params, field couplings, energies
-    integer  :: j, n, m                                              !! Loop variable, number of spins, hidden units
+    real(rk)    :: J_str, B_str, e_coupling                                   !! Ising params, energy of couplings
+    complex(rk) :: field_couplings, e_transverse                                 !! Field couplings, energy of field
+    integer     :: j, n, m                                           !! Loop variable, number of spins, hidden units
 
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
     J_str = abs(ising_params(1)); B_str = abs(ising_params(2))           !! Set coupling strength and field strength
-    e_coupling = 0.0_rk; e_transverse = 0.0_rk                                                         !! Initialize
+    e_coupling = 0.0_rk; e_transverse = (0.0_rk,0.0_rk)                                                !! Initialize
 
     s_map = -2.0_rk*s + 1.0_rk                                                              !! Map {0,1} -> {1.,-1.}
-    arg_theta = 1.0_rk + exp(theta)                                                        !! 1 + exp(θ) for input s
+    softplus_theta = softplus(theta)                                                   !! ln(1 + exp(θ)) for input s
 
-    field_couplings = 0.0_rk
+    field_couplings = (0.0_rk,0.0_rk)
     do j = 1, n
       field_couplings = field_couplings + exp( self%a(j)*s_map(j) + &                     !! ψ(s')/ψ(s) for all s'
-      sum(log(1.0_rk + exp(theta + self%w(:,j)*s_map(j))) - log(arg_theta)) )             !! Forget imaginary part
+      sum(softplus(theta + self%w(:,j)*s_map(j)) - softplus_theta) )
     end do
 
     e_coupling = -J_str*sum(s_map(1:n-1)*s_map(2:n))                    !! Local energy due to neighbor interactions
@@ -441,14 +432,16 @@ module nnqs
     energy = e_coupling + e_transverse              !! Local energy is sum of coupling and transverse field energies
   end subroutine ising_energy
 
-  pure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
+  pure recursive subroutine propagate(self, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
                       x_a, x_b, x_w)
     !---------------------------------------------------------------------------------------------------------------
     !! Procedure for updating parameters according to stochastic optimization update rule
+    !!
+    !! Each parameter block takes the step -δτ S^{-1} F of stochastic reconfiguration. ψ depends on conjg(b), so
+    !! F_b is the derivative of the energy with respect to b and the step for b is conjugated.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
-    integer, intent(in) :: epoch                                                                    !! Current epoch
-    real(rk),    contiguous, dimension(:),     intent(in)    :: e_loc                              !! Local energies
+    complex(rk), contiguous, dimension(:),     intent(in)    :: e_loc                     !! Centered local energies
     integer(ik), contiguous, dimension(:,:),   intent(in)    :: samples                            !! Network inputs
     real(rk),    contiguous, dimension(:,:),   intent(inout) :: O_a                         !! Log derivatives for a
     complex(rk), contiguous, dimension(:,:),   intent(inout) :: O_b                         !! Log derivatives for b
@@ -457,7 +450,7 @@ module nnqs
     complex(rk), contiguous, dimension(:),     intent(inout) :: F_b, S_b, x_b    !! Forces, SR matrix, solutions arr
     complex(rk), contiguous, dimension(:,:),   intent(inout) :: F_w, S_w, x_w    !! Forces, SR matrix, solutions arr
 
-    real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dtau         !! Normalization, regularization, ADAM vars
+    real(rk) :: covar_norm, delta, dtau                                !! Normalization, regularization, time step
     integer  :: n, m, num_samples, i, ii, j, jj, ind                                      !! Size and loop variables
 
     n = self%v_units                                                                          !! Get number of spins
@@ -467,9 +460,6 @@ module nnqs
     covar_norm  = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
 
     delta   = 1e-3_rk                                                                !! Set regularization parameter
-    beta_1  = 0.99_rk                                                                 !! Decay rate for first moment
-    beta_2  = 0.999_rk                                                               !! Decay rate for second moment
-    epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
     dtau    = 0.01_rk                                                                                   !! Time step
 
     !! Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -477,8 +467,7 @@ module nnqs
 
     O_b(:,:) = matmul(O_a, transpose(self%w))                                              !! ws^k for all samples k
     do concurrent (i = 1:m) shared(O_b, self)
-      O_b(:,i) = exp(conjg(self%b(i)) + O_b(:,i))      !! exp(θ_i^k) = exp(b_i + Σ_j w_ij*s_j^k) for all samples k
-      O_b(:,i) = O_b(:,i)/(1.0_rk + O_b(:,i))         !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
+      O_b(:,i) = sigmoid(conjg(self%b(i)) + O_b(:,i))   !! O_b(k,i) = 𝜕/𝜕b_i ln ψ(s^k) = exp(θ_i^k)/(1 + exp(θ_i^k))
     end do
 
     do concurrent (j = 1:n, i = 1:m) shared(O_a, O_b, O_w)
@@ -489,7 +478,7 @@ module nnqs
     !! Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     do concurrent (j = 1:n) shared(O_a, F_a, e_loc)
       O_a(:,j) = O_a(:,j) - sum(O_a(:,j))/num_samples                         !! Center each column about its mean
-      F_a(j) = sum(O_a(:,j)*e_loc)*covar_norm                                            !! F(j) = ⟨Δ∂_{a_j}^† ΔH⟩
+      F_a(j) = sum(O_a(:,j)*e_loc%re)*covar_norm                       !! F(j) = Re⟨Δ∂_{a_j}^† ΔH⟩ for real a
     end do
 
     do concurrent (jj = 1:n, j = 1:n, j >= jj) shared(S_a, O_a) local(ind)
@@ -500,9 +489,6 @@ module nnqs
 
     call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
-    self%p_a(:) = beta_1*self%p_a + (1.0_rk - beta_1)*x_a                            !! Biased first moment estimate
-    self%r_a(:) = beta_2*self%r_a + (1.0_rk - beta_2)*(x_a**2)                  !! Biased second raw moment estimate
-    x_a(:) = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
     self%a(:) = self%a - dtau*x_a                                                           !! Update visible biases
     !! End Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -520,10 +506,7 @@ module nnqs
 
     call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
-    self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
-    self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*(x_b**2)                  !! Biased second raw moment estimate
-    x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
-    self%b(:) = self%b - dtau*x_b                                                            !! Update hidden biases
+    self%b(:) = self%b - dtau*conjg(x_b)                       !! Update hidden biases; ψ depends on conjg(b), not b
     !! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     !! Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -542,9 +525,6 @@ module nnqs
       call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')       !! Stochastic reconfig x = S^{-1}F
     end do
 
-    self%p_w(:,:) = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                          !! Biased first moment estimate
-    self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*(x_w**2)                !! Biased second raw moment estimate
-    x_w(:,:) = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )   !! ADAM
     self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
     !! End Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   end subroutine propagate
@@ -560,6 +540,33 @@ module nnqs
     call random_number(r)
     s = nint(r, kind=ik)
   end subroutine random_sample
+
+  pure elemental complex(rk) function softplus(z)
+    !---------------------------------------------------------------------------------------------------------------
+    !! ln(1 + exp(z)) without overflow: for Re(z) > 0 it is computed as z + ln(1 + exp(-z)). The two forms can
+    !! differ by a multiple of 2πi, which leaves ψ unchanged.
+    !---------------------------------------------------------------------------------------------------------------
+    complex(rk), intent(in) :: z
+
+    if ( z%re > 0.0_rk ) then
+      softplus = z + log(1.0_rk + exp(-z))
+    else
+      softplus = log(1.0_rk + exp(z))
+    end if
+  end function softplus
+
+  pure elemental complex(rk) function sigmoid(z)
+    !---------------------------------------------------------------------------------------------------------------
+    !! exp(z)/(1 + exp(z)) without overflow: for Re(z) > 0 it is computed as 1/(1 + exp(-z)).
+    !---------------------------------------------------------------------------------------------------------------
+    complex(rk), intent(in) :: z
+
+    if ( z%re > 0.0_rk ) then
+      sigmoid = 1.0_rk/(1.0_rk + exp(-z))
+    else
+      sigmoid = exp(z)/(1.0_rk + exp(z))
+    end if
+  end function sigmoid
 
   pure recursive real(rk) function var(x) result(variance)
     !---------------------------------------------------------------------------------------------------------------
