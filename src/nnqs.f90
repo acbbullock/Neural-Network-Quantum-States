@@ -419,6 +419,9 @@ module nnqs
 
     n = self%v_units                                                                          !! Get number of spins
     m = self%h_units                                                                   !! Get number of hidden units
+    !! Flipping every other spin maps the chain with J < 0 onto the chain with |J|, so the network always learns
+    !! the ferromagnetic ground state, which its initial weights favour, and get_correlations staggers the
+    !! correlations back for J < 0. Rotating every spin about z likewise changes the sign of B.
     J_str = abs(ising_params(1)); B_str = abs(ising_params(2))           !! Set coupling strength and field strength
     e_coupling = 0.0_rk; e_transverse = (0.0_rk,0.0_rk)                                                !! Initialize
 
