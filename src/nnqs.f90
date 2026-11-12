@@ -19,9 +19,9 @@ module nnqs
     private
     integer :: v_units = 0                                                                !! Number of visible units
     integer :: h_units = 0                                                                 !! Number of hidden units
-    real(rk),    allocatable, dimension(:)   :: a, p_a, r_a                    !! Visible layer biases & ADAM arrays
-    complex(rk), allocatable, dimension(:)   :: b, p_b, r_b                     !! Hidden layer biases & ADAM arrays
-    complex(rk), allocatable, dimension(:,:) :: w, p_w, r_w                                 !! Weights & ADAM arrays
+    real(rk),    allocatable, dimension(:)   :: a                                               !! Visible layer biases
+    complex(rk), allocatable, dimension(:)   :: b                                                !! Hidden layer biases
+    complex(rk), allocatable, dimension(:,:) :: w                                                            !! Weights
     character(len=1) :: alignment = 'N'                                               !! For tracking spin alignment
     logical          :: initialized = .false.                                               !! Initialization status
     contains
@@ -65,9 +65,6 @@ module nnqs
     end if
 
     new%a = a; new%b = b; new%w = w
-    allocate(new%p_a(v_units), new%r_a(v_units), source=0.0_rk)
-    allocate(new%p_b(h_units), new%r_b(h_units), new%p_w(h_units,v_units), new%r_w(h_units,v_units), &
-         source=(0.0_rk,0.0_rk))
     new%initialized = .true.
   end function new_rbm
 
@@ -221,7 +218,7 @@ module nnqs
 
       e_loc = e_loc - sum(e_loc)/num_samples                                          !! Center the local energies
 
-      call self%propagate(epoch=epoch, e_loc=e_loc, samples=samples, &                        !! Update parameters
+      call self%propagate(e_loc=e_loc, samples=samples, &                                     !! Update parameters
                 O_a=O_a, O_b=O_b, O_w=O_w, &
                 F_a=F_a, F_b=F_b, F_w=F_w, &
                 S_a=S_a, S_b=S_b, S_w=S_w, &
@@ -271,20 +268,19 @@ module nnqs
     call sync_with_first()                                                    !! Other images wait for image 1
 
     if ( self%initialized ) then
-      deallocate(self%a, self%p_a, self%r_a, self%b, self%p_b, self%r_b, self%w, self%p_w, self%r_w, &
-             stat=stat, errmsg=errmsg)
+      deallocate(self%a, self%b, self%w, stat=stat, errmsg=errmsg)
       if (stat /= 0) error stop LF//errmsg                                                     !! Check allocation
       self%initialized = .false.
     end if
 
     !! Allocate class components:
-    allocate(self%a(n), self%p_a(n), self%r_a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
+    allocate(self%a(n), source=0.0_rk, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(self%b(m), self%p_b(m), self%r_b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(self%b(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(self%w(m,n), self%p_w(m,n), self%r_w(m,n), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(self%w(m,n), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     do j = 1, n
@@ -441,13 +437,15 @@ module nnqs
     energy = e_coupling + e_transverse              !! Local energy is sum of coupling and transverse field energies
   end subroutine ising_energy
 
-  pure recursive subroutine propagate(self, epoch, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
+  pure recursive subroutine propagate(self, e_loc, samples, O_a, O_b, O_w, F_a, F_b, F_w, S_a, S_b, S_w, &
                       x_a, x_b, x_w)
     !---------------------------------------------------------------------------------------------------------------
     !! Procedure for updating parameters according to stochastic optimization update rule
+    !!
+    !! Each parameter block takes the step -δτ S^{-1} F of stochastic reconfiguration. ψ depends on conjg(b), so
+    !! F_b is the derivative of the energy with respect to b and the step for b is conjugated.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(inout) :: self                                    !! Boltzmann machine
-    integer, intent(in) :: epoch                                                                    !! Current epoch
     complex(rk), contiguous, dimension(:),     intent(in)    :: e_loc                     !! Centered local energies
     integer(ik), contiguous, dimension(:,:),   intent(in)    :: samples                            !! Network inputs
     real(rk),    contiguous, dimension(:,:),   intent(inout) :: O_a                         !! Log derivatives for a
@@ -457,7 +455,7 @@ module nnqs
     complex(rk), contiguous, dimension(:),     intent(inout) :: F_b, S_b, x_b    !! Forces, SR matrix, solutions arr
     complex(rk), contiguous, dimension(:,:),   intent(inout) :: F_w, S_w, x_w    !! Forces, SR matrix, solutions arr
 
-    real(rk) :: covar_norm, delta, beta_1, beta_2, epsilon, dtau         !! Normalization, regularization, ADAM vars
+    real(rk) :: covar_norm, delta, dtau                                !! Normalization, regularization, time step
     integer  :: n, m, num_samples, i, ii, j, jj, ind                                      !! Size and loop variables
 
     n = self%v_units                                                                          !! Get number of spins
@@ -467,9 +465,6 @@ module nnqs
     covar_norm  = 1.0_rk/(num_samples - 1)                                    !! Set sample covariance normalization
 
     delta   = 1e-3_rk                                                                !! Set regularization parameter
-    beta_1  = 0.99_rk                                                                 !! Decay rate for first moment
-    beta_2  = 0.999_rk                                                               !! Decay rate for second moment
-    epsilon = 1e-8_rk                                                       !! Parameter to prevent division by zero
     dtau    = 0.01_rk                                                                                   !! Time step
 
     !! Logarithmic Derivatives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -499,9 +494,6 @@ module nnqs
 
     call ppsvx(AP=S_a, b=F_a, x=x_a, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
-    self%p_a(:) = beta_1*self%p_a + (1.0_rk - beta_1)*x_a                            !! Biased first moment estimate
-    self%r_a(:) = beta_2*self%r_a + (1.0_rk - beta_2)*(x_a**2)                  !! Biased second raw moment estimate
-    x_a(:) = ( self%p_a/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_a/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
     self%a(:) = self%a - dtau*x_a                                                           !! Update visible biases
     !! End Propagate a ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -519,9 +511,6 @@ module nnqs
 
     call ppsvx(AP=S_b, b=F_b, x=x_b, uplo='L', fact='E')                   !! Stochastic reconfiguration x = S^{-1}F
 
-    self%p_b(:) = beta_1*self%p_b + (1.0_rk - beta_1)*x_b                            !! Biased first moment estimate
-    self%r_b(:) = beta_2*self%r_b + (1.0_rk - beta_2)*abs(x_b)**2               !! Biased second raw moment estimate
-    x_b(:) = ( self%p_b/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_b/(1.0_rk - beta_2**epoch)) + epsilon )     !! ADAM
     self%b(:) = self%b - dtau*conjg(x_b)                       !! Update hidden biases; ψ depends on conjg(b), not b
     !! End Propagate b ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -541,9 +530,6 @@ module nnqs
       call ppsvx(AP=S_w(:,j), b=F_w(:,j), x=x_w(:,j), uplo='L', fact='E')       !! Stochastic reconfig x = S^{-1}F
     end do
 
-    self%p_w(:,:) = beta_1*self%p_w + (1.0_rk - beta_1)*x_w                          !! Biased first moment estimate
-    self%r_w(:,:) = beta_2*self%r_w + (1.0_rk - beta_2)*abs(x_w)**2             !! Biased second raw moment estimate
-    x_w(:,:) = ( self%p_w/(1.0_rk - beta_1**epoch) )/sqrt( (self%r_w/(1.0_rk - beta_2**epoch)) + epsilon )   !! ADAM
     self%w(:,:) = self%w - dtau*x_w                                                                !! Update weights
     !! End Propagate w ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   end subroutine propagate

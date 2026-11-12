@@ -525,9 +525,9 @@ type RestrictedBoltzmannMachine
     private
     integer :: v_units = 0                                                !! Number of visible units
     integer :: h_units = 0                                                 !! Number of hidden units
-    real(kind=rk),    allocatable, dimension(:)   :: a, p_a, r_a     !! Visible biases & ADAM arrays
-    complex(kind=rk), allocatable, dimension(:)   :: b, p_b, r_b      !! Hidden biases & ADAM arrays
-    complex(kind=rk), allocatable, dimension(:,:) :: w, p_w, r_w            !! Weights & ADAM arrays
+    real(kind=rk),    allocatable, dimension(:)   :: a                        !! Visible biases
+    complex(kind=rk), allocatable, dimension(:)   :: b                         !! Hidden biases
+    complex(kind=rk), allocatable, dimension(:,:) :: w                               !! Weights
     character(len=1) :: alignment = 'N'                               !! For tracking spin alignment
     logical          :: initialized = .false.                               !! Initialization status
     contains
@@ -544,12 +544,10 @@ end type RestrictedBoltzmannMachine
 In practice, we define the visible layer biases `a` as type `real` due
 to the fact that the logarithmic derivatives $O_{a_j}(s,a,b,w) = s_j$
 are real for all $j \in [1,n]$ such that the imaginary component will
-remain zero over the course of learning. Additionally, we define
-complementary arrays for each `a`, `b`, and `w`, which we use to
-supplement the stochastic optimization algorithm with ADAM (Adaptive
-Moment Estimation) for the purpose of numerical stability and for
-smoothing the learning process for less well-behaved energy functionals.
-The following is a dependency tree for the type-bound procedures:
+remain zero over the course of learning. Each epoch takes the plain
+stochastic reconfiguration step $\delta\alpha = -\delta\tau
+S^{-1}(\alpha) F(\alpha)$, with no momentum or adaptive step size. The
+following is a dependency tree for the type-bound procedures:
 
 ```text
 RestrictedBoltzmannMachine
