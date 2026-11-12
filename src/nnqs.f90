@@ -95,7 +95,6 @@ module nnqs
 
     real(rk),    allocatable, dimension(:)   :: e_loc, corrs                  !! Local energies, sample correlations
     real(rk),    allocatable, dimension(:,:) :: energies, correlations             !! Energy and correlation storage
-    complex(rk), allocatable, dimension(:)   :: theta                                 !! θ = b + ws for start sample
     real(rk) :: energy, sqerr, stderr, tau, acc                                               !! Recording variables
 
     real(rk),    allocatable, dimension(:,:)   :: O_a                           !! Log derivatives with respect to a
@@ -158,7 +157,6 @@ module nnqs
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     call random_sample(start_sample)                                                !! Randomize the starting sample
-    theta = conjg(self%b) + matmul(self%w, start_sample)                                            !! Get initial θ
 
     if ( my_image() == 1 ) then                                                         !! Do preparation on image 1
       !! Allocate storage arrays on image 1:
@@ -182,7 +180,7 @@ module nnqs
       call sum_images(self%w); self%w = self%w/image_count()                      !! Average weights across images
 
       call self%sample_distribution(ising_params=ising_params, &                                         !! Inputs
-                      start_sample=start_sample, theta=theta, &                     !! Input/outputs
+                      start_sample=start_sample, &                                  !! Input/outputs
                       samples=samples, e_loc=e_loc, corrs=corrs, &                  !! Array outputs
                       energy=energy, sqerr=sqerr, &                                !! Scalar outputs
                       stat=stat, errmsg=errmsg)                  !! Error vars for local allocations
@@ -294,19 +292,18 @@ module nnqs
     self%initialized = .true.
   end subroutine init
 
-  impure recursive subroutine sample_distribution(self, ising_params, start_sample, theta, samples, &
+  impure recursive subroutine sample_distribution(self, ising_params, start_sample, samples, &
                           e_loc, corrs, energy, sqerr, stat, errmsg)
     !---------------------------------------------------------------------------------------------------------------
     !! Markov Chain Monte Carlo procedure for sampling |ψ|^2 with Metropolis-Hastings algorithm
     !!
     !! One chain runs through the whole of training. Each call continues it from start_sample, takes 5n steps to
     !! re-equilibrate after the last parameter update, then records a sample after every sweep of n steps, and
-    !! leaves the chain's last configuration in start_sample, and its θ in theta, for the next call.
+    !! leaves the chain's last configuration in start_sample for the next call.
     !---------------------------------------------------------------------------------------------------------------
     class(RestrictedBoltzmannMachine), intent(in) :: self                              !! Distribution to be sampled
     real(rk),    contiguous, dimension(:),   intent(in)    :: ising_params                       !! Ising parameters
     integer(ik), contiguous, dimension(:),   intent(inout) :: start_sample           !! Where the chain continues from
-    complex(rk), contiguous, dimension(:),   intent(inout) :: theta                    !! θ = conjg(b) + ws for it
     integer(ik), contiguous, dimension(:,:), intent(out)   :: samples                              !! Output samples
     real(rk),    contiguous, dimension(:),   intent(out)   :: e_loc, corrs    !! Local energies, sample correlations
     real(rk),            intent(out)   :: energy, sqerr                              !! Energy average, square error
@@ -315,7 +312,7 @@ module nnqs
 
     real(rk),    allocatable, dimension(:) :: s_map                                                 !! Storage array
     integer(ik), allocatable, dimension(:) :: s_prop, s                                     !! Sample storage arrays
-    complex(rk), allocatable, dimension(:) :: theta2, arg_theta                                    !! Storage arrays
+    complex(rk), allocatable, dimension(:) :: theta, theta2, arg_theta                             !! Storage arrays
 
     real(rk) :: acc_prob, r                                                            !! M-H acceptance probability
     integer  :: n, m, num_samples                                           !! Number of spins, hidden units, samples
@@ -332,11 +329,12 @@ module nnqs
     allocate(s_prop(n), s(n), source=0_ik, stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
-    allocate(theta2(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
+    allocate(theta(m), theta2(m), arg_theta(m), source=(0.0_rk,0.0_rk), stat=stat, errmsg=errmsg)
     if (stat /= 0) error stop LF//errmsg                                                         !! Check allocation
 
     s(:) = start_sample                                                         !! Continue the chain where it ended
     s_prop(:) = s                                                                          !! Copy for the proposals
+    theta(:) = conjg(self%b) + matmul(self%w, real(s, kind=rk))              !! θ for the current parameters and s
 
     !! Thermalization ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     thermalize: do step = 1, 5*n
