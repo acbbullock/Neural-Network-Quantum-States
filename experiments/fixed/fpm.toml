@@ -1,0 +1,20 @@
+name = "nnqs"
+version = "1.0.5"
+license = "MIT"
+author = "Austin C Bullock, Andrew Wasserbeck"
+maintainer = "acb.bullock@gmail.com"
+copyright = "© 2022-2023, Austin Bullock & Andrew Wasserbeck"
+
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+# LAPACK's Fortran 77 interface, from any LAPACK installed as liblapack and libblas: reference LAPACK, OpenBLAS, or
+# Apple's Accelerate on macOS.
+link = ["lapack", "blas"]
+
+[install]
+library = false
+
+[dependencies]
+IO-Fortran-Library = { git = "https://github.com/acbbullock/IO-Fortran-Library", tag = "v2.3.0" }
