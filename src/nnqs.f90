@@ -108,8 +108,8 @@ module nnqs
     character(len=1000)           :: errmsg                                                         !! Error message
     integer :: stat                                                                                    !! Error stat
 
-    integer(int64) :: t1, t2                                                                      !! Clock variables
-    real(rk)       :: rate, wall_time                                                             !! Clock variables
+    integer(int64) :: t1, t2, rate                                                                !! Clock variables
+    real(rk)       :: wall_time                                                                   !! Clock variables
 
     if ( my_image() == 1 ) then                                       !! Check validity of Ising strength parameters
       if ( size(ising_params) /= 2 ) then
@@ -173,7 +173,7 @@ module nnqs
       call echo(logmsg, file=logfile)                                                              !! Echo to file
       write(unit=*, fmt='(a)') logmsg                                                         !! Print log message
 
-      call system_clock(t1)                                                                         !! Start timer
+      call system_clock(t1, count_rate=rate)                                                        !! Start timer
     end if
     call sync_with_first()                                                    !! Other images wait for image 1
 
@@ -225,7 +225,7 @@ module nnqs
     end do learning
 
     if ( my_image() == 1 ) then                                                !! Do finalization and I/O on image 1
-      call system_clock(t2, count_rate=rate); wall_time = real(t2-t1, kind=rk)/rate               !! Get time in s
+      call system_clock(t2); wall_time = real(t2-t1, kind=rk)/real(rate, kind=rk)                 !! Get time in s
 
       logmsg = LF//'    Optimization time: '//str(wall_time, fmt='f', decimals=3)//' seconds for n = '// &
              str(n)//' spins.'// &
