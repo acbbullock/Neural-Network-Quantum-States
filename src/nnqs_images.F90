@@ -15,7 +15,7 @@ module nnqs_images
 
   interface sum_images
     !! Replaces each value with its sum over all images, on every image, as `co_sum` does.
-    module procedure :: sum_images_real, sum_images_real_1, sum_images_complex_2
+    module procedure :: sum_images_real, sum_images_real_1, sum_images_complex_1, sum_images_complex_2
   end interface
 
   contains !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,6 +66,15 @@ module nnqs_images
     x = x
 #endif
   end subroutine sum_images_real_1
+
+  impure subroutine sum_images_complex_1(x)
+    complex(rk), contiguous, intent(inout) :: x(:)
+#ifdef NNQS_COARRAY
+    call co_sum(x)
+#else
+    x = x
+#endif
+  end subroutine sum_images_complex_1
 
   impure subroutine sum_images_complex_2(x)
     complex(rk), contiguous, intent(inout) :: x(:,:)

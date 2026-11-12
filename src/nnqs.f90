@@ -178,6 +178,10 @@ module nnqs
     call sync_with_first()                                                    !! Other images wait for image 1
 
     learning: do epoch = 1, max_epochs                                                             !! Begin learning
+      !! Average the parameters across images, so that every image samples the same ψ. Each image then takes
+      !! its own step from its own samples, and the next average combines those steps.
+      call sum_images(self%a); self%a = self%a/image_count()                 !! Average visible biases across images
+      call sum_images(self%b); self%b = self%b/image_count()                  !! Average hidden biases across images
       call sum_images(self%w); self%w = self%w/image_count()                      !! Average weights across images
 
       call self%sample_distribution(ising_params=ising_params, &                                         !! Inputs

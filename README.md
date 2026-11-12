@@ -562,10 +562,11 @@ RestrictedBoltzmannMachine
 The `stochastic_optimization` routine takes advantage of the coarray
 features of Fortran 2008 and, in particular, the collective subroutine
 extensions of Fortran 2018, allowing for many images of the program to
-run concurrently with collective communication. This allows us to
-average the weights across images in each epoch of learning, which
-dramatically improves stability and time to convergence in a stochastic
-framework.
+run concurrently with collective communication. Each image runs its own
+Markov chain, and at the start of every epoch the biases and weights are
+averaged across images, so every image samples the same wave-function
+and the average of their steps acts like one step from all their
+samples together.
 
 From a main program, we simply need to initialize the random number
 generator, instantiate a `RestrictedBoltzmannMachine`, and call the
