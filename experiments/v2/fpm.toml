@@ -1,0 +1,24 @@
+name = "nnqs"
+version = "2.0.0"
+license = "MIT"
+author = "Austin C Bullock, Andrew Wasserbeck"
+maintainer = "austin@acbbullock.com"
+copyright = "© 2022-2023, Austin Bullock & Andrew Wasserbeck"
+description = "Neural-network quantum states: a complex restricted Boltzmann machine learns the ground state of the transverse-field Ising chain by variational Monte Carlo, in parallel with Fortran 2018 coarrays"
+homepage = "https://github.com/acbbullock/Neural-Network-Quantum-States"
+categories = ["scientific"]
+keywords = ["neural-quantum-states", "restricted-boltzmann-machine", "variational-monte-carlo", "quantum-many-body", "ising-model", "stochastic-reconfiguration", "coarray", "fortran2018"]
+
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+# LAPACK's Fortran 77 interface, from any LAPACK installed as liblapack and libblas: reference LAPACK, OpenBLAS, or
+# Apple's Accelerate on macOS.
+link = ["lapack", "blas"]
+
+[install]
+library = false
+
+[dependencies]
+IO-Fortran-Library = { git = "https://github.com/acbbullock/IO-Fortran-Library", tag = "v2.3.0" }
