@@ -618,10 +618,11 @@ The output data consists of energies and spin correlations, which will
 be written to separate `csv` files in the `/data` folder upon successful
 execution.
 
-Note: with `init`, the biases are initialized to zero prior to training,
-and the weights have both real and imaginary parts initialized with
-samples from a standard Gaussian distribution using a routine adapted
-from
+Note: with `init`, the biases are initialized to zero prior to training.
+The real part of each weight is drawn from a Gaussian distribution with
+mean $0.01$ and standard deviation $10^{-4}$, and the imaginary part
+from one with mean $-0.005$ and standard deviation $10^{-5}$, using a
+routine adapted from
 [ROOT](https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00274).
 
 ## Building with fpm
