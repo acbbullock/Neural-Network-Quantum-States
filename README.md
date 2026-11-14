@@ -581,8 +581,16 @@ to the fact that the logarithmic derivatives $O_{a_j}(s,a,b,w) = s_j$
 are real for all $j \in [1,n]$ such that the imaginary component will
 remain zero over the course of learning. Each epoch takes the plain
 stochastic reconfiguration step $\delta\alpha = -\delta\tau
-S^{-1}(\alpha) F(\alpha)$, with no momentum or adaptive step size. The
-following is a dependency tree for the type-bound procedures:
+S^{-1}(\alpha) F(\alpha)$ with $\delta\tau = 0.01$ and no momentum or
+adaptive step size. The step uses a block-diagonal approximation of
+$S(\alpha)$ rather than the full matrix derived above: one block for
+the visible biases $a$, one for the hidden biases $b$, and one $m
+\times m$ block for the weights $w_{ij}$ of each visible unit $j$, so
+the correlations between blocks are neglected. Since $a$ is real, its
+block uses the real parts of $S$ and $F$. A shift of $10^{-3}$ is added
+to the diagonal of each block, which is then solved with LAPACK's
+packed positive-definite solver. The following is a dependency tree for
+the type-bound procedures:
 
 ```text
 RestrictedBoltzmannMachine
