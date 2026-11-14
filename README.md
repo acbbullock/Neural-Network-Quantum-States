@@ -126,19 +126,21 @@ $p_V(\alpha):V \to [0,1]$ and $p_H(\alpha): H \to [0,1]$ at each $\alpha
     $$p_V(v,\alpha) = \sum_{h \in H} p(v,h,\alpha)\~\~,\~\~p_H(h,\alpha)
     = \sum_{v \in V} p(v,h,\alpha)$$
 over $H$ and $V$ respectively. Due to the restricted nature of the RBM,
-the activation probabilities $p(h_i=1|v,\alpha)$ and $p(v_j=1|h,\alpha)$
-of each layer are mutually exclusive for all $i \in [1,m]$ and $j \in
-[1,n]$ such that the conditional probabilities are the products
-    $$p(h|v,\alpha) = \prod_{i=1}^m p(h_i=1|v,\alpha)~~,~~p(v|h,\alpha)
-    = \prod_{j=1}^n p(v_j=1|h,\alpha)$$
-of activation probabilities. The traditional method for training an RBM
+the units of each layer are conditionally independent given the other
+layer, such that the conditional probabilities are the products
+    $$p(h|v,\alpha) = \prod_{i=1}^m p(h_i|v,\alpha)~~,~~p(v|h,\alpha)
+    = \prod_{j=1}^n p(v_j|h,\alpha)$$
+of the probabilities of the individual units, where $p(h_i=1|v,\alpha)
+= 1/(1 + \exp[-(b_i + \sum_j w_{ij} v_j)])$ and $p(v_j=1|h,\alpha) =
+1/(1 + \exp[-(a_j + \sum_i h_i w_{ij})])$ are the activation
+probabilities. The traditional method for training an RBM
 involves [Hinton](https://en.wikipedia.org/wiki/Geoffrey_Hinton)'s
 Contrastive Divergence technique, which will not be covered here.
 
 ## Neural Network Quantum States
 
 The RBM is a natural choice for representing wave-functions of systems
-of spin $\frac{1}{2}$ fermions where each input vector represents a
+of spin $\frac{1}{2}$ particles where each input vector represents a
 configuration of $n$ spins. Ultimately, we seek to solve the
 time-independent Schrödinger equation $H\ket{\psi_0} = E_0\ket{\psi_0}$
 for the ground state $\ket{\psi_0}$ and its corresponding energy $E_0$
@@ -222,8 +224,9 @@ positions $j$ and $j+1$, and where $\sigma_x^{(j)} = I^{(1)} \otimes
 \cdots \otimes \sigma_x^{(j)} \otimes \cdots \otimes I^{(n)}$ denotes
 $\sigma_x$ at position $j$. The constant $J$ represents the nearest
 neighbor coupling strength, and $B$ represents the strength of the
-transverse field restricted to $|B| < 1$ to correspond to the ordered
-phase of the Ising material. When $J>0$, nearest neighbors tend to align
+transverse field, which the program restricts to $|B| < 1$. The chain
+is ordered for $|B| < |J|$ and disordered for $|B| > |J|$, with a
+quantum critical point at $|B| = |J|$. When $J>0$, nearest neighbors tend to align
 parallel (ferromagnetic), and tend to align anti-parallel when $J<0$
 (anti-ferromagnetic). The local energy of a configuration $s \in S$ in
 the Ising model can be seen to be
@@ -565,10 +568,11 @@ type RestrictedBoltzmannMachine
     contains
         private
         procedure, pass(self), public :: stochastic_optimization          !! Public training routine
+        procedure, pass(self), public :: log_amplitude                          !! ln ψ(s) for one s
+        procedure, pass(self), public :: prob_ratio               !! Probability ratio p(s_2)/p(s_1)
+        procedure, pass(self), public :: ising_energy                          !! Ising local energy
         procedure, pass(self)         :: init                              !! Initialization routine
         procedure, pass(self)         :: sample_distribution       !! MCMC routine for sampling p(s)
-        procedure, pass(self)         :: prob_ratio               !! Probability ratio p(s_2)/p(s_1)
-        procedure, pass(self)         :: ising_energy                          !! Ising local energy
         procedure, pass(self)         :: propagate        !! Routine for updating weights and biases
 end type RestrictedBoltzmannMachine
 ```
@@ -578,8 +582,16 @@ to the fact that the logarithmic derivatives $O_{a_j}(s,a,b,w) = s_j$
 are real for all $j \in [1,n]$ such that the imaginary component will
 remain zero over the course of learning. Each epoch takes the plain
 stochastic reconfiguration step $\delta\alpha = -\delta\tau
-S^{-1}(\alpha) F(\alpha)$, with no momentum or adaptive step size. The
-following is a dependency tree for the type-bound procedures:
+S^{-1}(\alpha) F(\alpha)$ with $\delta\tau = 0.01$ and no momentum or
+adaptive step size. The step uses a block-diagonal approximation of
+$S(\alpha)$ rather than the full matrix derived above: one block for
+the visible biases $a$, one for the hidden biases $b$, and one $m
+\times m$ block for the weights $w_{ij}$ of each visible unit $j$, so
+the correlations between blocks are neglected. Since $a$ is real, its
+block uses the real parts of $S$ and $F$. A shift of $10^{-3}$ is added
+to the diagonal of each block, which is then solved with LAPACK's
+packed positive-definite solver. The following is a dependency tree for
+the type-bound procedures:
 
 ```text
 RestrictedBoltzmannMachine
@@ -615,10 +627,11 @@ The output data consists of energies and spin correlations, which will
 be written to separate `csv` files in the `/data` folder upon successful
 execution.
 
-Note: with `init`, the biases are initialized to zero prior to training,
-and the weights have both real and imaginary parts initialized with
-samples from a standard Gaussian distribution using a routine adapted
-from
+Note: with `init`, the biases are initialized to zero prior to training.
+The real part of each weight is drawn from a Gaussian distribution with
+mean $0.01$ and standard deviation $10^{-4}$, and the imaginary part
+from one with mean $-0.005$ and standard deviation $10^{-5}$, using a
+routine adapted from
 [ROOT](https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00274).
 
 ## Building with fpm
