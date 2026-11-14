@@ -1,0 +1,6 @@
+% Shared by main.tex and supplementary.tex. AJP reviews anonymously: the first submission leaves out the author,
+% affiliation and acknowledgments, and the citation of the code, which names the authors. Set \anonymousfalse for
+% the version with them (after conditional acceptance).
+\newif\ifanonymous
+\anonymoustrue
+\newcommand{\codecite}{\ifanonymous\cite{nnqs_code_anon}\else\cite{nnqs_code}\fi}

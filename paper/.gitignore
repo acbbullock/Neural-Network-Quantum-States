@@ -1,0 +1,14 @@
+# LaTeX build output
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*Notes.bib
+main.pdf
+supplementary.pdf
+
+# The figures are needed to build the paper
+!figures/*.pdf

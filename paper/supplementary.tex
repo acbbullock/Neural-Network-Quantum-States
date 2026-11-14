@@ -1,0 +1,168 @@
+% Supplementary material for the AJP teaching article in main.tex. Build main.tex first: the references to its
+% equations and sections are read from main.aux through xr-hyper.
+% Build with:  latexmk -pdf main.tex      (from this folder)
+% Figures:     Rscript paper/figures/make_figures.R      (from the repository root)
+% To estimate the length in AJP's two-column journal format, replace "preprint" by "reprint".
+\documentclass[aps,prb,preprint,amsmath,amssymb,nofootinbib,longbibliography]{revtex4-2}
+
+
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{braket}
+\usepackage{xcolor}
+\usepackage{algpseudocode}
+\usepackage{xr-hyper}
+\usepackage[colorlinks=true,allcolors=blue!50!black]{hyperref}
+
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\ev}[1]{\left\langle #1 \right\rangle}
+\newcommand{\Eloc}{E_{\mathrm{loc}}}
+\newcommand{\dtau}{\delta\tau}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+\externaldocument[M-]{main}
+\input{anonymous}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thesection}{S\arabic{section}}
+
+\begin{document}
+
+\title{Supplementary material for ``Neural-network quantum states as imaginary-time evolution: a worked example on the transverse-field Ising chain''}
+\date{\today}
+\maketitle
+
+\section{Implementation details}
+\label{sec:impl}
+
+Figure~\ref{alg:training} lists one training run of the program\codecite\ described in Sec.~\ref{M-sec:implementation} of the
+main text, and Table~\ref{tab:settings} gives its settings. The comparisons of the sign gauge (Sec.~\ref{M-sec:model}),
+of the full and block-diagonal $S$ (Sec.~\ref{M-sec:critical}) and of the implementation errors
+(Sec.~\ref{M-sec:pitfalls}) use a single image; all other results use four.
+
+\paragraph*{Sampling.}
+Each image runs one Markov chain for the whole training, continuing from where the previous epoch left off. After
+each parameter update it takes $5n$ steps to re-equilibrate, and then records a sample after every sweep of $n$
+proposals. The vector $\theta(s)$ is cached and updated in $\mathcal{O}(m)$ operations per accepted flip, but it is
+recomputed from scratch after each parameter update.
+
+\paragraph*{The SR step.}
+For each block, the program centers the sampled $O_k$ and $\Eloc$. It then forms the block of $S$ and $F$ with the
+unbiased normalization $1/(N_s-1)$, adds $\epsilon$ to the diagonal, and solves the Hermitian positive-definite
+system with LAPACK's packed-storage driver \texttt{ppsvx}. In the code the hidden biases are stored as $b = c^*$, so
+their update is conjugated.
+
+\begin{figure}[h]
+\begin{algorithmic}[1]
+\State $a, c \gets 0$;\; $W_{ij} \gets$ small, nearly uniform (Table~\ref{tab:settings});\; $s \gets$ random
+\For{epoch $= 1, \ldots, 1000$}
+  \State $\alpha \gets$ average of $\alpha$ over all images
+  \State $\theta \gets c + W s$ \Comment{recompute after every update}
+  \State $5n$ Metropolis steps \Comment{re-equilibrate}
+  \For{$i = 1,\ldots,N_s$}
+    \State $n$ Metropolis steps; \; $s_i \gets s$; \; compute $\Eloc(s_i)$
+  \EndFor
+  \State $\bar E \gets$ mean of $\Re\Eloc$, averaged over images
+  \State form $O_k(s_i)$, then $S$ and $F$ for each block
+  \State $\alpha_B \gets \alpha_B - \dtau\,(S_{BB} + \epsilon)^{-1} F_B$ for each block $B$
+\EndFor
+\end{algorithmic}
+\caption{One training run, as carried out on each of the $P$ parallel images.}
+\label{alg:training}
+\end{figure}
+
+\begin{table}[h]
+\caption{Settings for all runs. The comparisons in Secs.~\ref{M-sec:model}, \ref{M-sec:critical} and
+\ref{M-sec:pitfalls} of the main text use one image instead of four.}
+\label{tab:settings}
+\begin{ruledtabular}
+\begin{tabular}{ll}
+Samples per image, $N_s$ & 256 \\
+Images, $P$ & 4 \\
+Epochs & 1000 \\
+Time step, $\dtau$ & 0.01 \\
+Diagonal shift, $\epsilon$ & $10^{-3}$ \\
+Burn-in after each update & $5n$ steps \\
+Steps between samples & $n$ (one sweep) \\
+Initial $a$, $c$ & 0 \\
+Initial $\Re W_{ij}$ & normal, mean $0.01$, s.d.\ $10^{-4}$ \\
+Initial $\Im W_{ij}$ & normal, mean $-0.005$, s.d.\ $10^{-5}$ \\
+Floating point & single precision \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\section{Exact solution of the open chain}
+\label{sec:exact}
+
+We outline the derivation; Refs.~\onlinecite{lieb1961,pfeuty1970,mbeng2024} give the details. By the sign gauge of
+Sec.~\ref{M-sec:model} of the main text we may take $J, B > 0$ and restore the stagger of
+Eq.~(\ref{M-eq:stagger}) at the end.
+
+\paragraph*{Fermions.}
+Exchanging the roles of $\sigma^x$ and $\sigma^z$ (a rotation of the spin axes) gives $H = -J\sum_{j=1}^{n-1}
+\sigma^x_j\sigma^x_{j+1} - B\sum_{j=1}^n \sigma^z_j$, and turns the correlation $\ev{\sigma^z_i\sigma^z_k}$ of the
+main text into $\ev{\sigma^x_i\sigma^x_k}$. The Jordan--Wigner transformation\cite{jordan1928}
+\begin{equation}
+  \sigma^z_j = 1 - 2c_j^\dagger c_j, \qquad \sigma^x_j = \prod_{l<j}(1 - 2c_l^\dagger c_l)\,(c_j + c_j^\dagger)
+\end{equation}
+maps the spins onto fermions $c_j$. In terms of the $2n$ Majorana operators
+\begin{equation}
+  a_j = c_j + c_j^\dagger, \qquad b_j = i(c_j^\dagger - c_j), \qquad \{\gamma_p, \gamma_q\} = 2\delta_{pq},
+\end{equation}
+ordered as $\gamma = (a_1, b_1, a_2, b_2, \ldots, a_n, b_n)$, the strings cancel between neighbors and
+\begin{equation}
+  \sigma^z_j = -i\,a_j b_j, \qquad \sigma^x_j\sigma^x_{j+1} = -i\,b_j a_{j+1} .
+  \label{eq:majorana-spins}
+\end{equation}
+The Hamiltonian is therefore quadratic,
+\begin{equation}
+  H = iB\sum_{j=1}^n a_j b_j + iJ\sum_{j=1}^{n-1} b_j a_{j+1} = \frac{i}{4}\sum_{p,q=1}^{2n} A_{pq}\gamma_p\gamma_q ,
+\end{equation}
+with the real antisymmetric $2n\times 2n$ matrix whose only nonzero entries are
+\begin{equation}
+  A_{a_j b_j} = -A_{b_j a_j} = 2B, \qquad A_{b_j a_{j+1}} = -A_{a_{j+1} b_j} = 2J ,
+  \label{eq:majorana-matrix}
+\end{equation}
+where $A_{a_j b_j}$ means the entry in the rows and columns of $a_j$ and $b_j$.
+
+\paragraph*{Energy.}
+The matrix $iA$ is Hermitian. Because $A$ couples each $a$ only to $b$'s, its eigenvalues come in pairs $\pm
+2\lambda_k$, where the $\lambda_k$ are the singular values of the $a$--$b$ block of $A/2$, which has $B$ on its
+diagonal and $-J$ next to it. Signs and transposition do not change singular values, so the $\lambda_k$ are those of
+the matrix $M$ of the main text. A Bogoliubov transformation to the eigenvectors of $iA$ gives $H = \sum_k
+2\lambda_k\,(f_k^\dagger f_k - \tfrac12)$ with independent fermion modes $f_k$. The ground state empties every mode,
+so $E_0 = -\sum_k\lambda_k$, which is Eq.~(\ref{M-eq:exact-energy}) of the main text.
+
+\paragraph*{Correlations.}
+In the ground state,
+\begin{equation}
+  \ev{\gamma_p\gamma_q} = \delta_{pq} + G_{pq}, \qquad G = \operatorname{sign}(iA) = U\operatorname{sign}(\Lambda)U^\dagger,
+  \label{eq:majorana-G}
+\end{equation}
+where $iA = U\Lambda U^\dagger$ is the eigendecomposition and the sign is taken eigenvalue by eigenvalue. $G$ is purely
+imaginary, and since the sign is an odd function, $G$ inherits the structure of $A$: it couples $a$'s only to $b$'s,
+so $\ev{a_pa_q} = \ev{b_pb_q} = \delta_{pq}$. For $i < k$, Eq.~\eqref{eq:majorana-spins} gives
+\begin{equation}
+  \sigma^x_i\sigma^x_k = \prod_{j=i}^{k-1}\sigma^x_j\sigma^x_{j+1} = \prod_{j=i}^{k-1}\left(-i\,b_j a_{j+1}\right),
+\end{equation}
+a product of $2(k-i)$ Majorana operators. Wick's theorem writes its average as a Pfaffian of contractions. Only the
+pairings of a $b$ with an $a$ survive, and the Pfaffian reduces to a determinant:
+\begin{equation}
+  \ev{\sigma^z_i\sigma^z_k} = \det\big[C_{pq}\big]_{p,q = i}^{k-1}, \qquad C_{pq} = \ev{-i\,b_p a_{q+1}}
+  = -i\,G_{b_p a_{q+1}} .
+  \label{eq:majorana-det}
+\end{equation}
+The matrix $C$ is real. For $J < 0$ the result is multiplied by $(-1)^{k-i}$.
+
+\paragraph*{Numerics.}
+One Hermitian eigendecomposition of the $2n\times 2n$ matrix $iA$ gives $G$, and each correlation is then a
+$(k-i)\times(k-i)$ determinant, which is easily affordable for $n = 1024$. The function \texttt{exact\_correlations}
+in \texttt{data\_visualization.R}, which comes with the program,\codecite\ implements Eqs.~\eqref{eq:majorana-matrix}--\eqref{eq:majorana-det} line by line.
+For 8 spins it agrees with exact diagonalization to $10^{-15}$.
+
+\bibliographystyle{ajp}
+\bibliography{references}
+
+\end{document}
