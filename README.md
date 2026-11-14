@@ -140,7 +140,7 @@ Contrastive Divergence technique, which will not be covered here.
 ## Neural Network Quantum States
 
 The RBM is a natural choice for representing wave-functions of systems
-of spin $\frac{1}{2}$ fermions where each input vector represents a
+of spin $\frac{1}{2}$ particles where each input vector represents a
 configuration of $n$ spins. Ultimately, we seek to solve the
 time-independent Schrödinger equation $H\ket{\psi_0} = E_0\ket{\psi_0}$
 for the ground state $\ket{\psi_0}$ and its corresponding energy $E_0$
