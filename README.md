@@ -126,12 +126,14 @@ $p_V(\alpha):V \to [0,1]$ and $p_H(\alpha): H \to [0,1]$ at each $\alpha
     $$p_V(v,\alpha) = \sum_{h \in H} p(v,h,\alpha)\~\~,\~\~p_H(h,\alpha)
     = \sum_{v \in V} p(v,h,\alpha)$$
 over $H$ and $V$ respectively. Due to the restricted nature of the RBM,
-the activation probabilities $p(h_i=1|v,\alpha)$ and $p(v_j=1|h,\alpha)$
-of each layer are mutually exclusive for all $i \in [1,m]$ and $j \in
-[1,n]$ such that the conditional probabilities are the products
-    $$p(h|v,\alpha) = \prod_{i=1}^m p(h_i=1|v,\alpha)~~,~~p(v|h,\alpha)
-    = \prod_{j=1}^n p(v_j=1|h,\alpha)$$
-of activation probabilities. The traditional method for training an RBM
+the units of each layer are conditionally independent given the other
+layer, such that the conditional probabilities are the products
+    $$p(h|v,\alpha) = \prod_{i=1}^m p(h_i|v,\alpha)~~,~~p(v|h,\alpha)
+    = \prod_{j=1}^n p(v_j|h,\alpha)$$
+of the probabilities of the individual units, where $p(h_i=1|v,\alpha)
+= 1/(1 + \exp[-(b_i + \sum_j w_{ij} v_j)])$ and $p(v_j=1|h,\alpha) =
+1/(1 + \exp[-(a_j + \sum_i h_i w_{ij})])$ are the activation
+probabilities. The traditional method for training an RBM
 involves [Hinton](https://en.wikipedia.org/wiki/Geoffrey_Hinton)'s
 Contrastive Divergence technique, which will not be covered here.
 
