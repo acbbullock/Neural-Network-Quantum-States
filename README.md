@@ -224,8 +224,9 @@ positions $j$ and $j+1$, and where $\sigma_x^{(j)} = I^{(1)} \otimes
 \cdots \otimes \sigma_x^{(j)} \otimes \cdots \otimes I^{(n)}$ denotes
 $\sigma_x$ at position $j$. The constant $J$ represents the nearest
 neighbor coupling strength, and $B$ represents the strength of the
-transverse field restricted to $|B| < 1$ to correspond to the ordered
-phase of the Ising material. When $J>0$, nearest neighbors tend to align
+transverse field, which the program restricts to $|B| < 1$. The chain
+is ordered for $|B| < |J|$ and disordered for $|B| > |J|$, with a
+quantum critical point at $|B| = |J|$. When $J>0$, nearest neighbors tend to align
 parallel (ferromagnetic), and tend to align anti-parallel when $J<0$
 (anti-ferromagnetic). The local energy of a configuration $s \in S$ in
 the Ising model can be seen to be
