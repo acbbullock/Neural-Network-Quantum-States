@@ -568,10 +568,11 @@ type RestrictedBoltzmannMachine
     contains
         private
         procedure, pass(self), public :: stochastic_optimization          !! Public training routine
+        procedure, pass(self), public :: log_amplitude                          !! ln ψ(s) for one s
+        procedure, pass(self), public :: prob_ratio               !! Probability ratio p(s_2)/p(s_1)
+        procedure, pass(self), public :: ising_energy                          !! Ising local energy
         procedure, pass(self)         :: init                              !! Initialization routine
         procedure, pass(self)         :: sample_distribution       !! MCMC routine for sampling p(s)
-        procedure, pass(self)         :: prob_ratio               !! Probability ratio p(s_2)/p(s_1)
-        procedure, pass(self)         :: ising_energy                          !! Ising local energy
         procedure, pass(self)         :: propagate        !! Routine for updating weights and biases
 end type RestrictedBoltzmannMachine
 ```
